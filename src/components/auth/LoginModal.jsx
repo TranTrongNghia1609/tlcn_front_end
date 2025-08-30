@@ -1,22 +1,48 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import { useAuthModal } from '../../context/AuthModalContext';
-
+import { useAuth } from '../../context/AuthContext';
 const LoginModal = () => {
   const { isLoginOpen, closeModals, switchToRegister } = useAuthModal();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const { login } = useAuth();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!username || !password) {
       setError('Vui lòng nhập đầy đủ email và mật khẩu.');
       return;
     }
+    setLoading(true);
     setError('');
-    console.log('Login:', { email, password });
+    try {
+      const credentials = {
+        userName: username.trim(),
+        password: password
+      }
+      const response = await login(credentials);
+      console.log('Login successful: ', response);
+      closeModals();
+      setUsername('');
+      setPassword('');
+      setError('');
+    } catch (error) {
+      console.error('Login error', error);
+      setError(error.message || 'Đăng nhập không thành công')
+    } finally {
+      setLoading(false);
+    }
+    const handleClose = () => {
+      closeModals();
+      setUsername('');
+      setPassword('');
+      setError('');
+      setLoading(false);
+    };
   };
 
   return (
@@ -46,15 +72,16 @@ const LoginModal = () => {
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5">
             {/* Email field */}
             <div>
-              <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Email
+              <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
+                Username
               </label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
+                disabled={loading}
                 className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="you@example.com"
               />
@@ -66,17 +93,18 @@ const LoginModal = () => {
                 Password
               </label>
               <input
-                type={showPassword ? "text" : "password"} 
+                type={showPassword ? "text" : "password"}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
                 className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 pr-10 sm:pr-12"
                 placeholder="●●●●●"
               />
               <div
                 className="absolute top-8 sm:top-9 right-2 sm:right-3 cursor-pointer p-1"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => !loading && setShowPassword(!showPassword)}
                 tabIndex={0}
                 aria-label="Hiện/Ẩn mật khẩu"
               >
@@ -95,20 +123,36 @@ const LoginModal = () => {
             {/* Submit button - responsive padding */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2.5 sm:py-3 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base"
             >
-              Login
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đang đăng nhập...
+                </div>
+              ) : (
+                'Login'
+              )}
             </button>
 
             {/* Forgot/Signup links - responsive layout */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 mt-2 text-xs sm:text-sm">
-              <button type="button" className="text-purple-600 hover:underline">
+              <button
+                type="button"
+                className="text-purple-600 hover:underline"
+                disabled={loading}
+              >
                 Forgot Password?
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={switchToRegister}
                 className="text-pink-600 hover:underline"
+                disabled={loading}
               >
                 Sign Up
               </button>
@@ -135,6 +179,7 @@ const LoginModal = () => {
               <button
                 className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-2 sm:py-2.5 rounded-md font-medium border border-gray-800 shadow-sm hover:scale-[1.02] transition text-xs sm:text-sm"
                 onClick={() => alert("GitHub Sign-In not implemented")}
+                disabled={loading}
               >
                 <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="hidden sm:inline">Sign in with GitHub</span>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthModal } from '../../context/AuthModalContext';
+import UserMenu from './UserMenu';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const { openLogin, openRegister } = useAuthModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
   // Handle scroll effect
@@ -93,20 +96,32 @@ const Navbar = () => {
             </button>
 
             {/* Auth Buttons */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <button 
-                onClick={openLogin}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-              >
-                Login
-              </button>
-              <button 
-                onClick={openRegister}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-              >
-                Sign Up
-              </button>
-            </div>
+
+            {loading ? (
+              // Loading spinner while checking auth
+              <div className="flex items-center">
+                <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+              </div>
+            ) : isAuthenticated ? (
+              // Show User Menu when authenticated
+              <UserMenu />
+            ) : (
+              // Show Auth Buttons when not authenticated
+              <div className="hidden sm:flex items-center space-x-2">
+                <button 
+                  onClick={openLogin}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={openRegister}
+                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button 

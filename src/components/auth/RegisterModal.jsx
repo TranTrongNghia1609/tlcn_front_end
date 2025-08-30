@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import { useAuthModal } from '../../context/AuthModalContext';
-
+import { useAuth } from '../../context/AuthContext';
+import OTPVerificationModal from './OTPVerificationModal';
 const RegisterModal = () => {
   const { isRegisterOpen, closeModals, switchToLogin } = useAuthModal();
-  const [form, setForm] = useState({ 
-    name: '', 
-    email: '', 
-    password: '', 
-    confirmPassword: '' 
+  const { register } = useAuth();
+  const [form, setForm] = useState({
+    userName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+
+  //OTP Modal State
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -35,8 +42,8 @@ const RegisterModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
+
+    if (!form.userName || !form.email || !form.password || !form.confirmPassword) {
       setError('Vui lòng điền đầy đủ thông tin.');
       return;
     }
@@ -50,12 +57,68 @@ const RegisterModal = () => {
       setError('Mật khẩu phải có ít nhất 6 ký tự.');
       return;
     }
-
+    setLoading(true);
     setError('');
-    console.log('Register:', form);
+    try {
+      const userData = {
+        userName: form.userName.trim(),
+        email: form.email,
+        fullName: form.userName.trim(),
+        password: form.password
+      };
+      console.log(userData)
+      const response = await register(userData);
+      console.log('✅ Registration successful:', response);
+      setForm({
+        userName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        fullName: ''
+      });
+      closeModals();
+      setRegisteredEmail(userData.email);
+      setShowOTPModal(true);
+      alert('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+    } catch (error) {
+      console.error('❌ Registration error:', error);
+      setError(error.message || 'Đăng ký không thành công. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+    
+
+
   };
+  // Handle OTP verification success
+    const handleOTPVerificationSuccess = (response) => {
+      console.log('✅ OTP verification completed:', response);
+      setShowOTPModal(false);
+      setRegisteredEmail('');
+      // Optionally auto-login or redirect
+    };
+
+    // Handle close OTP modal
+    const handleCloseOTPModal = () => {
+      setShowOTPModal(false);
+      setRegisteredEmail('');
+    };
+
+    // Handle close register modal
+    const handleCloseRegisterModal = () => {
+      closeModals();
+      setForm({
+        userName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setError('');
+      setLoading(false);
+    };
 
   return (
+    <>
     <Modal isOpen={isRegisterOpen} onClose={closeModals}>
       <div className="relative bg-white/80 backdrop-blur-md border border-white/30 shadow-xl rounded-xl sm:rounded-2xl w-full px-4 py-6 sm:px-6 md:px-8 sm:py-8 md:py-10 max-h-[90vh] overflow-y-auto">
         <div className="absolute inset-0 pointer-events-none z-0">
@@ -84,16 +147,16 @@ const RegisterModal = () => {
             {/* Name field */}
             <div>
               <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Họ và Tên
+                Username
               </label>
               <input
                 type="text"
-                id="name"
-                value={form.name}
+                id="userName"
+                value={form.userName}
                 onChange={handleChange}
                 required
                 className="w-full px-3 sm:px-4 py-2 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Nguyen Van A"
+                placeholder="user1"
               />
             </div>
 
@@ -131,11 +194,10 @@ const RegisterModal = () => {
               {form.password && (
                 <div className="w-full mt-1  h-1.5 sm:h-2 rounded bg-gray-200 overflow-hidden transition-opacity duration-300">
                   <div
-                    className={`h-full transition-all duration-500 ${
-                      passwordStrength <= 2 ? 'bg-red-500 w-1/4' :
-                      passwordStrength === 3 ? 'bg-yellow-400 w-2/4' :
-                      passwordStrength === 4 ? 'bg-yellow-500 w-3/4' :
-                      'bg-green-500 w-full'}`}
+                    className={`h-full transition-all duration-500 ${passwordStrength <= 2 ? 'bg-red-500 w-1/4' :
+                        passwordStrength === 3 ? 'bg-yellow-400 w-2/4' :
+                          passwordStrength === 4 ? 'bg-yellow-500 w-3/4' :
+                            'bg-green-500 w-full'}`}
                   />
                 </div>
               )}
@@ -160,9 +222,20 @@ const RegisterModal = () => {
             {/* Submit button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2 sm:py-2.5 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base"
             >
-              Sign Up
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đang đăng ký...
+                </div>
+              ) : (
+                'Sign Up'
+              )}
             </button>
 
             {/* Social divider */}
@@ -170,7 +243,7 @@ const RegisterModal = () => {
               — or sign up with —
             </p>
 
-            
+
             <div className="flex flex-col gap-1.5 sm:gap-2 mt-2">
               <a
                 href={`${import.meta.env.VITE_API_BASE_URL}/auth/google`}
@@ -195,7 +268,7 @@ const RegisterModal = () => {
             {/* Login link */}
             <p className="text-xs sm:text-sm text-center text-gray-700 mt-3 sm:mt-4">
               Already have an account?{' '}
-              <button 
+              <button
                 type="button"
                 onClick={switchToLogin}
                 className="underline text-purple-500 hover:text-pink-500 transition"
@@ -221,6 +294,13 @@ const RegisterModal = () => {
         </style>
       </div>
     </Modal>
+     <OTPVerificationModal
+        isOpen={showOTPModal}
+        onClose={handleCloseOTPModal}
+        email={registeredEmail}
+        onVerificationSuccess={handleOTPVerificationSuccess}
+      />
+    </>
   );
 };
 
