@@ -3,6 +3,7 @@ export const AUTH_ENDPOINTS = {
   REGISTER: '/auth/register',
   REGISTER_RESEND_OTP: '/auth/register/resend-otp',
   REGISTER_VERIFY_OTP: '/auth/register/verify-otp',
+  REFRESH_TOKEN: '/auth/refresh',
   LOGOUT: '/auth/logout',
   ME: '/auth/me',          
   FORGOT_PASSWORD_SEND_OTP: '/auth/forgot-password/send-otp',

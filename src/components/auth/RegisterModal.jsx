@@ -19,6 +19,7 @@ const RegisterModal = () => {
   //OTP Modal State
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [registerUserName, setRegisteredUserName] = useState('');
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -77,9 +78,12 @@ const RegisterModal = () => {
         fullName: ''
       });
       closeModals();
+      //Set data into verifyOtp
       setRegisteredEmail(userData.email);
+      setRegisteredUserName(userData.userName);
       setShowOTPModal(true);
       alert('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
+
     } catch (error) {
       console.error('❌ Registration error:', error);
       setError(error.message || 'Đăng ký không thành công. Vui lòng thử lại.');
@@ -95,6 +99,7 @@ const RegisterModal = () => {
       console.log('✅ OTP verification completed:', response);
       setShowOTPModal(false);
       setRegisteredEmail('');
+      setRegisteredUserName('');
       // Optionally auto-login or redirect
     };
 
@@ -102,6 +107,7 @@ const RegisterModal = () => {
     const handleCloseOTPModal = () => {
       setShowOTPModal(false);
       setRegisteredEmail('');
+      setRegisteredUserName('');
     };
 
     // Handle close register modal
@@ -298,6 +304,7 @@ const RegisterModal = () => {
         isOpen={showOTPModal}
         onClose={handleCloseOTPModal}
         email={registeredEmail}
+        userName={registerUserName}
         onVerificationSuccess={handleOTPVerificationSuccess}
       />
     </>

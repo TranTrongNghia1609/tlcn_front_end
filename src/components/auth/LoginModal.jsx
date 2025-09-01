@@ -14,7 +14,7 @@ const LoginModal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('Vui lòng nhập đầy đủ email và mật khẩu.');
+      setError('Vui lòng nhập đầy đủ username và mật khẩu.');
       return;
     }
     setLoading(true);
@@ -36,17 +36,18 @@ const LoginModal = () => {
     } finally {
       setLoading(false);
     }
-    const handleClose = () => {
+    
+  };
+  const handleClose = () => {
       closeModals();
       setUsername('');
       setPassword('');
       setError('');
       setLoading(false);
     };
-  };
 
   return (
-    <Modal isOpen={isLoginOpen} onClose={closeModals}>
+    <Modal isOpen={isLoginOpen} onClose={handleClose}>
       <div className="relative bg-white/80 backdrop-blur-md border border-white/30 shadow-xl rounded-xl sm:rounded-2xl w-full px-4 py-6 sm:px-6 md:px-8 sm:py-8 md:py-10 max-h-[90vh] overflow-y-auto">
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="flare-bg w-full h-full" />

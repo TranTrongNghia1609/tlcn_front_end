@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../common/Modal';
 import { useAuth } from '../../context/AuthContext';
 
-const OTPVerificationModal = ({ isOpen, onClose, email, onVerificationSuccess }) => {
+const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerificationSuccess }) => {
   const { verifyRegistrationOTP, resendRegistrationOTP } = useAuth();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
@@ -124,8 +124,13 @@ const OTPVerificationModal = ({ isOpen, onClose, email, onVerificationSuccess })
 
     try {
       console.log('🔄 Resending OTP to:', email);
-      
-      await resendRegistrationOTP({ email });
+      const dataEmailUserName = {
+        email: email,
+        userName: userName
+      }
+      await resendRegistrationOTP(
+        dataEmailUserName
+      );
       
       console.log('✅ OTP resent successfully');
       

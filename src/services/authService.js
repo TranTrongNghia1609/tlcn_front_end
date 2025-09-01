@@ -1,36 +1,94 @@
+import axios from 'axios';
 import API from '../utils/api';
 import { AUTH_ENDPOINTS } from '../config/endpoints';
 export const authService = {
   login: async (credentials) => {
     try {
-      console.log('🚀 Sending login request:', {
-        url: AUTH_ENDPOINTS.LOGIN,
-        credentials: credentials,
-        baseURL: import.meta.env.VITE_API_BASE_URL
+      console.log('📤 AuthService: Logging in...', {
+        userName: credentials.userName,
+        hasPassword: !!credentials.password
       });
-
-      const response = await API.post(AUTH_ENDPOINTS.LOGIN, credentials);
       
-      console.log('✅ Login response:', response.data);
-
-      // Kiểm tra cả accessToken và token
-      if (response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.accessToken);
-      } else if (response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.token);
+      if (!credentials.userName || !credentials.password) {
+        throw new Error('Username và password là bắt buộc');
+      }
+      
+      const response = await API.post(AUTH_ENDPOINTS.LOGIN, {
+        userName: credentials.userName.trim(),
+        password: credentials.password
+      });
+      
+      console.log('✅ Login API Response:', response.data);
+      
+      // Lưu access token
+      const  accessToken  = response.data.data.accessToken;
+      console.log(`AcessToken: ${accessToken}`)
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+        console.log('✅ Access token saved');
       }
       
       return response.data;
-
+      
     } catch (error) {
-      console.error('❌ Login error:', {
+      console.error('❌ AuthService Login error:', {
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
         message: error.message
       });
       
-      throw error.response?.data || { message: 'Đăng nhập thất bại - Kiểm tra server' };
+      // ✅ Better error handling
+      if (error.response?.status === 401) {
+        throw { message: 'Username hoặc mật khẩu không đúng' };
+      }
+      
+      if (error.response?.status === 500) {
+        throw { message: 'Lỗi server. Vui lòng thử lại sau.' };
+      }
+      
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        throw { message: 'Không thể kết nối đến server' };
+      }
+      
+      if (error.code === 'ECONNABORTED') {
+        throw { message: 'Kết nối timeout. Vui lòng thử lại.' };
+      }
+      
+      throw error.response?.data || { 
+        message: error.message || 'Đăng nhập thất bại' 
+      };
+    }
+  },
+  refreshToken: async () => {
+    try {
+      console.log('🔄 AuthService: Refreshing token...');
+      
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+      
+      const { accessToken } = response.data.data.accessToken;
+      console.log(`Ma accesstoken: ${accessToken} `)
+      
+      // Update access token mới
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+        console.log('✅ New access token saved');
+      }
+      
+      console.log('✅ AuthService: Token refreshed successfully');
+      return response.data;
+      
+    } catch (error) {
+      console.error('❌ AuthService: Refresh token error:', error);
+      
+      // Clear access token khi refresh thất bại
+      localStorage.removeItem('access_token');
+      
+      throw error.response?.data || { message: 'Refresh token failed' };
     }
   },
 
@@ -54,9 +112,9 @@ export const authService = {
     }
   },
   // Resend OTP - bạn có thể định nghĩa nhận email string hoặc object
-  resendRegisterOTP: async (email) => {
+  resendRegisterOTP: async (dataEmailUserName) => {
     try {
-      const response = await API.post(AUTH_ENDPOINTS.REGISTER_RESEND_OTP, { email });
+      const response = await API.post(AUTH_ENDPOINTS.REGISTER_RESEND_OTP, dataEmailUserName);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Gửi lại OTP thất bại' };
@@ -66,35 +124,62 @@ export const authService = {
   // Logout - không cần tham số
   logout: async () => {
     try {
+      console.log('🔄 AuthService: Logging out...');
+      
+      // Gọi API logout để clear refresh token cookie
       await API.post(AUTH_ENDPOINTS.LOGOUT);
+      
+      console.log('✅ Logout API called successfully');
+      
     } catch (error) {
-      console.warn('Logout API call failed:', error);
+      console.error('❌ Logout API error:', error);
+      // Tiếp tục logout dù API có lỗi
     } finally {
-      localStorage.removeItem('auth_token');
+      // Clear access token
+      localStorage.removeItem('access_token');
+      console.log('✅ AuthService: Access token cleared');
     }
   },
 
   // Get current user - không cần tham số
   getCurrentUser: async () => {
     try {
+      console.log('🔍 AuthService: Getting current user...');
+      
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token available');
+      }
+      
       const response = await API.get(AUTH_ENDPOINTS.ME);
+      
+      console.log('✅ AuthService: Current user fetched:', response.data);
       return response.data;
+      
     } catch (error) {
-      throw error.response?.data || { message: 'Không thể lấy thông tin người dùng' };
+      console.error('❌ AuthService: Get current user error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      // ✅ Throw error để AuthContext có thể handle
+      throw error.response?.data || { message: 'Failed to get current user' };
     }
   },
   
 
   // Utility methods - bạn tự định nghĩa tên và logic
   hasToken: () => {
-    return !!localStorage.getItem('auth_token');
+    return !!localStorage.getItem('access_token');
   },
 
   getToken: () => {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem('access_token');
   },
 
   removeToken: () => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('access_token');
   }
 }
