@@ -5,19 +5,17 @@ import ImageUpload from '../common/ImageUpload';
 const AvatarUpload = () => {
   const { user, updateAvatar, uploading } = useUser();
 
-  const handleAvatarUpload = async (uploadResult) => {
+  const handleAvatarUpload = async (file) => {
     try {
-      console.log('🖼️ New avatar uploaded:', uploadResult.url);
-      setUploading(true);
       
-      await updateAvatar(uploadResult.url);
+      await updateAvatar(file);
       alert('Avatar updated successfully!');
       
     } catch (error) {
       console.error('Failed to save avatar:', error);
       alert(`Failed to update avatar: ${error.message || 'Unknown error'}`);
     } finally {
-      setUploading(false);
+      // setUploading(false);
     }
   };
 
@@ -47,7 +45,7 @@ const AvatarUpload = () => {
         </p>
         
         <ImageUpload
-          onUploadSuccess={handleAvatarUpload}
+          onUpload={handleAvatarUpload}
           onUploadError={handleUploadError}
           folder="online_judge/avatars"
           maxSize={2 * 1024 * 1024} // 2MB

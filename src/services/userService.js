@@ -1,11 +1,15 @@
 import { USER_ENDPOINTS } from '../config/endpoints';
 import API from '../utils/api';
 export const userService ={
-  uploadAvatar: async(avatarUrl) => {
+  uploadAvatar: async(file) => {
     try{
-      console.log('📤 Updating avatar:', avatarUrl);
-      const response = await API.put(USER_ENDPOINTS.UPLOAD_AVATAR, {
-        avatar: avatarUrl
+      const form = new FormData();
+      form.append('avatar', file, file.name);
+
+      const response = await API.post(USER_ENDPOINTS.UPLOAD_AVATAR, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       
       console.log('✅ Avatar updated:', response.data);

@@ -11,6 +11,6 @@ export const AUTH_ENDPOINTS = {
   RESET_PASSWORD: '/auth/reset',
 };
 export const USER_ENDPOINTS = {
-  UPLOAD_AVATAR: '/users/profile/upload/avatar',    
+  UPLOAD_AVATAR: '/users/profile/avatar/upload',    
   UPDATE_PROFILE: '/users/profile/update', 
 }

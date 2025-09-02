@@ -10,17 +10,20 @@ export const UserProvider = ({ children }) => {
   const [uploading, setUploading] = useState(false);
 
   // ✅ Update avatar
-  const updateAvatar = async (avatarUrl) => {
+  const updateAvatar = async (file) => {
     try {
       setUploading(true);
       console.log('🔄 UserContext: Updating avatar...');
       
-      const response = await userService.uploadAvatar(avatarUrl);
+      const response = await userService.uploadAvatar(file);
       
       // Update user in AuthContext
-      const updatedUser = response.data?.user || response.user;
-      if (updatedUser) {
-        setUser(updatedUser);
+      const avatarUrl = response.data?.avatarUrl;
+      if (avatarUrl) {
+        setUser({
+          ...user,
+          avatar: avatarUrl
+        });
         console.log('✅ UserContext: Avatar updated, user state synced');
       }
       
