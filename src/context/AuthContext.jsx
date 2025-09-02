@@ -38,9 +38,13 @@ export const AuthProvider = ({ children }) => {
       console.log('🔍 Access token found:', !!token);
       // ✅ Kiểm tra có access token không
       if (!token) {
-        console.log('🔍 No access token found');
-        setUser(null);
-        setIsAuthenticated(false);
+        console.log('🔍 No access token found, call with access token in Cookie');
+        const response = await authService.getCurrentUser();
+        const userData = response.data?.user || response.user || response;
+        if (userData){
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
         return;
       }
 

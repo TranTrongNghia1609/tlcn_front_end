@@ -146,10 +146,10 @@ export const authService = {
     try {
       console.log('🔍 AuthService: Getting current user...');
       
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        throw new Error('No access token available');
-      }
+      // const token = localStorage.getItem('access_token');
+      // if (!token) {
+      //   throw new Error('No access token available');
+      // }
       
       const response = await API.get(AUTH_ENDPOINTS.ME);
       
