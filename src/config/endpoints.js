@@ -9,8 +9,10 @@ export const AUTH_ENDPOINTS = {
   FORGOT_PASSWORD_SEND_OTP: '/auth/forgot-password/send-otp',
   FORGOT_PASSWORD_VERIFY_OTP: '/auth/forgot-password/verify-otp',
   RESET_PASSWORD: '/auth/reset',
+  ONBOARDING: '/auth/onboarding'
 };
 export const USER_ENDPOINTS = {
   UPLOAD_AVATAR: '/users/profile/avatar/upload',    
   UPDATE_PROFILE: '/users/profile/update', 
+  CHECK_USERNAME: '/users/username/check'
 }

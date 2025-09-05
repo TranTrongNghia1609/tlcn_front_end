@@ -181,5 +181,26 @@ export const authService = {
 
   removeToken: () => {
     localStorage.removeItem('access_token');
+  },
+
+  onBoarding: async (userName) =>{
+    try{
+      const response = await API.post(AUTH_ENDPOINTS.ONBOARDING, {}, {
+        params: {username: userName}
+      });
+      // Lưu access token
+      const  accessToken  = response.data.data.accessToken;
+      console.log(`AcessToken: ${accessToken}`)
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+        console.log('✅ Access token saved');
+      }
+      
+      return response.data;
+    }
+    catch (e){
+      console.log(e);
+      throw e;
+    }
   }
 }
