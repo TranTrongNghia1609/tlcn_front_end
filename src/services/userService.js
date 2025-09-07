@@ -65,4 +65,17 @@ export const userService ={
       throw error.response?.data || { message: 'Failed to fetch stats' };
     }
   },
+  checkUserName: async(username) => {
+    try{
+      const response = await API.get(USER_ENDPOINTS.CHECK_USERNAME, {
+        params: {username: username}
+      });
+      console.log('✅ Username check fetched:', response.data);
+      return response.data;
+    }
+    catch (error){
+      console.error('❌ Get username check error:', error);
+      throw error.response?.data || { message: 'Failed to check' };
+    }
+  }
 }

@@ -235,7 +235,45 @@ export const AuthProvider = ({ children }) => {
       setPendingPasswordReset(null);
     }
   };
+  const onBoarding = async (userName) => {
+    try{
+      console.log('🔄 AuthContext: Starting login...');
 
+      const response = await authService.onBoarding(userName);
+
+      console.log('🔍 Login response:', response);
+      console.log('🔍 Response structure:', {
+        hasData: !!response.data,
+        hasUser: !!(response.data?.user || response.user),
+        hasAccessToken: !!(response.data?.data?.accessToken)
+      });
+
+      // ✅ Check if token was saved
+      const savedToken = authService.getToken();
+      console.log('🔍 Token saved after login:', !!savedToken);
+
+      const userData = response.data?.user || response.user || response.data;
+      console.log('🔍 Setting user data:', userData?.userName || userData?.email);
+
+      if (userData && (userData.userName || userData.email)) {
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        console.warn('⚠️ No user data in login response, trying to fetch...');
+        // Fallback: fetch user data if login successful but no user data
+        if (savedToken) {
+          await checkAuth();
+        }
+      }
+
+      console.log('✅ AuthContext: Login completed');
+      return response;
+    }
+    catch (e){
+      console.log('Auth context: ', e);
+      throw e;
+    }
+  }
   const value = {
     // User state
     user,
@@ -254,6 +292,7 @@ export const AuthProvider = ({ children }) => {
     verifyRegistrationOTP,
     resendRegistrationOTP,
     pendingRegistration,
+    onBoarding,
 
     // Password reset flow
     sendForgotPasswordOTP,

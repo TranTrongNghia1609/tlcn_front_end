@@ -8,6 +8,7 @@ const AppRoutes = () => {
   return(
     <Routes>
       <Route path="/" element = {<Home/>} />
+      <Route path="/onboarding" element = {<Home isShowOnboarding={true}/>} />
       <Route path="/dashboard" element = {<Dashboard/>}/>
       <Route path="*" element={<NotFound />} />
       <Route path="/profile" element={<Profile />} />
