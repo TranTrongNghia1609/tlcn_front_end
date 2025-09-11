@@ -20,7 +20,7 @@ const ProblemStatement = ({statement, input, output}) => {
   return (
     <div className="w-4/5 mx-auto mt">
       <Card className="mt-3">
-      <CardHeader className="border-b border-border/30 bg-gradient-to-r from-card to-card/80">
+      <CardHeader className="border-b border-border/60 bg-gradient-to-r from-card to-card/80">
         <CardTitle className="text-2xl font-extrabold text-judge-header flex items-center gap-2">
           <div className="w-1 h-6 bg-primary rounded-full"></div>
           Problem Statement
