@@ -16,3 +16,6 @@ export const USER_ENDPOINTS = {
   UPDATE_PROFILE: '/users/profile/update', 
   CHECK_USERNAME: '/users/username/check'
 }
+export const PROBLEM_ENDPOINTS = {
+  GET_PROLBEM_ID: (id) => `/problems/${id}`
+}
