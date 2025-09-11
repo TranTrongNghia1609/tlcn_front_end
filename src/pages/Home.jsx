@@ -6,7 +6,7 @@ import { useUser } from '../context/UserContext';
 import { getPosts } from '../services/postService';
 import OnboardingModal from "@/components/auth/OnboardingModel.jsx";
 
-const Home = ({isShowOnboarding = false, isOk = false}) => {
+const Home = ({isShowOnboarding = false}) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
