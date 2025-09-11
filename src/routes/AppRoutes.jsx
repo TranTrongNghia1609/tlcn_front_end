@@ -4,6 +4,7 @@ import Home from '../pages/Home';
 import Dashboard from '../pages/DashBoard';
 import NotFound from '../pages/NotFound';
 import Profile from '../pages/Profile'
+import ProblemDetail from "../pages/ProblemDetail";
 const AppRoutes = () => {
   return(
     <Routes>
@@ -12,6 +13,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element = {<Dashboard/>}/>
       <Route path="*" element={<NotFound />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/problem/:id" element={<ProblemDetail/>}/>
     </Routes>
   )
 }

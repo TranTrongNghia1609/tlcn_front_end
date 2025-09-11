@@ -4,12 +4,14 @@ import CreatePost from '../components/home/CreatePost';
 import Sidebar from '../components/home/Sidebar';
 import { useUser } from '../context/UserContext';
 import { getPosts } from '../services/postService';
+import OnboardingModal from "@/components/auth/OnboardingModel.jsx";
 
-const Home = () => {
+const Home = ({isShowOnboarding = false}) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, following, trending
+  const [onboarding, setOnboarding] = useState(isShowOnboarding);
 
   useEffect(() => {
     fetchPosts();
@@ -57,7 +59,9 @@ const Home = () => {
                 Chia sẻ hành trình học lập trình của bạn, thảo luận về các vấn đề và học hỏi cùng nhau
               </p>
             </div>
-
+            <OnboardingModal open={onboarding}
+             onClose={() => setOnboarding(false)}
+            />
             {/* Create Post */}
             {user && (
               <CreatePost onPostCreated={handleNewPost} />

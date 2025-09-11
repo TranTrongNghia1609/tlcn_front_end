@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Modal from '../common/Modal';
-import { useAuthModal } from '../../context/AuthModalContext';
 import { userService } from '../../services/userService';
 import debounce from "lodash.debounce";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +10,6 @@ const OnboardingModal = ({open, onClose}) => {
     const [loading, setLoading] = useState(false);
     const [loadingCheckUsername, setLoadingCheckUsername] = useState(false);
     const [userName, setUserName] = useState('');
-    const { closeModals } = useAuthModal();
     const { onBoarding } = useAuth();
     const checkUserName = userService.checkUserName;
     const navigate = useNavigate()
@@ -27,6 +25,7 @@ const OnboardingModal = ({open, onClose}) => {
                 }
                 catch (error){
                     setError('Username này đã tồn tại')
+                    console.log(error)
                 }
             }, 1000),
             []
@@ -44,7 +43,7 @@ const OnboardingModal = ({open, onClose}) => {
             setLoading(false)
             navigate('/profile')
         }
-        catch (e){
+        catch (error){
             setLoading(false)
             console.error('❌ Lỗi trong khi đăng ký', error);
             setError('❌ Lỗi trong khi đăng ký')
