@@ -36,7 +36,7 @@ const ProblemExamples = ({ examplesInput = [], examplesOutput = [] }) => {
   }
 
   return (
-    <div className="w-4/5 mx-auto mt-6">
+    <div className="ml-2 mr-2 mx-auto mt-6">
       <Card className="mt-4">
         <CardHeader className="border-b border-border/60 bg-gradient-to-r from-card to-card/80">
           <CardTitle className="text-2xl font-extrabold text-judge-header flex items-center gap-2">
