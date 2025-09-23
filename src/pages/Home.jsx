@@ -30,8 +30,9 @@ const Home = ({isShowOnboarding = false}) => {
   };
 
   const handleNewPost = (newPost) => {
-    setPosts(prev => [newPost, ...prev]);
+    getPosts();
   };
+  
 
   const handlePostUpdate = (updatedPost) => {
     setPosts(prev => prev.map(post => 

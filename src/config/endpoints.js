@@ -19,3 +19,36 @@ export const USER_ENDPOINTS = {
 export const PROBLEM_ENDPOINTS = {
   GET_PROLBEM_ID: (id) => `/problems/${id}`
 }
+export const POST_ENDPOINTS = {
+  GET_ALL: '/posts/all',
+  GET_POPULAR: '/posts/popular',
+  GET_RECENT: '/posts/recent',
+  GET_DETAILS: (id) => `/posts/${id}/details`,
+  CREATE: '/posts/create',
+  UPDATE: (id) => `/posts/${id}/update`,
+  DELETE: (id) => `/posts/${id}/delete`,
+  LIKE: (id) => `/posts/${id}/actions/like`,
+  UNLIKE: (id) => `/posts/${id}/actions/unlike`,
+  TOGGLE_LIKE: (id) => `/posts/${id}/actions/toggle-like`,
+  SHARE: (id) => `/posts/${id}/actions/share`,
+  VIEW: (id) => `/posts/${id}/actions/view`,
+  BOOKMARK: (id) => `/posts/${id}/bookmark`,
+  UNBOOKMARK: (id) => `/posts/${id}/unbookmark`
+};
+
+export const COMMENT_ENDPOINTS = {
+  CREATE: '/comments',
+  GET_POST_COMMENTS: (postId) => `/comments/post/${postId}`,
+  GET_COMMENT_REPLIES: (commentId) => `/comments/${commentId}/replies`,
+  UPDATE: (commentId) => `/comments/${commentId}`,
+  DELETE: (commentId) => `/comments/${commentId}`,
+  TOGGLE_LIKE: (commentId) => `/comments/${commentId}/like`,
+  GET_BY_ID: (commentId) => `/comments/${commentId}`
+};
+
+export const UPLOAD_ENDPOINTS = {
+  POST_IMAGES_MULTIPLE: '/upload/posts/multiple',
+  POST_IMAGE_SINGLE: '/upload/posts/single',
+  POST_IMAGES_GET: (postId) => `/upload/posts/${postId}/images`,
+  AVATAR: '/upload/avatar'
+};

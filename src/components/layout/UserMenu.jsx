@@ -7,14 +7,7 @@ const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // ✅ DEBUG: Xem structure của user object
-  useEffect(() => {
-    console.log('🔍 User object in UserMenu:', user);
-    console.log('🔍 User keys:', user ? Object.keys(user) : 'No user');
-    if (user) {
-      console.log('🔍 userName:', user.userName);
-    }
-  }, [user]);
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -51,7 +44,6 @@ const UserMenu = () => {
                  user?.email ||         // ← Fallback cuối
                  'User';                // ← Default
     
-    console.log('🔍 Avatar name used:', name);
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=40&rounded=true`;
   };
 
@@ -62,7 +54,6 @@ const UserMenu = () => {
                        user?.email?.split('@')[0] ||  // ← Fallback cuối
                        'User';                     // ← Default
     
-    console.log('🔍 Display name used:', displayName);
     return displayName;
   };
 
