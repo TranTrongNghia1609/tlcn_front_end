@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
 import TurndownService from 'turndown';
 import { useUser } from '../../context/UserContext';
-import { createPost } from '../../services/postService';
-import PostEditor from './CreatePostComponent/PostEditor';
-import CodeEditor from './CreatePostComponent/CodeEditor';
-import ImageUpload from './CreatePostComponent/ImageUpload';
-//import PostMedia from './CreatePostComponent/PostMedia';
-import TagsInput from './CreatePostComponent/TagsInput';
-import PostActions from './CreatePostComponent/PostActions';
+import { createPost, uploadPostImages, uploadPostImageSingle } from '../../services/postService';
+import Modal from '../common/Modal';
+import { useModalManager } from '../../hooks/useModalManager';
+import ModalContentRenderer from './CreatePostComponent/ModalContentRenderer';
 
 const CreatePost = ({ onPostCreated }) => {
   const { user } = useUser();
-  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const modalManager = useModalManager();
+  
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    htmlContent: '',
     codeSnippet: '',
     tags: [],
-    images: []
+    images: [],
+    imageFiles: []
   });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
-  // Initialize TurndownService
   const turndownService = new TurndownService({
     headingStyle: 'atx',
     codeBlockStyle: 'fenced',
@@ -44,11 +44,12 @@ const CreatePost = ({ onPostCreated }) => {
     replacement: (content) => '<u>' + content + '</u>'
   });
 
+  // ✅ Form handlers
   const handleContentChange = (htmlContent) => {
     const markdownContent = turndownService.turndown(htmlContent);
+    console.log('📄 Markdown output:', markdownContent);
     setFormData(prev => ({
       ...prev,
-      htmlContent,
       content: markdownContent
     }));
   };
@@ -67,6 +68,67 @@ const CreatePost = ({ onPostCreated }) => {
     }));
   };
 
+  const handleImageFilesChange = (files) => {
+    console.log('🔍 Processing', files.length, 'images...');
+    const fileArray = Array.from(files);
+
+    const imagePreviews = fileArray.map(file => {
+      const preview = URL.createObjectURL(file);
+      console.log('🔗 Created preview URL:', preview);
+    console.log('📁 File details:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
+      
+      const customizedImage = {
+        file,
+        preview,
+        name: file.name,
+        originalName: file.name,
+        size: file.size,
+        type: file.type,
+        caption: `${file.name.split('.')[0]}`,
+        altText: `User uploaded image: ${file.name}`,
+        quality: 85,
+        resize: {
+          width: null,
+          height: null,
+          maintainAspectRatio: true
+        },
+        effects: {
+          brightness: 100,
+          contrast: 100,
+          saturation: 100,
+          blur: 0
+        },
+        timestamp: Date.now(),
+        id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+
+      if (file.size > 5 * 1024 * 1024) {
+        customizedImage.suggested = {
+          quality: 70,
+          resize: { width: 1920, height: 1080, maintainAspectRatio: true },
+          message: "Large file detected. Suggest reducing quality and size."
+        };
+      } else if (file.size > 2 * 1024 * 1024) {
+        customizedImage.suggested = {
+          quality: 80,
+          message: "Medium file. Consider slight quality reduction."
+        };
+      }
+
+      return customizedImage;
+    });
+
+    setFormData(prev => ({
+      ...prev,
+      imageFiles: [...prev.imageFiles, ...fileArray],
+      images: [...prev.images, ...imagePreviews]
+    }));
+  };
+
   const handleAddImage = (imageData) => {
     setFormData(prev => ({
       ...prev,
@@ -75,17 +137,71 @@ const CreatePost = ({ onPostCreated }) => {
   };
 
   const handleRemoveImage = (indexToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, index) => index !== indexToRemove)
-    }));
+    setFormData(prev => {
+      const imageToRemove = prev.images[indexToRemove];
+      if (imageToRemove && imageToRemove.preview) {
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+
+      return {
+        ...prev,
+        images: prev.images.filter((_, index) => index !== indexToRemove),
+        imageFiles: prev.imageFiles.filter((_, index) => index !== indexToRemove)
+      };
+    });
   };
 
   const handleEditImage = (index, updatedImageData) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.map((img, i) => i === index ? updatedImageData : img)
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, ...updatedImageData } : img
+      )
     }));
+  };
+
+  // ✅ Enhanced modal-aware image edit
+  const handleEditImageSave = (index, updatedImageData) => {
+    console.log('🎨 Editing image:', index, updatedImageData);
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => 
+        i === index ? { ...img, ...updatedImageData } : img
+      )
+    }));
+    modalManager.handleBackToCreate();
+  };
+
+  const uploadImages = async () => {
+    if (formData.imageFiles.length === 0) return [];
+
+    try {
+      setIsUploadingImages(true);
+      console.log('📤 Uploading', formData.imageFiles.length, 'files to Cloudinary...');
+      
+      const uploadResult = await uploadPostImages(formData.imageFiles);
+      console.log('✅ Cloudinary upload response:', uploadResult);
+      
+      const cloudinaryImages = uploadResult.images || uploadResult.data?.images || [];
+      return cloudinaryImages;
+    } catch (error) {
+      console.error('❌ Error uploading to Cloudinary:', error);
+      throw new Error('Failed to upload images: ' + error.message);
+    } finally {
+      setIsUploadingImages(false);
+    }
+  };
+
+  const handleEditorImageUpload = async (file) => {
+    try {
+      console.log('📤 Uploading editor image...');
+      const result = await uploadPostImageSingle(file);
+      console.log('✅ Editor image uploaded:', result);
+      return result.url;
+    } catch (error) {
+      console.error('❌ Error uploading editor image:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -95,53 +211,75 @@ const CreatePost = ({ onPostCreated }) => {
     try {
       setIsSubmitting(true);
       
+      let uploadedImages = [];
+      if (formData.imageFiles.length > 0) {
+        console.log('📤 Starting Cloudinary upload...');
+        uploadedImages = await uploadImages();
+      }
+      
       const submitData = {
         title: formData.title.trim(),
         content: formData.content,
-        htmlContent: formData.htmlContent,
-        codeSnippet: formData.codeSnippet,
-        hashtags: formData.tags.join(','),
-        images: formData.images
+        hashtags: formData.tags,
+        images: uploadedImages
       };
 
+      console.log('📝 Submitting:', submitData);
       const response = await createPost(submitData);
-      onPostCreated(response.data.post);
+      console.log('✅ Post created:', response);
       
-      // Reset form
-      setFormData({
-        title: '',
-        content: '',
-        htmlContent: '',
-        codeSnippet: '',
-        tags: [],
-        images: []
-      });
-      setIsExpanded(false);
-      setShowCodeEditor(false);
+      handleCancel();
+      
+      if (onPostCreated) {
+        onPostCreated(response.data || response);
+      }
+      
+      alert('Bài viết đã được tạo thành công!');
       
     } catch (error) {
-      console.error('Error creating post:', error);
-      alert('Failed to create post. Please try again.');
+      console.error('❌ Error:', error);
+      alert('Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsSubmitting(false);
     }
   };
-  
 
   const handleCancel = () => {
+    // Cleanup preview URLs
+    formData.images.forEach(image => {
+      if (image.preview) {
+        URL.revokeObjectURL(image.preview);
+      }
+    });
+
     setFormData({
       title: '',
       content: '',
-      htmlContent: '',
       codeSnippet: '',
       tags: [],
-      images: []
+      images: [],
+      imageFiles: []
     });
-    setIsExpanded(false);
     setShowCodeEditor(false);
+    modalManager.closeModal();
   };
 
-  const canSubmit = formData.title.trim() && formData.content.trim();
+  const handleOpenModal = () => {
+    modalManager.openModal('create');
+  };
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      formData.images.forEach(image => {
+        if (image.preview) {
+          URL.revokeObjectURL(image.preview);
+        }
+      });
+    };
+  }, []);
+
+  const canSubmit = formData.title.trim() && formData.content.trim() && !isSubmitting && !isUploadingImages;
 
   if (!user) {
     return (
@@ -155,8 +293,9 @@ const CreatePost = ({ onPostCreated }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-      {!isExpanded ? (
+    <>
+      {/* Trigger Button */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
         <div className="p-6">
           <div className="flex items-center space-x-4">
             <img
@@ -165,93 +304,53 @@ const CreatePost = ({ onPostCreated }) => {
               className="w-12 h-12 rounded-full object-cover"
             />
             <button
-              onClick={() => setIsExpanded(true)}
+              onClick={handleOpenModal}
               className="flex-1 text-left px-4 py-3 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
             >
               Bạn có suy nghĩ gì, {user.fullName || user.userName}?
             </button>
           </div>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="flex items-start space-x-4 mb-4">
-            <img
-              src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.userName)}&size=48&background=2563eb&color=fff`}
-              alt={user.userName}
-              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Tiêu đề..."
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full text-xl font-semibold border-none outline-none placeholder-gray-400 mb-4"
-                maxLength={200}
-              />
-              
-              <PostEditor
-                value={formData.htmlContent}
-                onChange={handleContentChange}
-                placeholder="Chia sẻ suy nghĩ của bạn..."
-              />
+      </div>
 
-              {/* Character/Word Count */}
-              <div className="flex justify-between text-sm text-gray-500 mt-2 mb-4">
-                <span>
-                  Characters: {formData.content.length}
-                </span>
-                <span>
-                  Words: {formData.content.split(/\s+/).filter(word => word.length > 0).length}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Code Editor */}
-          <CodeEditor
-            value={formData.codeSnippet}
-            onChange={(value) => setFormData(prev => ({ ...prev, codeSnippet: value }))}
-            onClose={() => setShowCodeEditor(false)}
-            isVisible={showCodeEditor}
-          />
-
-          {/* Image Upload */}
-          <ImageUpload
-            images={formData.images}
-            onUpload={handleAddImage}
-            onRemove={handleRemoveImage}
-            maxImages={4}
-          />
-
-          {/* Media Preview */}
-          {/* <PostMedia
-            images={formData.images}
-            onRemoveImage={handleRemoveImage}
-            onEditImage={handleEditImage}
-            maxImages={4}
-          /> */}
-
-          {/* Tags Input */}
-          <TagsInput
-            tags={formData.tags}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-            maxTags={5}
-          />
-
-          {/* Actions */}
-          <PostActions
-            showCodeEditor={showCodeEditor}
-            onToggleCodeEditor={() => setShowCodeEditor(!showCodeEditor)}
-            onCancel={handleCancel}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            canSubmit={canSubmit}
-          />
-        </form>
-      )}
-    </div>
+      {/* ✅ Single Modal với dynamic content */}
+      <Modal
+        isOpen={modalManager.isModalOpen}
+        onClose={modalManager.modalContent === 'create' ? handleCancel : modalManager.handleBackToCreate}
+        {...modalManager.getModalProps()}
+      >
+        <ModalContentRenderer
+          modalContent={modalManager.modalContent}
+          activeImageIndex={modalManager.activeImageIndex}
+          formData={formData}
+          user={user}
+          isSubmitting={isSubmitting}
+          isUploadingImages={isUploadingImages}
+          showCodeEditor={showCodeEditor}
+          canSubmit={canSubmit}
+          
+          // Form handlers
+          setFormData={setFormData}
+          handleContentChange={handleContentChange}
+          handleEditorImageUpload={handleEditorImageUpload}
+          setShowCodeEditor={setShowCodeEditor}
+          handleAddImage={handleAddImage}
+          handleRemoveImage={handleRemoveImage}
+          handleEditImage={handleEditImage}
+          handleImageFilesChange={handleImageFilesChange}
+          handleAddTag={handleAddTag}
+          handleRemoveTag={handleRemoveTag}
+          handleSubmit={handleSubmit}
+          handleCancel={handleCancel}
+          
+          // Modal navigation
+          showImagePreview={modalManager.showImagePreview}
+          showImageCustomizer={modalManager.showImageCustomizer}
+          handleBackToCreate={modalManager.handleBackToCreate}
+          handleEditImageSave={handleEditImageSave}
+        />
+      </Modal>
+    </>
   );
 };
 

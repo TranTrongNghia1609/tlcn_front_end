@@ -1,213 +1,291 @@
-import React, { useState, useEffect } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import { useUser } from '../../context/UserContext';
-import { getComments, createComment, likeComment } from '../../services/commentService';
-import { 
-  HeartIcon, 
-  ChatBubbleLeftIcon,
-  PaperAirplaneIcon 
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { useComment } from '../../context/CommentContext';
+import {
+  CommentForm,
+  CommentList,
+  CommentStats,
+  ErrorDisplay
+} from './CommentComponent';
 
-const CommentSection = ({ postId, onCommentUpdate }) => {
+const CommentSection = ({ postId }) => {
   const { user } = useUser();
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [replyTo, setReplyTo] = useState(null);
+  const [sortBy, setSortBy] = useState('oldest');
+  const [localComments, setLocalComments] = useState([]);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
+  const {
+    getPostComments: getPostCommentsData,
+    loadPostComments,
+    createComment,
+    updateComment,
+    deleteComment,
+    toggleLikeComment,
+    clearError,
+    loading,
+    error
+  } = useComment();
+
+  const { comments: contextComments, pagination } = getPostCommentsData(postId);
 
   useEffect(() => {
-    fetchComments();
-  }, [postId]);
-
-  const fetchComments = async () => {
-    try {
-      setLoading(true);
-      const response = await getComments(postId);
-      setComments(response.data.comments);
-      onCommentUpdate(response.data.comments);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-    } finally {
-      setLoading(false);
+    if (contextComments && contextComments.length > 0) {
+      setLocalComments(contextComments);
     }
-  };
+  }, [contextComments]);
 
-  const handleSubmitComment = async (e) => {
-    e.preventDefault();
-    if (!user || !newComment.trim() || submitting) return;
+  useEffect(() => {
+    if (!hasLoadedOnce && postId) {
+      console.log('CommentSection initial load:', {
+        postId: postId?.slice(-4),
+        sortBy
+      });
+
+      // Pass sortBy in options object
+      loadPostComments(postId, 1, { sortBy, limit: 10 });
+      setHasLoadedOnce(true);
+    }
+  }, [postId, hasLoadedOnce, loadPostComments, sortBy]);
+
+  const handleLikeComment = useCallback(async (commentId) => {
+    if (!user) {
+      toast.error('Please login to like comments');
+      return;
+    }
 
     try {
-      setSubmitting(true);
-      const response = await createComment({
-        postId,
-        content: newComment,
-        parentId: replyTo
-      });
-      
-      const updatedComments = [...comments, response.data.comment];
-      setComments(updatedComments);
-      onCommentUpdate(updatedComments);
-      setNewComment('');
-      setReplyTo(null);
+      await toggleLikeComment(commentId);
+
+      setTimeout(() => {
+        toast.success('Like updated!', {
+          position: "bottom-right",
+          autoClose: 800,
+        });
+      }, 100);
+
     } catch (error) {
-      console.error('Error creating comment:', error);
+      toast.error('Failed to like comment. Please try again.');
+    }
+  }, [user, toggleLikeComment]);
+
+  // Remove frontend sorting since backend handles it
+  const sortedComments = useMemo(() => {
+    return localComments || [];
+  }, [localComments]);
+
+  const handleCreateComment = useCallback(async (content) => {
+    if (!content.trim() || submitting) return;
+
+    if (!user) {
+      toast.error('Please login to post a comment');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await createComment({
+        postId,
+        content: content.trim(),
+        parentCommentId: null
+      });
+      toast.success('Comment posted successfully!');
+
+      //  Reload with current sort after posting - pass options correctly
+      setTimeout(() => {
+        loadPostComments(postId, 1, { sortBy, limit: 10 });
+      }, 500);
+    } catch (error) {
+      toast.error(error.message || 'Failed to post comment.');
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [user, submitting, postId, createComment, loadPostComments, sortBy]);
 
-  const handleLikeComment = async (commentId) => {
-    if (!user) return;
+  const handleCreateReply = useCallback(async (content, parentCommentId) => {
+    if (!content.trim()) return;
+
+    if (!user) {
+      toast.error('Please login to reply');
+      return;
+    }
 
     try {
-      const response = await likeComment(commentId);
-      setComments(prev => prev.map(comment => 
-        comment._id === commentId ? response.data.comment : comment
-      ));
+      await createComment({
+        postId,
+        content: content.trim(),
+        parentCommentId
+      });
+      toast.success('Reply posted successfully!');
+
+      //   Reload with current sort after replying
+      setTimeout(() => {
+        loadPostComments(postId, 1, { sortBy, limit: 10 });
+      }, 500);
     } catch (error) {
-      console.error('Error liking comment:', error);
+      toast.error(error.message || 'Failed to post reply.');
     }
-  };
+  }, [user, postId, createComment, loadPostComments, sortBy]);
 
-  const CommentItem = ({ comment, isReply = false }) => {
-    const isLiked = comment.likes?.includes(user?._id);
+  const handleEditComment = useCallback(async (commentId, content) => {
+    if (!content.trim()) {
+      toast.error('Comment content cannot be empty');
+      return;
+    }
 
-    return (
-      <div className={`${isReply ? 'ml-12' : ''}`}>
-        <div className="flex space-x-3">
-          <img
-            src={comment.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author.userName)}&size=32&background=2563eb&color=fff`}
-            alt={comment.author.userName}
-            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-          />
-          
-          <div className="flex-1 min-w-0">
-            <div className="bg-gray-50 rounded-lg px-3 py-2">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="font-semibold text-sm text-gray-900">
-                  {comment.author.fullName || comment.author.userName}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {formatDistanceToNow(new Date(comment.createdAt))} ago
-                </span>
-              </div>
-              
-              <p className="text-sm text-gray-700">{comment.content}</p>
-            </div>
+    try {
+      await updateComment(commentId, content, postId);
+      toast.success('Comment updated successfully!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update comment.');
+    }
+  }, [updateComment, postId]);
 
-            <div className="flex items-center space-x-4 mt-2">
-              <button
-                onClick={() => handleLikeComment(comment._id)}
-                disabled={!user}
-                className={`flex items-center space-x-1 text-xs ${
-                  isLiked ? 'text-red-600' : 'text-gray-500 hover:text-red-600'
-                } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isLiked ? (
-                  <HeartSolidIcon className="w-4 h-4" />
-                ) : (
-                  <HeartIcon className="w-4 h-4" />
-                )}
-                <span>{comment.likesCount || 0}</span>
-              </button>
+  const handleDeleteComment = useCallback(async (commentId) => {
+    const confirmMessage = 'Are you sure you want to delete this comment?';
+    if (!window.confirm(confirmMessage)) return;
 
-              {user && !isReply && (
-                <button
-                  onClick={() => setReplyTo(comment._id)}
-                  className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-600"
-                >
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  <span>Reply</span>
-                </button>
-              )}
-            </div>
+    try {
+      await deleteComment(commentId, postId);
+      toast.success('Comment deleted successfully!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete comment.');
+    }
+  }, [deleteComment, postId]);
 
-            {/* Replies */}
-            {comment.replies && comment.replies.length > 0 && (
-              <div className="mt-3 space-y-3">
-                {comment.replies.map(reply => (
-                  <CommentItem key={reply._id} comment={reply} isReply={true} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const handleLoadMore = useCallback(async () => {
+    if (!pagination?.hasNext || loading) return;
+
+    try {
+      console.log('🔄 Loading more comments:', {
+        postId: postId?.slice(-4),
+        currentPage: pagination.currentPage,
+        nextPage: pagination.currentPage + 1,
+        sortBy
+      });
+
+      //   Pass sortBy when loading more
+      await loadPostComments(postId, pagination.currentPage + 1, { sortBy, limit: 10 });
+    } catch (error) {
+      toast.error('Failed to load more comments');
+    }
+  }, [pagination, loading, loadPostComments, postId, sortBy]);
+
+  const handleRefresh = useCallback(() => {
+    console.log('🔄 Refreshing comments with sort:', sortBy);
+    setHasLoadedOnce(false);
+
+    //   Refresh with current sort
+    loadPostComments(postId, 1, { sortBy, limit: 10 });
+  }, [loadPostComments, postId, sortBy]);
+
+  //   Enhanced sort change handler - reload comments with new sort
+  const handleSortChange = useCallback(async (newSortBy) => {
+    if (newSortBy === sortBy) return; // No change
+
+    console.log('🔄 Changing sort:', {
+      from: sortBy,
+      to: newSortBy,
+      postId: postId?.slice(-4)
+    });
+
+    setSortBy(newSortBy);
+    setHasLoadedOnce(false);
+
+    try {
+      //  Reload comments with new sort
+      await loadPostComments(postId, 1, { sortBy: newSortBy, limit: 10 });
+
+      toast.success(`Sorted by ${newSortBy}`, {
+        position: "bottom-right",
+        autoClose: 1000,
+      });
+    } catch (error) {
+      console.error(' Sort change error:', error);
+      toast.error('Failed to sort comments');
+      // Revert sort if failed
+      setSortBy(sortBy);
+    }
+  }, [sortBy, postId, loadPostComments]);
+
+  const handleDismissError = useCallback(() => {
+    clearError();
+  }, [clearError]);
 
   return (
-    <div className="border-t border-gray-100 bg-gray-50">
+    <div className="border-t border-gray-100 bg-white">
       <div className="p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
-          Comments ({comments.length})
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <CommentStats
+            totalComments={pagination?.totalComments || localComments?.length || 0}
+            totalReplies={pagination?.totalReplies || 0}
+            loading={loading}
+          />
 
-        {/* Comment Form */}
-        {user ? (
-          <form onSubmit={handleSubmitComment} className="mb-6">
-            <div className="flex space-x-3">
-              <img
-                src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.userName)}&size=40&background=2563eb&color=fff`}
-                alt={user.userName}
-                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-              />
-              
-              <div className="flex-1">
-                {replyTo && (
-                  <div className="mb-2 text-sm text-gray-600">
-                    Replying to comment...
-                    <button
-                      type="button"
-                      onClick={() => setReplyTo(null)}
-                      className="ml-2 text-blue-600 hover:text-blue-700"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-                
-                <div className="relative">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a comment..."
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    rows="3"
-                    disabled={submitting}
-                  />
-                  
-                  <button
-                    type="submit"
-                    disabled={!newComment.trim() || submitting}
-                    className="absolute bottom-3 right-3 p-2 text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <PaperAirplaneIcon className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-        ) : (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-700">Please login to comment</p>
-          </div>
-        )}
+          {localComments && localComments.length > 1 && (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading} //   Disable while loading
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="most_liked">Most Liked</option>
+              </select>
 
-        {/* Comments List */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center py-4">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              {/*  Show loading indicator when sorting */}
+              {loading && (
+                <div className="w-4 h-4 border border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+              )}
             </div>
-          ) : comments.length > 0 ? (
-            comments.map(comment => (
-              <CommentItem key={comment._id} comment={comment} />
-            ))
+          )}
+        </div>
+
+        <ErrorDisplay
+          error={error}
+          onDismiss={handleDismissError}
+        />
+
+        <div className="mt-4">
+          <CommentList
+            comments={sortedComments}
+            loading={loading}
+            pagination={pagination}
+            onLoadMore={handleLoadMore}
+            onEditComment={handleEditComment}
+            onDeleteComment={handleDeleteComment}
+            onLikeComment={handleLikeComment}
+            onCreateReply={handleCreateReply}
+            onRefresh={handleRefresh}
+          />
+        </div>
+
+        <div className="border-t border-gray-100 pt-4 mt-6">
+          {user ? (
+            <CommentForm
+              onSubmit={handleCreateComment}
+              placeholder="Write a comment..."
+              submitting={submitting}
+              size="normal"
+              user={user}
+            />
           ) : (
-            <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
+            <div className="text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <p className="text-gray-500 text-sm">
+                Please{' '}
+                <button
+                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                  onClick={() => window.location.href = '/login'}
+                >
+                  login
+                </button>
+                {' '}to post a comment
+              </p>
+            </div>
           )}
         </div>
       </div>

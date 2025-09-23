@@ -35,10 +35,8 @@ export const AuthProvider = ({ children }) => {
     try {
 
       const token = authService.getToken();
-      console.log('🔍 Access token found:', !!token);
       // ✅ Kiểm tra có access token không
       if (!token) {
-        console.log('🔍 No access token found, call with access token in Cookie');
         const response = await authService.getCurrentUser();
         const userData = response.data?.user || response.user || response;
         if (userData){
@@ -52,7 +50,6 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.getCurrentUser();
       const userData = response.data?.user || response.user || response;
 
-      console.log('🔍 CheckAuth user data:', userData?.userName || userData?.email);
       setUser(userData);
       setIsAuthenticated(true);
 
@@ -65,44 +62,21 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
-      console.log('🔍 CheckAuth completed');
     }
   };
 
-  // Login
-  // const login = async (credentials) => {
-  //   try {
-  //     const response = await authService.login(credentials);
-  //     console.log('🔍 Login response:', response);
-  //     console.log('🔍 User data:', response.data?.user);
-  //     const userData = response.data?.user || response.user || response;
-  //     console.log('🔍 Setting user data:', userData);
-  //     setUser(userData);
-  //     setIsAuthenticated(true);
-  //     return response;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // };
+
   const login = async (credentials) => {
     try {
-      console.log('🔄 AuthContext: Starting login...');
 
       const response = await authService.login(credentials);
 
-      console.log('🔍 Login response:', response);
-      console.log('🔍 Response structure:', {
-        hasData: !!response.data,
-        hasUser: !!(response.data?.user || response.user),
-        hasAccessToken: !!(response.data?.data?.accessToken)
-      });
+    
 
       // ✅ Check if token was saved
       const savedToken = authService.getToken();
-      console.log('🔍 Token saved after login:', !!savedToken);
 
       const userData = response.data?.user || response.user || response;
-      console.log('🔍 Setting user data:', userData?.userName || userData?.email);
 
       if (userData && (userData.userName || userData.email)) {
         setUser(userData);
@@ -115,7 +89,6 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      console.log('✅ AuthContext: Login completed');
       return response;
     } catch (error) {
       console.error('❌ AuthContext: Login failed:', error);
@@ -153,11 +126,7 @@ export const AuthProvider = ({ children }) => {
   // Resend Registration OTP
   const resendRegistrationOTP = async (dataEmailUserName) => {
     try {
-      console.log('🔄 AuthContext: Resending registration OTP...', {
-        email: dataEmailUserName.email,
-        userName: dataEmailUserName.userName,
-        //endpoint: AUTH_ENDPOINTS.REGISTER_RESEND_OTP
-      });
+     
       if (!dataEmailUserName?.email || !dataEmailUserName?.userName) {
         throw new Error('Không có email để gửi OTP');
       }
@@ -208,11 +177,9 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUserToken = async () => {
     try {
-      console.log('🔄 AuthContext: Manually refreshing token...');
 
       const response = await authService.refreshToken();
 
-      console.log('✅ AuthContext: Token refreshed manually');
       return response;
     } catch (error) {
       console.error('❌ AuthContext: Manual refresh failed:', error);
@@ -237,23 +204,18 @@ export const AuthProvider = ({ children }) => {
   };
   const onBoarding = async (userName) => {
     try{
-      console.log('🔄 AuthContext: Starting login...');
+     
 
       const response = await authService.onBoarding(userName);
 
-      console.log('🔍 Login response:', response);
-      console.log('🔍 Response structure:', {
-        hasData: !!response.data,
-        hasUser: !!(response.data?.user || response.user),
-        hasAccessToken: !!(response.data?.data?.accessToken)
-      });
+      
 
       // ✅ Check if token was saved
       const savedToken = authService.getToken();
-      console.log('🔍 Token saved after login:', !!savedToken);
+   
 
       const userData = response.data?.user || response.user || response.data;
-      console.log('🔍 Setting user data:', userData?.userName || userData?.email);
+ 
 
       if (userData && (userData.userName || userData.email)) {
         setUser(userData);
@@ -266,11 +228,11 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      console.log('✅ AuthContext: Login completed');
+   
       return response;
     }
     catch (e){
-      console.log('Auth context: ', e);
+     
       throw e;
     }
   }

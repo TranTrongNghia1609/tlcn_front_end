@@ -3,12 +3,7 @@ import API from '../utils/api';
 import { AUTH_ENDPOINTS } from '../config/endpoints';
 export const authService = {
   login: async (credentials) => {
-    try {
-      console.log('📤 AuthService: Logging in...', {
-        userName: credentials.userName,
-        hasPassword: !!credentials.password
-      });
-      
+    try {  
       if (!credentials.userName || !credentials.password) {
         throw new Error('Username và password là bắt buộc');
       }
@@ -18,14 +13,11 @@ export const authService = {
         password: credentials.password
       });
       
-      console.log('✅ Login API Response:', response.data);
       
       // Lưu access token
       const  accessToken  = response.data.data.accessToken;
-      console.log(`AcessToken: ${accessToken}`)
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        console.log('✅ Access token saved');
       }
       
       return response.data;
@@ -62,7 +54,6 @@ export const authService = {
   },
   refreshToken: async () => {
     try {
-      console.log('🔄 AuthService: Refreshing token...');
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
@@ -71,15 +62,12 @@ export const authService = {
       );
       
       const { accessToken } = response.data.data.accessToken;
-      console.log(`Ma accesstoken: ${accessToken} `)
       
       // Update access token mới
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        console.log('✅ New access token saved');
       }
       
-      console.log('✅ AuthService: Token refreshed successfully');
       return response.data;
       
     } catch (error) {
@@ -124,12 +112,10 @@ export const authService = {
   // Logout - không cần tham số
   logout: async () => {
     try {
-      console.log('🔄 AuthService: Logging out...');
       
       // Gọi API logout để clear refresh token cookie
       await API.post(AUTH_ENDPOINTS.LOGOUT);
       
-      console.log('✅ Logout API called successfully');
       
     } catch (error) {
       console.error('❌ Logout API error:', error);
@@ -137,14 +123,12 @@ export const authService = {
     } finally {
       // Clear access token
       localStorage.removeItem('access_token');
-      console.log('✅ AuthService: Access token cleared');
     }
   },
 
   // Get current user - không cần tham số
   getCurrentUser: async () => {
     try {
-      console.log('🔍 AuthService: Getting current user...');
       
       // const token = localStorage.getItem('access_token');
       // if (!token) {
@@ -153,7 +137,6 @@ export const authService = {
       
       const response = await API.get(AUTH_ENDPOINTS.ME);
       
-      console.log('✅ AuthService: Current user fetched:', response.data);
       return response.data;
       
     } catch (error) {
@@ -190,16 +173,13 @@ export const authService = {
       });
       // Lưu access token
       const  accessToken  = response.data.data.accessToken;
-      console.log(`AcessToken: ${accessToken}`)
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        console.log('✅ Access token saved');
       }
       
       return response.data;
     }
     catch (e){
-      console.log(e);
       throw e;
     }
   }
