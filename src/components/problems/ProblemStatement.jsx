@@ -39,9 +39,7 @@ const ProblemStatement = ({statement, input, output}) => {
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
             >
-              {statement}
-                {/* Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus accusantium at enim. Id consequuntur quia nam incidunt dolorum? Eius minus, commodi sequi magni in omnis quibusdam sed odio deleniti adipisci?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos mollitia aspernatur, officia dolorem minima iure non illo tempora adipisci ipsa neque pariatur tempore similique possimus voluptatibus, consequuntur vero molestiae quos? */}
+              {statement?.replace(/\\n/g, '\n')}
             </ReactMarkdown>
         </div>
       </CardContent>
@@ -59,9 +57,7 @@ const ProblemStatement = ({statement, input, output}) => {
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
             >
-              {input}
-                {/* Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus accusantium at enim. Id consequuntur quia nam incidunt dolorum? Eius minus, commodi sequi magni in omnis quibusdam sed odio deleniti adipisci?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos mollitia aspernatur, officia dolorem minima iure non illo tempora adipisci ipsa neque pariatur tempore similique possimus voluptatibus, consequuntur vero molestiae quos? */}
+              {input?.replace(/\\n/g, '\n')}
             </ReactMarkdown>
         </div>
       </CardContent>
@@ -79,9 +75,7 @@ const ProblemStatement = ({statement, input, output}) => {
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
             >
-              {output}
-                {/* Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus accusantium at enim. Id consequuntur quia nam incidunt dolorum? Eius minus, commodi sequi magni in omnis quibusdam sed odio deleniti adipisci?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos mollitia aspernatur, officia dolorem minima iure non illo tempora adipisci ipsa neque pariatur tempore similique possimus voluptatibus, consequuntur vero molestiae quos? */}
+              {output?.replace(/\\n/g, '\n')}
             </ReactMarkdown>
         </div>
       </CardContent>
