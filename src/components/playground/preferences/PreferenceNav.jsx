@@ -3,22 +3,30 @@ import { ComboBox } from "@/components/common/Combobox"
 import { Play, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { languages } from "@/lib/utils";
-export function PreferenceNav({changLanguage}) {
+import { useProblem } from "@/context/ProblemContext";
+import { submitCode } from "@/services/submissionService";
+export function PreferenceNav({changLanguage, onSubmit}) {
+  const { currentProblem } = useProblem();
+
   return (
     <div className="flex justify-between">
       <ComboBox
         options={languages}
         placeholder="Select language..."
-        defaultValue="py"
+        defaultValue="cpp"
         onChange={changLanguage}
       />
       <div className="mr-1 flex">
-      <Button
+        <Button
           variant="ghost">
           <Settings color="#7008e7" strokeWidth={2.5}/>
         </Button>
+        
+        {/* button submit code */}
         <Button
-          variant="ghost">
+          variant="ghost"
+          onClick={onSubmit}
+          >
           <Play color="#7008e7" size={20} strokeWidth={2.5}/>
         </Button>
       </div>
