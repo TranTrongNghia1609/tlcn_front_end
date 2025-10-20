@@ -12,14 +12,18 @@ import {
   Clock, 
   AlertCircle, 
   Code,
-  TrendingUp,
-  Eye,
-  ArrowLeft,
-  Calendar,
   Target,
-  Activity,
-  Zap
+  Activity
 } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { ComboBox } from '../common/Combobox';
 import { languages } from '@/lib/utils';
 import { getSubmissionById, getSubmissionByUserId } from '@/services/submissionService';
@@ -36,18 +40,19 @@ const ProblemSubmissions = () => {
   const { user, isAuthenticated } = useAuth();
   const { currentProblem, loading } = useProblem(); 
   const { updateSubmissionResult } = useSubmission();
-  
+  const [ pageActive, setPageActive ] = useState(1);
   useEffect(()=>{
     const fetchSubmissions = async () => {
       console.log('Fetching submissions for user:', user);
+      console.log('Fetching page: ', pageActive);
       if (isAuthenticated && !loading){
-        const response = await getSubmissionByUserId(user.id, currentProblem._id);
+        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive);
         setProblemSubmissions(response.data.content);
         setProblemSubmissionPagination(response.data);
       }
     }
     fetchSubmissions();
-  }, []);
+  }, [pageActive]);
 
   // Statistics calculation
   const stats = useMemo(() => {
@@ -223,6 +228,35 @@ const ProblemSubmissions = () => {
                 })}
               </tbody>
             </table>
+            
+            {/* Pagination */}
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => pageActive > 1 ? setPageActive(pageActive - 1) : {}}/>
+                  </PaginationItem>
+                  {
+                    Array.from({ length: problemSubmissionPagination.totalPages }, (_, index) => {
+                      const page = index + 1;
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink 
+                            onClick={() => setPageActive(page) }
+                            isActive={page === problemSubmissionPagination.page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })
+                  }
+                  <PaginationItem>
+                    <PaginationNext onClick={() => pageActive < problemSubmissionPagination.totalPages ? setPageActive(pageActive + 1) : {}} />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </CardContent>
       </Card>
