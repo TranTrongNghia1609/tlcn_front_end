@@ -1,13 +1,8 @@
 import React, { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
-import { cpp } from '@codemirror/lang-cpp';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
 import {vscodeLight} from '@uiw/codemirror-theme-vscode';
 import PreferenceNav from './preferences/PreferenceNav';
-import ProblemSubmissions from '@/components/submission/ProblemSubmission';
 import { mapLanguage } from '@/lib/utils.js';
-import Split from 'react-split';
 import { useProblem } from '@/context/ProblemContext';
 import { useSubmission } from '@/context/SubmissionContext';
 import { submitCode } from '@/services/submissionService';
@@ -20,8 +15,7 @@ const PlayGround = () => {
   const [language, setLanguage] = useState('cpp');
   const [code, setCode] = useState(mapValue[language].code);
   const { currentProblem } = useProblem();
-  const { startSubmission, updateSubmissionResult} = useSubmission();
-
+  const { startSubmission, updateSubmissionResult, submissionState} = useSubmission();
   const changeLanguage = (lang) =>{
     setLanguage(lang);
   }
@@ -43,21 +37,13 @@ const PlayGround = () => {
       </div>
       <div className='w-full overflow-auto'>
         <CodeMirror
-          value={currentProblem?.lastSubmission?.source || code}
+          value={submissionState?.result?.source || currentProblem?.lastSubmission?.source || code}
           extensions={mapValue[language].extensions()}
           theme={vscodeLight}
           style={{fontSize:16}}
           onChange={(value) => setCode(value)}
         />
       </div>
-      {false && <div className='mt-1 text-2xl'>
-        <Split className="h-[calc(100vh-150px)]" direction='vertical' minSize={60} sizes={[60, 40]}>
-          {/* <ProblemSubmissions/> */}
-          <div className='w-full overflow-auto'>
-            <ProblemSubmissions problemId={currentProblem.problem._id}/>
-          </div>
-        </Split>
-      </div>}
     </div>
   )
 }

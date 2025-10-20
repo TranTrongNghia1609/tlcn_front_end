@@ -57,4 +57,5 @@ export const UPLOAD_ENDPOINTS = {
 
 export const SUBMISSION_ENDPOINTS = {
   GET_SUBMISSION_BY_USER_ID: (userId) => `/submissions/user/${userId}`,
+  GET_SUBMISSION_BY_ID: (submissionId) => `/submissions/${submissionId}`
 }

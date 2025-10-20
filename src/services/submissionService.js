@@ -49,3 +49,15 @@ export const getSubmissionByUserId = async (userId, problemId = null, language =
     throw error;
   }
 }
+
+
+export const getSubmissionById = async (submissionId) => {
+  try{
+    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_BY_ID(submissionId));
+    return response.data;
+  }
+  catch (error){
+    console.error("Error getting submission by ID:", error);
+    throw error;
+  }
+}

@@ -22,10 +22,11 @@ import {
 } from 'lucide-react';
 import { ComboBox } from '../common/Combobox';
 import { languages } from '@/lib/utils';
-import { getSubmissionByUserId } from '@/services/submissionService';
+import { getSubmissionById, getSubmissionByUserId } from '@/services/submissionService';
 import { useUser } from '@/context/UserContext';
 import { useAuth } from '@/context/AuthContext';
 import { useProblem } from '@/context/ProblemContext';
+import { useSubmission } from '@/context/SubmissionContext';
 
 const ProblemSubmissions = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
@@ -34,6 +35,7 @@ const ProblemSubmissions = () => {
   const [problemSubmissionPagination, setProblemSubmissionPagination] = useState([]);
   const { user, isAuthenticated } = useAuth();
   const { currentProblem, loading } = useProblem(); 
+  const { updateSubmissionResult } = useSubmission();
   
   useEffect(()=>{
     const fetchSubmissions = async () => {
@@ -122,6 +124,12 @@ const ProblemSubmissions = () => {
     );
   };
 
+  const handleGetSubmission = async (submissionId) => {
+    console.log('Fetching submission result for ID:', submissionId);
+    const response = await getSubmissionById(submissionId);
+    updateSubmissionResult(response.data);
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className='text-2xl font-bold'>My Submission</div>
@@ -190,7 +198,9 @@ const ProblemSubmissions = () => {
                     submission.passed || 0 - prevSubmission.passed || 0 : 0;
                   
                   return (
-                    <tr key={submission.id} className="border-b hover:bg-gray-50">
+                    <tr key={submission._id} className="border-b hover:bg-gray-50"
+                      onClick={() => handleGetSubmission(submission._id)}
+                    >
                       <td className="p-2 font-mono text-gray-600">#{submission.shortId}</td>
                       <td className="p-2">{getStatusBadge(submission.status)}</td>
                       <td className="p-2">
