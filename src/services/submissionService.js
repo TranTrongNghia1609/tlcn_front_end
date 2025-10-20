@@ -32,15 +32,17 @@ export const getSubmission  = async (userId, problemId) => {
   }
 }
 
-export const getSubmissionByUserId = async (userId, problemId = null, language = 'all') => {
+export const getSubmissionByUserId = async (userId, problemId = null, page = 1, language = 'all', ) => {
   try{
     console.log('Problem ID in service:', problemId);
     const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_BY_USER_ID(userId), {
       params: {
         problemId: problemId, 
-        language: language
+        language: language,
+        page: page
       }
     });
+    console.log(typeof page);
     console.log('Submissions by user response:', response.data);
     return response.data;
   }
