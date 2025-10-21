@@ -5,7 +5,8 @@ import Dashboard from '../pages/DashBoard';
 import NotFound from '../pages/NotFound';
 import Profile from '../pages/Profile'
 import ProblemDetail from "../components/problems/ProblemDetail";
-import WorkSpace from "@/components/workspace/WorkSpace";
+import WorkSpace from "@/pages/WorkSpace";
+import Problems from "@/pages/Problem";
 const AppRoutes = () => {
   return(
     <Routes>
@@ -14,7 +15,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element = {<Dashboard/>}/>
       <Route path="*" element={<NotFound />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/problem/:id" element={<WorkSpace/>}/>
+      <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
+      <Route path="/problemset" element={<Problems/>}/>
     </Routes>
   )
 }

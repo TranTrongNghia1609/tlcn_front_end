@@ -17,7 +17,9 @@ export const USER_ENDPOINTS = {
   CHECK_USERNAME: '/users/username/check'
 }
 export const PROBLEM_ENDPOINTS = {
-  GET_PROLBEM_ID: (id) => `/problems/${id}`
+  GET_PROLBEM_ID: (id) => `/problems/${id}`,
+  GET_PROBLEM_SHORT_ID: (shortId) => `/problems/short/${shortId}`,
+  GET_PROBLEMS: '/problems',
 }
 export const POST_ENDPOINTS = {
   GET_ALL: '/posts/all',
@@ -52,3 +54,8 @@ export const UPLOAD_ENDPOINTS = {
   POST_IMAGES_GET: (postId) => `/upload/posts/${postId}/images`,
   AVATAR: '/upload/avatar'
 };
+
+export const SUBMISSION_ENDPOINTS = {
+  GET_SUBMISSION_BY_USER_ID: (userId) => `/submissions/user/${userId}`,
+  GET_SUBMISSION_BY_ID: (submissionId) => `/submissions/${submissionId}`
+}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -12,72 +12,51 @@ import {
   Clock, 
   AlertCircle, 
   Code,
-  TrendingUp,
-  Eye,
-  ArrowLeft,
-  Calendar,
   Target,
-  Activity,
-  Zap
+  Activity
 } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { ComboBox } from '../common/Combobox';
 import { languages } from '@/lib/utils';
+import { getSubmissionById, getSubmissionByUserId } from '@/services/submissionService';
+import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
+import { useProblem } from '@/context/ProblemContext';
+import { useSubmission } from '@/context/SubmissionContext';
 
-const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
+const ProblemSubmissions = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [timeRange, setTimeRange] = useState('all');
-
-  // Mock data cho submissions của 1 bài cụ thể
-  const problemSubmissions = [
-    {
-      id: 'SUB001',
-      status: 'Accepted',
-      language: 'JavaScript',
-      runtime: '68ms',
-      memory: '42.1MB',
-      submittedAt: '2025-01-13 17:45:32',
-      score: 100,
-      testCases: { passed: 57, total: 57 },
-      attempt: 4
-    },
-    {
-      id: 'SUB002',
-      status: 'Wrong Answer',
-      language: 'JavaScript',
-      runtime: '72ms',
-      memory: '41.8MB',
-      submittedAt: '2025-01-13 17:30:15',
-      score: 0,
-      testCases: { passed: 45, total: 57 },
-      attempt: 3
-    },
-    {
-      id: 'SUB003',
-      status: 'Time Limit Exceeded',
-      language: 'Python',
-      runtime: 'TLE',
-      memory: '16.2MB',
-      submittedAt: '2025-01-13 16:45:20',
-      score: 60,
-      testCases: { passed: 34, total: 57 },
-      attempt: 2
-    },
-    {
-      id: 'SUB004',
-      status: 'Runtime Error',
-      language: 'JavaScript',
-      runtime: 'N/A',
-      memory: 'N/A',
-      submittedAt: '2025-01-13 15:20:10',
-      score: 0,
-      testCases: { passed: 12, total: 57 },
-      attempt: 1
+  const [problemSubmissions, setProblemSubmissions] = useState([]);
+  const [problemSubmissionPagination, setProblemSubmissionPagination] = useState([]);
+  const { user, isAuthenticated } = useAuth();
+  const { currentProblem, loading } = useProblem(); 
+  const { updateSubmissionResult } = useSubmission();
+  const [ pageActive, setPageActive ] = useState(1);
+  useEffect(()=>{
+    const fetchSubmissions = async () => {
+      console.log('Fetching submissions for user:', user);
+      console.log('Fetching page: ', pageActive);
+      if (isAuthenticated && !loading){
+        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive);
+        setProblemSubmissions(response.data.content);
+        setProblemSubmissionPagination(response.data);
+      }
     }
-  ];
+    fetchSubmissions();
+  }, [pageActive]);
 
   // Statistics calculation
   const stats = useMemo(() => {
-    const total = problemSubmissions.length;
+    const total = problemSubmissionPagination.total;
     const accepted = problemSubmissions.filter(s => s.status === 'Accepted').length;
     const wrongAnswer = problemSubmissions.filter(s => s.status === 'Wrong Answer').length;
     const tle = problemSubmissions.filter(s => s.status === 'Time Limit Exceeded').length;
@@ -89,11 +68,11 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
     const successRate = total > 0 ? (accepted / total * 100).toFixed(1) : 0;
     
     // Progress tracking
-    const maxTestCases = Math.max(...problemSubmissions.map(s => s.testCases.passed));
+    const maxTestCases = Math.max(...problemSubmissions.map(s => s.passed || 0));
     const progressOverTime = problemSubmissions.reverse().map((sub, index) => ({
       attempt: index + 1,
-      testsPassed: sub.testCases.passed,
-      percentage: (sub.testCases.passed / sub.testCases.total * 100).toFixed(1)
+      testsPassed: sub.passed || 0,
+      percentage: (sub.passed || 0 / (sub.total || 10) * 100).toFixed(1)
     }));
 
     return {
@@ -110,6 +89,11 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
       progressOverTime
     };
   }, [problemSubmissions]);
+
+  if (loading){
+    return <div>Loading...</div>;
+  }
+
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -145,13 +129,19 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
     );
   };
 
+  const handleGetSubmission = async (submissionId) => {
+    console.log('Fetching submission result for ID:', submissionId);
+    const response = await getSubmissionById(submissionId);
+    updateSubmissionResult(response.data);
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className='text-2xl font-bold'>My Submission</div>
       {/* Overview Stats */}
       <div className="">
-        <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
+        <Card className=" bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+          <CardContent className="">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-green-500 rounded-full">
                 <Target className="h-6 w-6 text-white" />
@@ -165,8 +155,8 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
+        <Card className="mt-2 bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-blue-500 rounded-full">
                 <Activity className="h-6 w-6 text-white" />
@@ -184,16 +174,14 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
       {/* My submission */}
       <Card>
         <CardHeader>
-          <div className='flex justify-between'>
-            <CardTitle>Last submisson</CardTitle>
-            <ComboBox
-              options={languages}
-              placeholder="Select language..."
-              defaultValue="py"
-              className={'text-2xl'}
-              // onChange={changLanguage}
-            />
-          </div>
+          <CardTitle>Last submisson</CardTitle>
+          <ComboBox
+            options={languages}
+            placeholder="Select language..."
+            defaultValue="all"
+            className={'text-2xl ml-auto'}
+            // onChange={changLanguage}
+          />
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -212,25 +200,27 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
                 {problemSubmissions.map((submission, index) => {
                   const prevSubmission = problemSubmissions[index + 1];
                   const improvement = prevSubmission ? 
-                    submission.testCases.passed - prevSubmission.testCases.passed : 0;
+                    submission.passed || 0 - prevSubmission.passed || 0 : 0;
                   
                   return (
-                    <tr key={submission.id} className="border-b hover:bg-gray-50">
-                      <td className="p-2 font-mono text-gray-600">#{submission.attempt}</td>
+                    <tr key={submission._id} className="border-b hover:bg-gray-50"
+                      onClick={() => handleGetSubmission(submission._id)}
+                    >
+                      <td className="p-2 font-mono text-gray-600">#{submission.shortId}</td>
                       <td className="p-2">{getStatusBadge(submission.status)}</td>
                       <td className="p-2">
                         <Badge variant="outline" className="text-xs">
                           {submission.language}
                         </Badge>
                       </td>
-                      <td className="p-2 font-mono">{submission.runtime}</td>
+                      <td className="p-2 font-mono">{submission.time}</td>
                       <td className="p-2 font-mono">{submission.memory}</td>
                       <td className="p-2">
                         <span className={`font-semibold ${
-                          submission.testCases.passed === submission.testCases.total 
+                          submission.passed === submission.total 
                             ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {submission.testCases.passed}/{submission.testCases.total}
+                          {submission.passed || 0}/{submission.total || 10}
                         </span>
                       </td>
                     </tr>
@@ -238,6 +228,35 @@ const ProblemSubmissions = ({ problemId, problemName, onBack }) => {
                 })}
               </tbody>
             </table>
+            
+            {/* Pagination */}
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => pageActive > 1 ? setPageActive(pageActive - 1) : {}}/>
+                  </PaginationItem>
+                  {
+                    Array.from({ length: problemSubmissionPagination.totalPages }, (_, index) => {
+                      const page = index + 1;
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink 
+                            onClick={() => setPageActive(page) }
+                            isActive={page === problemSubmissionPagination.page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })
+                  }
+                  <PaginationItem>
+                    <PaginationNext onClick={() => pageActive < problemSubmissionPagination.totalPages ? setPageActive(pageActive + 1) : {}} />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </CardContent>
       </Card>

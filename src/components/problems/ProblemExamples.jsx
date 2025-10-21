@@ -2,7 +2,13 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ClipboardCopy, FileInput, FileOutput, Copy, CopyCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
+import remarkMath from 'remark-math';
 const ProblemExamples = ({ examplesInput = [], examplesOutput = [] }) => {
   const [copiedInputs, setCopiedInputs] = useState(Array(examplesInput.length).fill(false));
   const [copiedOutputs, setCopiedOutputs] = useState(Array(examplesOutput.length).fill(false));
@@ -87,7 +93,14 @@ const ProblemExamples = ({ examplesInput = [], examplesOutput = [] }) => {
                     }
                     </Button>
                   </div>
-                  <pre className="bg-background p-3 rounded-md text-sm overflow-auto whitespace-pre-wrap">{examplesOutput[index]}</pre>
+                  <pre className="bg-background p-3 rounded-md text-sm overflow-auto whitespace-pre-wrap">
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
+                    >
+                      {examplesOutput[index]?.replace(/\\n/g, '\n')}
+                    </ReactMarkdown>
+                  </pre>
                 </div>
               )}
             </div>

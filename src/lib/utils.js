@@ -9,6 +9,10 @@ export function cn(...inputs) {
 
 export const languages = [
   {
+    value: "all",
+    label: "All Languages"
+  },
+  {
     value: "py",
     label: "Python"
   },
@@ -22,10 +26,10 @@ export const languages = [
   },
 ]
 
-const CPP_VALUE = '#include<iostream>\nusing namespace std;\nint main(){\n  return 0;\n  cout << "Hello world!"\n}'
-const JS_VALUE = `console.log('Hello world!');`
-const PYTHON_VALUE = `print('Hello world!')`
-
+const extraSpace = '\n'.repeat(30);
+const CPP_VALUE = '#include<iostream>\nusing namespace std;\nint main(){\n  return 0;\n  cout << "Hello world!"\n}' + extraSpace
+const JS_VALUE = `console.log('Hello world!');` + extraSpace
+const PYTHON_VALUE = `print('Hello world!')` + extraSpace
 export const mapLanguage = () => {
   const map = []
   map['cpp'] = {code: CPP_VALUE, extensions: cpp};

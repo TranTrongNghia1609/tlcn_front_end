@@ -5,43 +5,31 @@ export const problemService = {
   getProblemById: async (id) =>{
     try{
         console.log('Get problem by Id 🆔');
-        const data = await API.get(PROBLEM_ENDPOINTS.GET_PROLBEM_ID(id));
+        const data = await API.get(PROBLEM_ENDPOINTS.GET_PROBLEM_SHORT_ID(id));
         console.log('Problem data: ', data);
         const payload = data.data;
-        // const data = {
-        //   _id: {
-        //     "$oid": "68bf8d2b4759126242242442"
-        //   },
-        //   name: "Palindrome String",
-        //   statement: "## Palindrome String\nCho một xâu ký tự **s**, hãy kiểm tra xem nó có phải là xâu đối xứng (palindrome) hay không.\n\n### Ràng buộc\n- $1 \\leq |s| \\leq 10^5$\n- Xâu chỉ gồm các ký tự chữ cái thường `a-z`.",
-        //   input: "Một dòng chứa xâu `s`.",
-        //   output: "In `YES` nếu `s` là palindrome, ngược lại in `NO`.",
-        //   img: [],
-        //   isPrivate: false,
-        //   isPdf: false,
-        //   time: 2,
-        //   memory: 512,
-        //   examples: [
-        //     "**Input**\n```\nabba\n```\n\n**Output**\n```\nYES\n```",
-        //     "**Input**\n```\nabc\n```\n\n**Output**\n```\nNO\n```"
-        //   ],
-        //   numberOfTestCases: 4,
-        //   createdAt: {
-        //     $date: "2025-09-09T02:12:59.774Z"
-        //   },
-        //   updatedAt: {
-        //     $date: "2025-09-09T02:12:59.774Z"
-        //   },
-        //   tags: [
-        //     "Tham lam",
-        //     "Số học"
-        //   ]
-        // }
         return payload;
     }
     catch(err){
         console.log('Get problem error: ', err);
         throw err;
     }
+  }
+}
+
+export const getProblems = async (params) => {
+  try {
+    console.log('Fetch problems with params:', params);
+    const response = await API.get(PROBLEM_ENDPOINTS.GET_PROBLEMS, { params });
+    console.log('Fetched problems:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error fetching problems:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error.response?.data || { message: error.message || 'Error fetching problems' };
   }
 }
