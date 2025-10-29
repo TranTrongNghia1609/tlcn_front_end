@@ -174,27 +174,7 @@ const CommentActions = ({
       {/* Timestamp */}
       <span className="text-gray-400">
         {formatDate(comment.createdAt)}
-      </span>
-
-      {/* Toggle replies button */}
-      {shouldShowToggle && (
-        <button
-          onClick={onToggleReplies}
-          className="ml-auto flex items-center text-blue-600 hover:text-blue-700 transition-colors"
-        >
-          {showReplies ? (
-            <>
-              <ChevronUpIcon className="w-4 h-4 mr-1" />
-              <span>Hide replies</span>
-            </>
-          ) : (
-            <>
-              <ChevronDownIcon className="w-4 h-4 mr-1" />
-              <span>Show replies</span>
-            </>
-          )}
-        </button>
-      )}
+      </span>     
     </div>
   );
 };

@@ -15,37 +15,21 @@ export const commentService = {
       
       const url = `${COMMENT_ENDPOINTS.GET_POST_COMMENTS(postId)}?${params.toString()}`;
       
-      console.log('🚀 commentService.getPostComments:', {
-        postId: postId?.slice(-4),
-        page,
-        limit,
-        sortBy: options.sortBy,
-        url
-      });
-      
+    
       const response = await api.get(url);
       
-      console.log('✅ commentService response:', {
-        status: response.status,
-        dataStructure: {
-          hasData: !!response.data.data,
-          hasComments: !!response.data.data?.comments,
-          commentsCount: response.data.data?.comments?.length,
-          hasPagination: !!response.data.data?.pagination,
-          hasMeta: !!response.data.data?.meta
-        }
-      });
+ 
       
       // Return đúng structure mà CommentContext expect
       return {
         data: {
           comments: response.data.data?.comments || [],
           pagination: response.data.data?.pagination || {},
-          meta: response.data.data?.meta || {} // ✅ Include meta info from backend
+          meta: response.data.data?.meta || {} //  Include meta info from backend
         }
       };
     } catch (error) {
-      console.error('❌ commentService.getPostComments error:', error);
+      console.error('commentService.getPostComments error:', error);
       throw error;
     }
   },
