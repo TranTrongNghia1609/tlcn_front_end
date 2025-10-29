@@ -5,26 +5,28 @@ import Split from 'react-split';
 import PlayGround from '../components/playground/PlayGround';
 import { ProblemProvider, useProblem } from '@/context/ProblemContext';
 import { useParams } from 'react-router-dom';
-import { SubmissionProvider, useSubmission } from '@/context/SubmissionContext';
 import MySubmission from '@/components/submission/ProblemSubmission'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Description from '@/assets/description';
 import History from '@/assets/history';
+import { submissionsStore } from '@/zustand/store';
 
 const WorkSpaceContent = () => {
-  const { submissionState } = useSubmission();
-  const showSubmissionStatus = useMemo(() => {
-    return submissionState.isSubmitting || submissionState.status !== null;
-  }, [submissionState]);
-  
-  const [activeTab, setActiveTab] = useState(showSubmissionStatus ? "submission" : "statement");
+  const currentSubmission = submissionsStore((state) => state.currentSubmission);
+  const [activeTab, setActiveTab] = useState("statement");
 
   // Update tab when submission state changes
   useEffect(() => {
-    if (showSubmissionStatus) {
+    console.log('First log: ', currentSubmission);
+    if (currentSubmission && currentSubmission.isNew === true){
       setActiveTab("submission");
+      // Mark as not new anymore
+      currentSubmission.isNew = false;
     }
-  }, [showSubmissionStatus]);
+    else{
+      setActiveTab("statement");
+    }
+  }, [currentSubmission]);
   return (
     <div className='h-[calc(100vh-88px)] mt-1 min-h-0 overflow-hidden'>
       <Split className="split h-full min-h-0" minSize={200}>
@@ -68,9 +70,7 @@ const WorkSpace = () => {
   
   return (
     <ProblemProvider problemId={id}>
-      <SubmissionProvider>
-        <WorkSpaceContent />
-      </SubmissionProvider>
+      <WorkSpaceContent />
     </ProblemProvider>
   );
 };
