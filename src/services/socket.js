@@ -12,6 +12,7 @@ export const connectSocket = (token) => {
 
   socket.on('connect', () => {
     console.log('Socket connected:', socket.id);
+    socket.emit('register', )
   });
 
   socket.on('disconnect', () => {
@@ -31,6 +32,12 @@ export const disconnectSocket = () => {
     socket = null;
   }
 };
+
+export const onEventListeners = (event, callback) => {
+  if (socket) {
+    socket.on(event, callback);
+  }
+}
 
 export const onPostCreated = (callback) => {
   if (socket) {
