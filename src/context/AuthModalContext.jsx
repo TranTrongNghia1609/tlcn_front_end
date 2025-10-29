@@ -15,11 +15,16 @@ export const AuthModalProvider = ({ children }) => {
     setIsRegisterOpen(true);
     setIsLoginOpen(false);
   };
+  const switchToRegister = () => {
+    setIsLoginOpen(false);
+    setIsRegisterOpen(true);
+  };
 
   const closeModals = () => {
     setIsLoginOpen(false);
     setIsRegisterOpen(false);
   };
+  
 
   return (
     <AuthModalContext.Provider value={{
@@ -27,7 +32,8 @@ export const AuthModalProvider = ({ children }) => {
       isRegisterOpen,
       openLogin,
       openRegister,
-      closeModals
+      closeModals,
+      switchToRegister
     }}>
       {children}
     </AuthModalContext.Provider>

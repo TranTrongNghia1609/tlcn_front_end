@@ -30,6 +30,7 @@ const LoginModal = () => {
       setUsername('');
       setPassword('');
       setError('');
+      window.location.reload();
     } catch (error) {
       console.error('Login error', error);
       setError(error.message || 'Đăng nhập không thành công')

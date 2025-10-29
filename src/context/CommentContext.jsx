@@ -218,14 +218,9 @@ export const CommentProvider = ({ children }) => {
       try {
         dispatch({ type: COMMENT_ACTIONS.SET_LOADING, payload: true });
 
-        console.log('🎯 CommentContext.loadPostComments:', {
-          postId: postId?.slice(-4),
-          page,
-          options,
-          sortBy: options.sortBy
-        });
+        
 
-        // ✅ Pass options including sortBy to service
+        // Pass options including sortBy to service
         const response = await commentService.getPostComments(
           postId,
           page,
@@ -233,13 +228,9 @@ export const CommentProvider = ({ children }) => {
           options
         );
 
-        console.log('✅ CommentContext response:', {
-          commentsCount: response.data.comments?.length,
-          pagination: response.data.pagination,
-          meta: response.data.meta
-        });
+    
 
-        // ✅ Parse correct structure from service
+        // Parse correct structure from service
         const { comments, pagination, meta } = response.data;
 
         if (page === 1) {
@@ -272,7 +263,7 @@ export const CommentProvider = ({ children }) => {
 
         return response.data;
       } catch (error) {
-        console.error('❌ CommentContext.loadPostComments error:', error);
+        console.error(' CommentContext.loadPostComments error:', error);
         dispatch({ type: COMMENT_ACTIONS.SET_ERROR, payload: error.message });
         throw error;
       }

@@ -72,9 +72,7 @@ const Home = ({isShowOnboarding = false}) => {
             <div className="bg-white rounded-lg shadow-sm mb-6">
               <div className="flex border-b">
                 {[
-                  { key: 'all', label: 'All Posts' },
-                  { key: 'trending', label: 'Trending' },
-                  { key: 'following', label: 'Following' }
+                  { key: 'all', label: 'Bài viết' },
                 ].map(tab => (
                   <button
                     key={tab.key}
