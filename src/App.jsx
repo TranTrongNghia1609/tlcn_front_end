@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import { CommentProvider } from './context/CommentContext';
 import './index.css'
+import { SocketProvider } from './context/SocketContext';
 
 
 // function App() {
@@ -47,23 +48,25 @@ const AppContent = () => {
   }
 
   return (
-    <UserProvider>
-      <PostProvider>
-        <CommentProvider>
-          <AuthModalProvider>
-            <div className="min-h-screen bg-gray-50">
-              <Navbar />
-              <main className="pt-16 lg:pt-20">
-                <AppRoutes />
-              </main>
-              {/* Modal Components - Luôn có sẵn để mở từ bất kỳ đâu */}
-              <LoginModal />
-              <RegisterModal />
-            </div>
-          </AuthModalProvider>
-        </CommentProvider>
-      </PostProvider>
-    </UserProvider>
+    <SocketProvider url={import.meta.env.VITE_SOCKET_URL}>
+      <UserProvider>
+        <PostProvider>
+          <CommentProvider>
+            <AuthModalProvider>
+              <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <main className="pt-16 lg:pt-20">
+                  <AppRoutes />
+                </main>
+                {/* Modal Components - Luôn có sẵn để mở từ bất kỳ đâu */}
+                <LoginModal />
+                <RegisterModal />
+              </div>
+            </AuthModalProvider>
+          </CommentProvider>
+        </PostProvider>
+      </UserProvider>
+    </SocketProvider>
   );
 };
 

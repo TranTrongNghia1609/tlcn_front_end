@@ -42,8 +42,7 @@ export const getSubmissionByUserId = async (userId, problemId = null, page = 1, 
         page: page
       }
     });
-    console.log(typeof page);
-    console.log('Submissions by user response:', response.data);
+    console.log('Submissions by user response:', response.data.data);
     return response.data;
   }
   catch (error){
