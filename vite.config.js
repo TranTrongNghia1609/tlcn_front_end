@@ -12,6 +12,6 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ["56be45cd891f.ngrok-free.app"],
+    allowedHosts: ["56be45cd891f.ngrok-free.app", "ball.io.vn"],
   }
 })
