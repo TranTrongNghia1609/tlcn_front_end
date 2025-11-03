@@ -47,6 +47,14 @@
   --color-hard-foreground: var(--hard-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-ac: #15a92a;    /* Accepted - xanh lá */
+  --color-wa: #ed441f;    /* Wrong Answer - đỏ */
+  --color-tle: #fbc18f;   /* Time Limit Exceeded - vàng */
+  --color-re: #a3bcbd;    /* Runtime Error - đỏ */
+  --color-ce: #42586d;    /* Runtime Error - đỏ */
+  --color-ie: #17a2b8;    /* Internal Error - xanh cyan */
+  /* --color-mle: #FF9900;   */
+  --color-mle: #fda71d;   /* Memory Limit Exceeded - cam */
 }
 
 :root {

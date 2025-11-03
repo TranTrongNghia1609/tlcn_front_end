@@ -15,6 +15,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element = {<Dashboard/>}/>
       <Route path="*" element={<NotFound />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/:username" element={<Profile />} />
+      <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
       <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
       <Route path="/problemset" element={<Problems/>}/>
     </Routes>
