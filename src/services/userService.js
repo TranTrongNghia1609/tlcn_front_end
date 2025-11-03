@@ -33,6 +33,20 @@ export const userService ={
       throw error.response?.data || { message: 'Failed to fetch profile' };
     }
   },
+  getProfileByUsername: async (username) => {
+    try {
+      console.log(`🔍 Getting profile for username: ${username}...`);
+      
+      const response = await API.get(USER_ENDPOINTS.GET_PROFILE(username));
+      
+      console.log('✅ Profile fetched:', response.data);
+      return response.data;
+      
+    } catch (error) {
+      console.error('❌ Get profile by username error:', error);
+      throw error.response?.data || { message: 'Failed to fetch profile' };
+    }
+  },
 
   // ✅ Update user profile
   updateProfile: async (profileData) => {

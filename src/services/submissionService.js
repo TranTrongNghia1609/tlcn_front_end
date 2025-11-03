@@ -62,3 +62,38 @@ export const getSubmissionById = async (submissionId) => {
     throw error;
   }
 }
+
+export const getSubmissionCalendar = async (userId) => {
+  try{
+    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_CALENDAR(userId));
+    return response.data;
+  }
+  catch (error){
+    console.error("Error getting submission by ID:", error);
+    throw error;
+  }
+}
+
+export const getSubmissionStatusChart = async (userId) => {
+  try{
+    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_STATUS_CHART(userId));
+    console.log('Data status chart submissions (service):', response.data);
+    return response.data;
+  }
+  catch (error){
+    console.error("Error getting submission by ID:", error);
+    throw error;
+  }
+}
+
+export const getSubmissionDifficultyChart = async (userId) => {
+  try{
+    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_DIFFICULTY_CHART(userId));
+    console.log('Data difficulty chart submissions (service):', response.data);
+    return response.data;
+  }
+  catch (error){
+    console.error("Error getting difficulty chart:", error);
+    throw error;
+  }
+}

@@ -112,7 +112,7 @@ const UserMenu = () => {
           {/* Menu Items */}
           <div className="py-2">
             <Link
-              to="/profile"
+              to={`/profile/${user?.userName}`}
               onClick={() => setIsOpen(false)}
               className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-all duration-200"
             >
