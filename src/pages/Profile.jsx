@@ -79,12 +79,12 @@ const Profile = () => {
 
           <div className='flex-1 md:mt-0 mt-4'>
             <div className='flex md:flex-row flex-col items-stretch justify-center mb-4 space-y-4 md:space-x-4'>
-              <div className='md:w-1/2'>
+              <div className='md:w-1/2 h-full'>
                 <SubmissionPieChart 
                   userId={profileData._id}
                 />
               </div>
-              <div className='md:w-1/2'>
+              <div className='md:w-1/2 h-full'>
                 <DifficultyChart 
                   userId={profileData._id}
                 />

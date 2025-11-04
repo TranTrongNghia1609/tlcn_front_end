@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import { AuthModalProvider } from './context/AuthModalContext';
-import { UserProvider } from './context/UserContext';
-import LoginModal from './components/auth/LoginModal';
-import RegisterModal from './components/auth/RegisterModal';
-import Navbar from './components/layout/Navbar';
-import { PostProvider } from './context/PostContext';
-import AppRoutes from './routes/AppRoutes';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import LoadingSpinner from './components/common/LoadingSpinner';
-import { CommentProvider } from './context/CommentContext';
-import './index.css'
-import { SocketProvider } from './context/SocketContext';
+import { AuthModalProvider } from '@/context/AuthModalContext';
+import { UserProvider } from '@/context/UserContext';
+import LoginModal from '@/components/auth/LoginModal';
+import RegisterModal from '@/components/auth/RegisterModal';
+import Navbar from '@/components/layout/NavBar';
+import { PostProvider } from '@/context/PostContext';
+import AppRoutes from '@/routes/AppRoutes';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { CommentProvider } from '@/context/CommentContext';
+import '@/index.css'
+import { SocketProvider } from '@/context/SocketContext';
 
 
 // function App() {
