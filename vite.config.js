@@ -13,5 +13,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ["56be45cd891f.ngrok-free.app", "ball.io.vn"],
+    host: "0.0.0.0",
+    port: 5173,
   }
 })
