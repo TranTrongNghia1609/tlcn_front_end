@@ -14,7 +14,8 @@ export const AUTH_ENDPOINTS = {
 export const USER_ENDPOINTS = {
   UPLOAD_AVATAR: '/users/profile/avatar/upload',    
   UPDATE_PROFILE: '/users/profile/update', 
-  CHECK_USERNAME: '/users/username/check'
+  CHECK_USERNAME: '/users/username/check',
+  GET_PROFILE: (username) => `/users/profile/${username}`
 }
 export const PROBLEM_ENDPOINTS = {
   GET_PROLBEM_ID: (id) => `/problems/${id}`,
@@ -57,5 +58,8 @@ export const UPLOAD_ENDPOINTS = {
 
 export const SUBMISSION_ENDPOINTS = {
   GET_SUBMISSION_BY_USER_ID: (userId) => `/submissions/user/${userId}`,
-  GET_SUBMISSION_BY_ID: (submissionId) => `/submissions/${submissionId}`
+  GET_SUBMISSION_BY_ID: (submissionId) => `/submissions/${submissionId}`,
+  GET_SUBMISSION_CALENDAR: (userId) => `/submissions/user/${userId}/calendar`,
+  GET_SUBMISSION_STATUS_CHART: (userId) => `/submissions/user/${userId}/status-chart`,
+  GET_SUBMISSION_DIFFICULTY_CHART: (userId) => `/submissions/user/${userId}/difficulty-chart`
 }

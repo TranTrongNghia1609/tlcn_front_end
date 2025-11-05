@@ -1,79 +1,51 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { User, MapPinHouse, Mail } from 'lucide-react';
 
-const UserInfo = () => {
+const UserInfo = ({ profileData }) => {
   const { user } = useAuth();
+  const isOwner = profileData.isOwner || (user && user._id === profileData._id);
 
   return (
-    <div className="space-y-8">
-      {/* Profile Information */}
-      <div className="border-t pt-8">
-        <h3 className="text-xl font-semibold mb-6">Profile Information</h3>
+    <div className='p-4 flex space-y-8 flex-col'>
+      <div className='space-y-8 flex-col items-center justinty-center flex'>
+        <div className='flex space-x-4'>
+          <div className='h-20 w-20 flex-shrink-0'>
+            <img 
+              src={profileData.avatar} 
+              alt={profileData.userName}
+              className='h-full w-full object-cover rounded-full'
+            />
+          </div>
+
+          <div>
+            <div className='flex space-x-2'>
+              <User size='20px'/>
+              <p className='font-bold'>{profileData.userName}</p>
+            </div>
+            <div className='flex space-x-2 mt-2'>
+              <Mail size='20px'/>
+              <p className='text-gray-500'>{profileData.email}</p>
+            </div>
+            <div className='flex space-x-2 mt-2'>
+              <MapPinHouse size={'20px'}/>
+              <p className='text-gray-500 text-sm'>Vietnam</p>
+            </div>
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
-            <input
-              type="text"
-              value={user?.userName || ''}
-              readOnly
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-            />
-            <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              readOnly
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-            />
-            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text"
-              value={user?.fullName || ''}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-500 mt-1">You can update your full name</p>
-          </div>
-        </div>
+        {isOwner && (
+          <Button className={'w-2/3 bg-violet-600/80 hover:bg-violet-600 text-white cursor-pointer'}>
+            Edit Profile
+          </Button>
+        )}
       </div>
 
-      {/* Account Status */}
-      <div className="border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4">Account Status</h3>
-        <div className="flex items-center space-x-3">
-          <div className={`w-3 h-3 rounded-full ${user?.active ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className={`font-medium ${user?.active ? 'text-green-600' : 'text-red-600'}`}>
-            {user?.active ? 'Active' : 'Inactive'}
-          </span>
-        </div>
+      {/* language */}
+      <div className=''>
+        <div>Languages</div>
       </div>
-
-      {/* Avatar URL Debug */}
-      {user?.avatar && (
-        <div className="border-t pt-8">
-          <h3 className="text-lg font-semibold mb-3">Current Avatar URL</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 break-all">{user.avatar}</p>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(user.avatar);
-                alert('URL copied to clipboard!');
-              }}
-              className="mt-2 px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            >
-              Copy URL
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
