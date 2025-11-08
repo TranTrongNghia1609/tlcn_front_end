@@ -4,13 +4,14 @@ import Home from '../pages/Home';
 import Dashboard from '../pages/DashBoard';
 import NotFound from '../pages/NotFound';
 import Profile from '../pages/Profile'
-import ProblemDetail from "../components/problems/ProblemDetail";
 import WorkSpace from "@/pages/WorkSpace";
 import Problems from "@/pages/Problem";
+import LandingPage from "@/pages/LandingPage"; 
 const AppRoutes = () => {
   return(
     <Routes>
-      <Route path="/" element = {<Home/>} />
+      <Route path="/" element = {<LandingPage/>} />
+      <Route path= "/home" element ={<Home/>} />
       <Route path="/onboarding" element = {<Home isShowOnboarding={true}/>} />
       <Route path="/dashboard" element = {<Dashboard/>}/>
       <Route path="*" element={<NotFound />} />

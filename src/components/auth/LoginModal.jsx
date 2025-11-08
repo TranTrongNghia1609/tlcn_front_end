@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
+import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { useAuth } from '../../context/AuthContext';
 const LoginModal = () => {
@@ -10,7 +11,7 @@ const LoginModal = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -25,27 +26,32 @@ const LoginModal = () => {
         password: password
       }
       const response = await login(credentials);
-      console.log('Login successful: ', response);
-      closeModals();
+      // Reset form
       setUsername('');
       setPassword('');
       setError('');
-      window.location.reload();
+
+      // Close modal
+      closeModals();
+
+     
+      navigate('/home');
+     
     } catch (error) {
       console.error('Login error', error);
       setError(error.message || 'Đăng nhập không thành công')
     } finally {
       setLoading(false);
     }
-    
+
   };
   const handleClose = () => {
-      closeModals();
-      setUsername('');
-      setPassword('');
-      setError('');
-      setLoading(false);
-    };
+    closeModals();
+    setUsername('');
+    setPassword('');
+    setError('');
+    setLoading(false);
+  };
 
   return (
     <Modal isOpen={isLoginOpen} onClose={handleClose}>
@@ -57,9 +63,9 @@ const LoginModal = () => {
         <div className="relative z-10">
           {/* Header - responsive text sizes */}
           <div className="flex flex-col items-center space-y-1 sm:space-y-2 mb-4 sm:mb-6">
-            <h2 className="text-2xl sm:text-3xl font-extrabold gradient-text-dark">Welcome</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold gradient-text-dark">Chào mừng</h2>
             <p className="text-xs sm:text-sm text-gray-600 text-center px-2">
-              Your account is protected with secure authentication.
+              Tài khoản của bạn được bảo vệ bằng xác thực an toàn.
             </p>
           </div>
 
@@ -75,7 +81,7 @@ const LoginModal = () => {
             {/* Email field */}
             <div>
               <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Username
+                Tên đăng nhập
               </label>
               <input
                 type="text"
@@ -85,14 +91,14 @@ const LoginModal = () => {
                 required
                 disabled={loading}
                 className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="you@example.com"
+                placeholder="Tên đăng nhập"
               />
             </div>
 
             {/* Password field */}
             <div className="relative">
               <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Password
+                Mật khẩu
               </label>
               <input
                 type={showPassword ? "text" : "password"}
@@ -148,7 +154,7 @@ const LoginModal = () => {
                 className="text-purple-600 hover:underline"
                 disabled={loading}
               >
-                Forgot Password?
+                Quên mật khẩu?
               </button>
               <button
                 type="button"
@@ -156,7 +162,7 @@ const LoginModal = () => {
                 className="text-pink-600 hover:underline"
                 disabled={loading}
               >
-                Sign Up
+                Đăng ký
               </button>
             </div>
           </form>
@@ -173,7 +179,7 @@ const LoginModal = () => {
                 className="w-full flex items-center justify-center gap-2 bg-white text-black py-2 sm:py-2.5 rounded-md font-medium border border-gray-200 shadow-sm hover:scale-[1.02] transition text-xs sm:text-sm"
               >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sign in with Google</span>
+                <span className="hidden sm:inline">Đăng nhập với Google</span>
                 <span className="sm:hidden">Google</span>
               </a>
 
@@ -184,7 +190,7 @@ const LoginModal = () => {
                 disabled={loading}
               >
                 <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sign in with GitHub</span>
+                <span className="hidden sm:inline">Đăng nhập với GitHub</span>
                 <span className="sm:hidden">GitHub</span>
               </button>
             </div>

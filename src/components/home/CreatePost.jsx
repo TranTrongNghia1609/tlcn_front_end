@@ -44,7 +44,7 @@ const CreatePost = ({ onPostCreated }) => {
     replacement: (content) => '<u>' + content + '</u>'
   });
 
-  // ✅ Form handlers
+  // Form handlers
   const handleContentChange = (htmlContent) => {
     const markdownContent = turndownService.turndown(htmlContent);
     console.log('📄 Markdown output:', markdownContent);
@@ -160,7 +160,7 @@ const CreatePost = ({ onPostCreated }) => {
     }));
   };
 
-  // ✅ Enhanced modal-aware image edit
+  //  Enhanced modal-aware image edit
   const handleEditImageSave = (index, updatedImageData) => {
     console.log('🎨 Editing image:', index, updatedImageData);
     setFormData(prev => ({

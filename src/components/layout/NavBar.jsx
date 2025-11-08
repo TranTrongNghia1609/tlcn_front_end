@@ -21,11 +21,11 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Problems', path: '/problemset' },
-    { name: 'Contests', path: '/contests' },
-    { name: 'Leaderboard', path: '/leaderboard' },
-    { name: 'Tutorials', path: '/tutorials' },
+    { name: 'Trang chủ', path: '/home' },
+    { name: 'Bài tập', path: '/problemset' },
+    { name: 'Kì thi', path: '/contests' },
+    { name: 'Bảng xếp hạng', path: '/leaderboard' },
+    { name: 'Hướng dẫn', path: '/tutorials' },
   ];
 
   return (
@@ -58,7 +58,7 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative group ${
+                className={`relative px-4 py-2 font-medium rounded-lg transition-all duration-300 cursor-pointer ${
                   location.pathname === item.path
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
@@ -74,20 +74,7 @@ const Navbar = () => {
 
           {/* Right Side - Search + Auth */}
           <div className="flex items-center space-x-3 lg:space-x-4">
-            {/* Search Bar */}
-            <div className="hidden md:flex items-center">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search problems..."
-                  className="w-48 lg:w-56 px-4 py-2 pl-10 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-                <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
-
+            
             {/* Theme Toggle */}
             <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,15 +97,19 @@ const Navbar = () => {
               <div className="hidden sm:flex items-center space-x-2">
                 <button 
                   onClick={openLogin}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium 
+                  transition-all duration-300 transform hover:scale-105"
                 >
-                  Login
+                  Đăng nhập
                 </button>
                 <button 
                   onClick={openRegister}
-                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  className="px-4 py-2 font-medium 
+                  text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700
+                  hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 
+                  transition-all duration-300"
                 >
-                  Sign Up
+                  Đăng kí
                 </button>
               </div>
             )}
