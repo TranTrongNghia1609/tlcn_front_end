@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CommentHeader from './CommentHeader';
 import CommentContent from './CommentContent';
 import CommentActions from './CommentActions';
 import CommentForm from './CommentForm';
 import { useUser } from '../../../context/UserContext';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { commentService } from '../../../services/commentService';
 
 const CommentItem = ({
   comment,
@@ -20,48 +21,108 @@ const CommentItem = ({
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showReplies, setShowReplies] = useState(!hideReplies);
+  
+  // State cho pagination
+  const [replies, setReplies] = useState(comment.replies || []);
+  // Backend đã tính sẵn totalReplies đệ quy
+  const [totalReplies, setTotalReplies] = useState(comment.totalReplies || 0);
+  const [loadedRepliesCount, setLoadedRepliesCount] = useState(comment.loadedRepliesCount || 0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreReplies, setHasMoreReplies] = useState(comment.hasMoreReplies || false);
 
-  // Safety check
-  if (!comment || typeof comment !== 'object') {
+  // Initialize state from comment prop
+  useEffect(() => {
+    if (comment.replies) {
+      setReplies(comment.replies);
+    }
+    if (comment.totalReplies !== undefined) {
+      setTotalReplies(comment.totalReplies);
+    }
+    if (comment.loadedRepliesCount !== undefined) {
+      setLoadedRepliesCount(comment.loadedRepliesCount);
+    }
+    if (comment.hasMoreReplies !== undefined) {
+      setHasMoreReplies(comment.hasMoreReplies);
+    }
+  }, [comment]);
+
+  if (!comment || typeof comment !== 'object' || comment.buffer || !comment.content) {
     return null;
   }
 
-  // Skip buffer objects
-  if (comment.buffer && !comment.content) {
-    return null;
-  }
-
-  // Lọc ra replies hợp lệ và bỏ qua buffer objects
-  const getValidReplies = (replies) => {
-    if (!Array.isArray(replies)) return [];
+  const getValidReplies = (repliesList) => {
+    if (!Array.isArray(repliesList)) return [];
     
-    return replies.filter(reply => {
+    return repliesList.filter(reply => {
       return reply && 
              typeof reply === 'object' && 
              reply._id && 
              !reply.buffer &&
-             reply.content; // Đảm bảo có content
+             reply.content;
     });
   };
 
-  // Tính toán số lượng replies đúng
-  const calculateTotalReplies = (replies) => {
-    if (!Array.isArray(replies)) return 0;
+  const validReplies = getValidReplies(replies);
+  const hasRepliesData = validReplies.length > 0 || totalReplies > 0;
+  const remainingRepliesCount = totalReplies - loadedRepliesCount;
+
+  const handleLoadMoreReplies = async () => {
+    if (isLoadingMore || !hasMoreReplies) return;
     
-    return replies.reduce((count, reply) => {
-      if (!reply || reply.buffer || !reply.content) return count;
+    setIsLoadingMore(true);
+    try {
+      const response = await commentService.loadMoreReplies(
+        comment._id,
+        loadedRepliesCount,
+        5,
+        true
+      );
+
+      const { replies: newReplies, pagination } = response.data;
       
-      // Đếm cả reply con nếu có
-      const validNestedReplies = reply.replies ? getValidReplies(reply.replies) : [];
-      const nestedCount = validNestedReplies.length;
+      setReplies(prev => [...prev, ...newReplies]);
+      setLoadedRepliesCount(pagination.currentSkip + pagination.loadedCount);
+      setTotalReplies(pagination.totalReplies); 
+      setHasMoreReplies(pagination.hasMore);
       
-      return count + 1 + nestedCount;
-    }, 0);
+    } catch (error) {
+      console.error('Error loading more replies:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
-  const validReplies = getValidReplies(comment.replies);
-  const hasReplies = validReplies.length > 0;
-  const totalRepliesCount = calculateTotalReplies(comment.replies);
+  const handleShowAllReplies = async () => {
+    if (isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const response = await commentService.loadMoreReplies(
+        comment._id,
+        loadedRepliesCount,
+        remainingRepliesCount,
+        true
+      );
+
+      const { replies: newReplies, pagination } = response.data;
+      
+      setReplies(prev => [...prev, ...newReplies]);
+      setLoadedRepliesCount(pagination.totalReplies);
+      setHasMoreReplies(false);
+      
+    } catch (error) {
+      console.error('Error loading all replies:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleCollapseReplies = () => {
+    const initialReplies = comment.replies?.slice(0, 3) || [];
+    setReplies(initialReplies);
+    setLoadedRepliesCount(initialReplies.length);
+    setHasMoreReplies(totalReplies > initialReplies.length);
+  };
 
   const handleReply = () => {
     setIsReplying(prev => !prev);
@@ -86,6 +147,22 @@ const CommentItem = ({
       await onCreateReply(content, comment._id);
       setIsReplying(false);
       setShowReplies(true);
+      
+      try {
+        const response = await commentService.loadMoreReplies(
+          comment._id,
+          0,
+          3,
+          true
+        );
+        
+        setReplies(response.data.replies);
+        setTotalReplies(response.data.pagination.totalReplies);
+        setLoadedRepliesCount(response.data.replies.length);
+        setHasMoreReplies(response.data.pagination.hasMore);
+      } catch (error) {
+        console.error('Error refreshing replies:', error);
+      }
     }
   };
 
@@ -112,35 +189,27 @@ const CommentItem = ({
     setShowReplies(prev => !prev);
   };
 
-  // Logic hiển thị và indent
-  const MAX_LEVEL = 2; // Level tối đa là 2
-  
-  // Cấp hiện tại hiển thị (không vượt quá MAX_LEVEL)
+  const MAX_LEVEL = 2;
   const displayLevel = Math.min(level, MAX_LEVEL);
-  
   const nextLevel = level >= MAX_LEVEL ? MAX_LEVEL : level + 1;
-  
-  // Toggle button chỉ hiển thị ở level 0 (comment gốc)
-  const shouldShowToggleButton = hasReplies && level === 0;
-  
-  // Hiển thị avatar ở tất cả các cấp
+  const shouldShowToggleButton = hasRepliesData && level === 0;
   const showAvatar = true;
+
+  const mentionDisplayName = comment.author?.fullName || comment.author?.userName || 'User';
 
   return (
     <div className={`comment-item mb-3 ${isReply ? `ml-${Math.min(displayLevel * 4, 8)}` : ''}`}>
       <div className="flex items-start">
-        {/* Avatar */}
         {showAvatar && (
           <div className="flex-shrink-0 mr-3">
             <img
-              src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author?.userName || 'User')}&background=2563eb&color=fff`}
-              alt={comment.author?.userName || 'User'}
+              src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentionDisplayName)}&background=2563eb&color=fff`}
+              alt={mentionDisplayName}
               className="w-8 h-8 rounded-full object-cover"
             />
           </div>
         )}
         
-        {/* Content container */}
         <div className="flex-grow">
           <div className={`rounded-lg ${isReply ? 'bg-gray-50' : 'bg-white'} p-3`}>
             <CommentHeader
@@ -178,9 +247,11 @@ const CommentItem = ({
                 <CommentForm
                   onSubmit={handleSubmitReply}
                   onCancel={handleCancelReply}
-                  placeholder="Write a reply..."
+                  placeholder={`Reply to ${mentionDisplayName}...`}
                   isReply={true}
                   size="small"
+                  user={user}
+                  mentionUser={comment.author}
                 />
               </div>
             )}
@@ -188,7 +259,7 @@ const CommentItem = ({
         </div>
       </div>
 
-      {/* Toggle button */}
+      {/* Toggle Button - Hiển thị totalReplies từ Backend */}
       {shouldShowToggleButton && (
         <div className="mt-2 mb-2 ml-2">
           <button
@@ -198,20 +269,19 @@ const CommentItem = ({
             {showReplies ? (
               <>
                 <ChevronUpIcon className="w-4 h-4 mr-1" />
-                Hide {totalRepliesCount} {totalRepliesCount === 1 ? 'reply' : 'replies'}
+                Hide {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
               </>
             ) : (
               <>
                 <ChevronDownIcon className="w-4 h-4 mr-1" />
-                View {totalRepliesCount} {totalRepliesCount === 1 ? 'reply' : 'replies'}
+                View {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
               </>
             )}
           </button>
         </div>
       )}
 
-      {/* Replies container */}
-      {hasReplies && (
+      {hasRepliesData && (
         <div 
           className={`transition-all duration-300 ml-10 ${
             showReplies 
@@ -219,22 +289,79 @@ const CommentItem = ({
               : 'max-h-0 opacity-0 overflow-hidden mt-0'
           }`}
         >
-          {showReplies && validReplies.map((reply) => {
-            // Thực hiện đệ quy để hiển thị replies
-            return (
-              <CommentItem
-                key={reply._id}
-                comment={reply}
-                isReply={true}
-                onEditComment={onEditComment}
-                onDeleteComment={onDeleteComment}
-                onLikeComment={onLikeComment}
-                onCreateReply={onCreateReply}
-                level={nextLevel}
-                hideReplies={false}
-              />
-            );
-          })}
+          {showReplies && (
+            <>
+              {validReplies.map((reply) => (
+                <CommentItem
+                  key={reply._id}
+                  comment={reply}
+                  isReply={true}
+                  onEditComment={onEditComment}
+                  onDeleteComment={onDeleteComment}
+                  onLikeComment={onLikeComment}
+                  onCreateReply={onCreateReply}
+                  level={nextLevel}
+                  hideReplies={false}
+                />
+              ))}
+
+              {hasMoreReplies && (
+                <div className="mt-3 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                    
+                    <button
+                      onClick={handleLoadMoreReplies}
+                      disabled={isLoadingMore}
+                      className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap transition-colors"
+                    >
+                      {isLoadingMore ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Loading...
+                        </span>
+                      ) : (
+                        `View ${Math.min(remainingRepliesCount, 5)} more ${remainingRepliesCount === 1 ? 'reply' : 'replies'}`
+                      )}
+                    </button>
+
+                    {remainingRepliesCount > 5 && (
+                      <>
+                        <span className="text-gray-400">|</span>
+                        <button
+                          onClick={handleShowAllReplies}
+                          disabled={isLoadingMore}
+                          className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap transition-colors"
+                        >
+                          View all ({totalReplies})
+                        </button>
+                      </>
+                    )}
+                    
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                  </div>
+                </div>
+              )}
+
+              {!hasMoreReplies && loadedRepliesCount > 3 && (
+                <div className="mt-3 mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                    <button
+                      onClick={handleCollapseReplies}
+                      className="text-sm font-semibold text-gray-600 hover:text-gray-800 whitespace-nowrap transition-colors"
+                    >
+                      Collapse replies
+                    </button>
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

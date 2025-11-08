@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../common/Modal';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'sonner';
 
-const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerificationSuccess }) => {
+const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerificationSuccess }) => {
   const { verifyRegistrationOTP, resendRegistrationOTP } = useAuth();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -39,9 +39,6 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
-
-    // Clear error when user starts typing
-    if (error) setError('');
   };
 
   const handleKeyDown = (index, e) => {
@@ -74,22 +71,27 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
     const otpCode = otp.join('');
     
     if (otpCode.length !== 6) {
-      setError('Vui lòng nhập đầy đủ 6 số OTP.');
+      toast.error('Vui lòng nhập đầy đủ 6 số OTP');
       return;
     }
 
     setLoading(true);
-    setError('');
+
+    const toastId = toast.loading('Đang xác thực OTP...');
 
     try {
-      console.log('🔍 Verifying OTP:', { email, otp: otpCode });
       
       const response = await verifyRegistrationOTP({
         email: email,
         otp: otpCode
       });
       
-      console.log('✅ OTP verification successful:', response);
+      console.log('OTP verification successful:', response);
+      
+      toast.success('Xác thực thành công! Tài khoản của bạn đã được kích hoạt.', {
+        id: toastId,
+        duration: 4000
+      });
       
       // Reset form
       setOtp(['', '', '', '', '', '']);
@@ -102,11 +104,13 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
       // Close modal
       onClose();
       
-      alert('Xác thực thành công! Tài khoản của bạn đã được kích hoạt.');
-      
     } catch (error) {
-      console.error('❌ OTP verification failed:', error);
-      setError(error.message || 'Mã OTP không đúng. Vui lòng thử lại.');
+      const errorMessage = error.message || 'Mã OTP không đúng. Vui lòng thử lại.';
+      
+      toast.error(errorMessage, {
+        id: toastId,
+        duration: 4000
+      });
       
       // Clear OTP inputs on error
       setOtp(['', '', '', '', '', '']);
@@ -120,19 +124,21 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
     if (countdown > 0) return;
 
     setResendLoading(true);
-    setError('');
+
+    const toastId = toast.loading('Đang gửi lại mã OTP...');
 
     try {
-      console.log('🔄 Resending OTP to:', email);
       const dataEmailUserName = {
         email: email,
         userName: userName
       }
-      await resendRegistrationOTP(
-        dataEmailUserName
-      );
+      await resendRegistrationOTP(dataEmailUserName);
       
-      console.log('✅ OTP resent successfully');
+      
+      toast.success('Mã OTP mới đã được gửi đến email của bạn. Vui lòng kiểm tra!', {
+        id: toastId,
+        duration: 5000
+      });
       
       // Start countdown
       setCountdown(60);
@@ -141,11 +147,13 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
       
-      alert('Mã OTP mới đã được gửi đến email của bạn.');
-      
     } catch (error) {
-      console.error('❌ Resend OTP failed:', error);
-      setError(error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại.');
+      const errorMessage = error.message || 'Không thể gửi lại mã OTP. Vui lòng thử lại.';
+      
+      toast.error(errorMessage, {
+        id: toastId,
+        duration: 4000
+      });
     } finally {
       setResendLoading(false);
     }
@@ -153,7 +161,6 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
 
   const handleClose = () => {
     setOtp(['', '', '', '', '', '']);
-    setError('');
     setCountdown(0);
     onClose();
   };
@@ -183,13 +190,6 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
               {email}
             </p>
           </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm text-center">{error}</p>
-            </div>
-          )}
 
           {/* OTP Form */}
           <form onSubmit={handleSubmit}>
@@ -242,7 +242,13 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName ,onVerification
               className="text-blue-600 font-medium hover:text-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {resendLoading ? (
-                'Đang gửi lại...'
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đang gửi lại...
+                </span>
               ) : countdown > 0 ? (
                 `Gửi lại sau ${countdown}s`
               ) : (

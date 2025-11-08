@@ -114,8 +114,6 @@ export const AuthProvider = ({ children }) => {
         email: otp.email,
         otp: otp.otp
       });
-      setUser(response.user);
-      setIsAuthenticated(true);
       setPendingRegistration(null);
       return response;
     } catch (error) {
