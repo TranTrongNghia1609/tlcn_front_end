@@ -45,8 +45,8 @@ const OnboardingModal = ({open, onClose}) => {
         }
         catch (error){
             setLoading(false)
-            console.error('❌ Lỗi trong khi đăng ký', error);
-            setError('❌ Lỗi trong khi đăng ký')
+            console.error(' Lỗi trong khi đăng ký', error);
+            setError(' Lỗi trong khi đăng ký')
             throw error.response?.data || { message: 'Failed to check' };
         }
     }

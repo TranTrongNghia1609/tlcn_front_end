@@ -5,14 +5,13 @@ export const uploadService = {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET); // ✅ Sử dụng preset
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET); 
       
       // Optional: Override folder từ preset
       if (options.folder) {
         formData.append('folder', options.folder);
       }
       
-      console.log('📤 Uploading with preset:', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
       
       const response = await fetch(CLOUDINARY_URL, {
         method: 'POST',
@@ -24,7 +23,6 @@ export const uploadService = {
       }
 
       const result = await response.json();
-      console.log('✅ Upload successful:', result);
       
       return {
         success: true,

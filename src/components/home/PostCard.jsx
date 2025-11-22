@@ -77,7 +77,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         }));
       }
     } catch (error) {
-      console.error('❌ PostCard toggleLike error:', error);
+      console.error(' PostCard toggleLike error:', error);
 
       setLocalPost(prev => ({
         ...prev,
