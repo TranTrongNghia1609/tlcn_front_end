@@ -35,4 +35,7 @@ export const submissionsStore = create((set) => ({
     set({submissions: [...response.data.content]});
     console.log('🟢 Submissions fetched and stored:', [...response.data.content]);
   },
+  setProblemSubmissions: (submissions) => {
+    set({submissions: submissions});
+  }
 }));  

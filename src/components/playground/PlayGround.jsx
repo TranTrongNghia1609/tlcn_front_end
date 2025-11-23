@@ -10,7 +10,7 @@ import { submissionsStore } from '@/zustand/store';
 
 
 
-const PlayGround = () => {
+const PlayGround = ({contestId = null}) => {
   const mapValue = mapLanguage();
   const [language, setLanguage] = useState('cpp');
   const [code, setCode] = useState(mapValue[language].code);
@@ -22,15 +22,13 @@ const PlayGround = () => {
   }
   
   const handleSumit = async () => {
-    console.log('Hello');
     const problemId = currentProblem._id;
-    const response = await submitCode(problemId, code, language);
+    const response = await submitCode(problemId, code, language, contestId);
     const submissionResult = response.data;
     submissionResult.isNew = true;
     addSubmission(submissionResult);
   }
 
-  console.log('currentSubmission: ', currentSubmission);
 
   return (
     <div>

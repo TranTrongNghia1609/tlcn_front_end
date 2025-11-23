@@ -18,11 +18,12 @@ export const SocketProvider = ({ children, url }) => {
     });
 
     socketRef.current.on('connect', () => {
-      setIsConnected(true);
       console.log('Token: ', token);
       socketRef.current.emit('register');
     });
-
+    socketRef.current.on('connected', () =>{
+      setIsConnected(true);
+    });
     socketRef.current.on('disconnect', () => {
       setIsConnected(false);
     });
