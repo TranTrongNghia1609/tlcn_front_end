@@ -224,7 +224,6 @@ const CommentSection = ({ postId, hideCommentForm = false }) => {
               const cId = comment._id || comment.id;
 
               if (cId === parentCommentId) {
-                console.log('✨ Found parent comment!', comment);
                 found = true;
                 if (!comment.replies) comment.replies = [];
                 comment.replies.push(optimisticReply);

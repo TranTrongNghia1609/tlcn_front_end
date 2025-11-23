@@ -11,15 +11,12 @@ const TestUpload = () => {
     setResult(null);
 
     try {
-      console.log('📁 Selected file:', file.name, file.size, file.type);
 
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
-      console.log('📤 Uploading to Cloudinary...');
-      console.log('🔧 Cloud name:', import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-      console.log('🔧 Upload preset:', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -32,16 +29,13 @@ const TestUpload = () => {
       const result = await response.json();
 
       if (response.ok) {
-        console.log('✅ Upload successful:', result);
         setResult(result);
         alert('Upload thành công!');
       } else {
-        console.error('❌ Upload failed:', result);
         setError(result.error?.message || 'Upload failed');
       }
 
     } catch (error) {
-      console.error('❌ Upload error:', error);
       setError(error.message);
     } finally {
       setUploading(false);

@@ -76,9 +76,7 @@ const RegisterModal = () => {
         password: form.password
       };
 
-      console.log('Registering user:', userData);
       const response = await register(userData);
-      console.log('Registration successful:', response);
 
       toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.', {
         id: toastId,
@@ -111,7 +109,6 @@ const RegisterModal = () => {
   };
 
   const handleOTPVerificationSuccess = (response) => {
-    console.log('OTP verification completed:', response);
     
     toast.success('Xác thực tài khoản thành công! Vui lòng đăng nhập.', {
       duration: 4000

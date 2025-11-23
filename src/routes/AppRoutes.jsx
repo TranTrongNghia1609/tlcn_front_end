@@ -7,6 +7,9 @@ import Profile from '../pages/Profile'
 import WorkSpace from "@/pages/WorkSpace";
 import Problems from "@/pages/Problem";
 import LandingPage from "@/pages/LandingPage"; 
+import Contests from "@/pages/Contests";
+import ContestDetail from "@/pages/ContestDetail";
+import Contest from "@/pages/Contest";
 const AppRoutes = () => {
   return(
     <Routes>
@@ -18,8 +21,10 @@ const AppRoutes = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/profile/:username" element={<Profile />} />
       <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
-      <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
       <Route path="/problemset" element={<Problems/>}/>
+      <Route path="/contests" element={<Contests/>}/>
+      <Route path="/contest/:code" element={<ContestDetail/>}/>
+      <Route path="/contest/:code/problem/:id" element={<Contest/>}/>
     </Routes>
   )
 }
