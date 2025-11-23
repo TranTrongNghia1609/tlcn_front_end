@@ -32,7 +32,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useProblem } from '@/context/ProblemContext';
 import { submissionsStore } from '@/zustand/store';
 import { useSocket } from '@/context/SocketContext';
-const ProblemSubmissions = () => {
+const ProblemSubmissions = ({contestParticipant=null}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [timeRange, setTimeRange] = useState('all');
   // const [submissions, setProblemSubmissions] = useState([]);
@@ -40,7 +40,7 @@ const ProblemSubmissions = () => {
   const { user, isAuthenticated } = useAuth();
   const { currentProblem, loading } = useProblem(); 
   const [ pageActive, setPageActive ] = useState(1);
-  const fetchSubmissions = submissionsStore((state) => state.fetchSubmissions)
+  const setProblemSubmissions = submissionsStore((state) => state.setProblemSubmissions)
   const submissions = submissionsStore((state) => state.submissions);
   const setCurrentSubmission = submissionsStore((state) => state.setCurrentSubmission);
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
@@ -51,11 +51,11 @@ const ProblemSubmissions = () => {
       console.log('Fetching submissions for user:', user);
       console.log('Fetching page: ', pageActive);
       if (isAuthenticated && !loading){
-        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive);
-        // setProblemSubmissions(response.data.content);
+        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive, contestParticipant);
+        setProblemSubmissions(response.data.content);
         setProblemSubmissionPagination(response.data);
 
-        await fetchSubmissions(user.id, currentProblem._id, pageActive);
+        // await fetchSubmissions(user.id, currentProblem._id, pageActive);
       }
     }
     fetchProblemSubmission();

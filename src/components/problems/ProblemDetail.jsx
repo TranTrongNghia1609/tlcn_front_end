@@ -3,37 +3,18 @@ import ProblemHeader from './ProblemHeader';
 import ProblemStatement from '@/components/problems/ProblemStatement';
 import ProblemExamples from '@/components/problems/ProblemExamples';
 import { useProblem } from '@/context/ProblemContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 
 const ProblemDetail = () => {
   const { currentProblem, loading, error } = useProblem();
   console.log("Current Problem:", currentProblem);
+  
   if (loading) {
     return (
-      <div className="w-full px-4 py-6 space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-16" />
-          </div>
-          <div className="flex gap-4">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-28" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-        </div>
-        
-        <div className="border border-border/50 rounded-lg p-6 space-y-4">
-          <Skeleton className="h-6 w-48" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-4/5" />
-          </div>
+      <div className="w-full h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading problem...</p>
         </div>
       </div>
     );

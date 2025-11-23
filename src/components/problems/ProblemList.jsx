@@ -12,6 +12,14 @@ import { getProblems } from "@/services/problemService";
 import { CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const getDifficultyVariant = (difficulty) => {
   switch (difficulty) {
@@ -26,25 +34,93 @@ const getDifficultyVariant = (difficulty) => {
   }
 };
 
+
+const ProblemListSkeleton = () => {
+  return (
+    <div className="w-full">
+      <Card className="border-border">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent border-border">
+              <TableHead className="w-[100px] font-semibold">ID</TableHead>
+              <TableHead className="font-semibold">Problem</TableHead>
+              <TableHead className="font-semibold">Difficulty</TableHead>
+              <TableHead className="font-semibold">Tags</TableHead>
+              <TableHead className="text-right font-semibold w-[140px]">
+                <div className="flex items-center justify-end gap-1">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Solved
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(10)].map((_, index) => (
+              <TableRow key={index} className="border-border">
+                <TableCell>
+                  <Skeleton className="h-4 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-48" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                    <Skeleton className="h-5 w-14 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex flex-col items-end gap-1">
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+};
+
 const ProblemList = () => {
   const navigate = useNavigate();
 
   const [problems, setProblems] = useState([]);
+  const [problemPagination, setProblemPagination] = useState();
+  const [pageActive, setPageActive] = useState(1);
+
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const response = await getProblems();
+        const params = {page: pageActive}
+        const response = await getProblems(params);
         setProblems(response.data.content);
-        console.log('Fetched problems:', response.data.content);
+        setProblemPagination(response.data);
+        console.log('Fetched problems:', response.data);
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching problems:', error);
       }
     }
     fetchProblems();
-  }, []);
-
+  }, [pageActive]);
+  if (isLoading){
+    return <ProblemListSkeleton />
+  }
   return (
-    <div className="w-full">
+    <div className="w-full space-y-3">
+      <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Danh sách bài tập
+        </h2>
+      </div>
       <Card className="border-border">
         <Table>
           <TableHeader>
@@ -107,6 +183,36 @@ const ProblemList = () => {
             ))}
           </TableBody>
         </Table>
+        <div className="mt-4 flex justify-center">
+          <Pagination className={"cursor-pointer"}>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious onClick={() => pageActive > 1 ? setPageActive(pageActive - 1) : {}}/>
+              </PaginationItem>
+              {
+                Array.from({ length: problemPagination.totalPages }, (_, index) => {
+                  const page = index + 1;
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink 
+                        onClick={() => {
+                          setPageActive(page);
+                          setIsLoading(true)
+                        } }
+                        isActive={page === problemPagination.page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })
+              }
+              <PaginationItem>
+                <PaginationNext onClick={() => pageActive < problemPagination.totalPages ? setPageActive(pageActive + 1) : {}} />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </Card>
     </div>
   );

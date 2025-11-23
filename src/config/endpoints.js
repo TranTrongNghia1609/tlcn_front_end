@@ -133,3 +133,10 @@ export const MATERIAL_ENDPOINTS = {
   GET_RECENT: (classCode) => `/classroom/class/${classCode}/materials/recent`,
   GET_POPULAR: (classCode) => `/classroom/class/${classCode}/materials/popular`,
 };
+
+export const CONTEST_ENDPOINTS = {
+  GET_ALL: '/contests',
+  GET_BY_CODE: (code) => `/contests/code/${code}`,  // Append contest code when using
+  REGISTER_CONTEST: (id) => `/contests/${id}/register`,
+  GET_CONTETS_RANKING: (contestId) => `/contests/${contestId}/ranking`
+}

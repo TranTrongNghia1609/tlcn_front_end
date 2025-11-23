@@ -1,11 +1,12 @@
 import { SUBMISSION_ENDPOINTS } from "@/config/endpoints";
 import API from "@/utils/api"
 
-export const submitCode = async (problemId, code, language) => {
+export const submitCode = async (problemId, code, language, contestId = null) => {
   try{
     const response = await API.post(`/submissions/${problemId}`, {
       source: code,
-      language
+      language: language, 
+      contest: contestId
     });
     return response.data;
   }
@@ -32,14 +33,15 @@ export const getSubmission  = async (userId, problemId) => {
   }
 }
 
-export const getSubmissionByUserId = async (userId, problemId = null, page = 1, language = 'all', ) => {
+export const getSubmissionByUserId = async (userId, problemId = null, page = 1, contestParticipant = null, language = 'all', ) => {
   try{
     console.log('Problem ID in service:', problemId);
     const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_BY_USER_ID(userId), {
       params: {
         problemId: problemId, 
         language: language,
-        page: page
+        page: page,
+        contestParticipant: contestParticipant
       }
     });
     console.log('Submissions by user response:', response.data.data);
