@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,37 +17,20 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@/utils/dateHelpers';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { useStudentClassroom } from '@/context/StudentClassroomContext';
 
-const MaterialList = ({ classCode }) => {
+const MaterialList = ({ classCode, materials = [], loading = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const { materials, loading, fetchMaterials } = useStudentClassroom();
-
-  // ✅ Fetch materials when component mounts
-  useEffect(() => {
-    console.log('📄 MaterialList: Fetching materials for', classCode);
-    if (classCode) {
-      fetchMaterials(classCode);
-    }
-  }, [classCode, fetchMaterials]);
-
-  // ✅ Debug log
-  useEffect(() => {
-    console.log('📄 Materials state updated:', materials);
-  }, [materials]);
 
   const safeMaterials = Array.isArray(materials) ? materials : [];
-  console.log('📄 Safe materials:', safeMaterials);
+  console.log('📄 MaterialList - Safe materials:', safeMaterials.length);
 
   const filteredMaterials = safeMaterials.filter(material =>
     material.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     material.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  console.log('📄 Filtered materials:', filteredMaterials);
+  console.log('📄 MaterialList - Filtered materials:', filteredMaterials.length);
 
-  // ✅ Enhanced file icon detection
   const getFileIcon = (fileType, fileName) => {
     const type = fileType?.toLowerCase() || '';
     const ext = fileName?.split('.').pop()?.toLowerCase() || '';
@@ -91,7 +74,7 @@ const MaterialList = ({ classCode }) => {
         window.open(material.fileUrl, '_blank');
       }
     } catch (error) {
-      console.error('Error downloading material:', error);
+      console.error('❌ Error downloading material:', error);
     }
   };
 
@@ -219,18 +202,6 @@ const MaterialList = ({ classCode }) => {
               </Card>
             );
           })}
-        </div>
-      )}
-
-      {/* Debug Info (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-gray-100 p-4 rounded-lg text-xs font-mono">
-          <div>Loading: {loading ? 'true' : 'false'}</div>
-          <div>Materials count: {safeMaterials.length}</div>
-          <div>Filtered count: {filteredMaterials.length}</div>
-          <pre className="mt-2 overflow-auto max-h-40">
-            {JSON.stringify(safeMaterials[0] || {}, null, 2)}
-          </pre>
         </div>
       )}
     </div>

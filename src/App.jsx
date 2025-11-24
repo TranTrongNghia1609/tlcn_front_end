@@ -3,6 +3,10 @@ import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 
 import { AuthModalProvider } from '@/context/AuthModalContext';
 import { UserProvider } from '@/context/UserContext';
+import { ClassroomProvider } from '@/context/ClassroomContext';
+import { MaterialProvider } from '@/context/MaterialContext';
+import { ProblemProvider } from '@/context/ProblemContext';
+import { StudentClassroomProvider } from '@/context/StudentClassroomContext';
 import LoginModal from '@/components/auth/LoginModal';
 import RegisterModal from '@/components/auth/RegisterModal';
 import Navbar from '@/components/layout/NavBar';
@@ -11,8 +15,9 @@ import AppRoutes from '@/routes/AppRoutes';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { CommentProvider } from '@/context/CommentContext';
-import '@/index.css'
 import { SocketProvider } from '@/context/SocketContext';
+import { Toaster } from 'sonner';
+import '@/index.css'
 
 const AppContent = () => {
   const { loading } = useAuth();
@@ -28,22 +33,48 @@ const AppContent = () => {
   return (
     <SocketProvider url={import.meta.env.VITE_SOCKET_URL}>
       <UserProvider>
-        <PostProvider>
-          <CommentProvider>
-            <AuthModalProvider>
-              <div className="min-h-screen bg-gray-50">
-                {/* Only show Navbar if NOT on landing page */}
-                {!isLandingPage && <Navbar />}
-                
-                <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
-                  <AppRoutes />
-                </main>
-                <LoginModal />
-                <RegisterModal />
-              </div>
-            </AuthModalProvider>
-          </CommentProvider>
-        </PostProvider>
+        <ClassroomProvider>
+          <MaterialProvider>
+            <ProblemProvider>
+              <StudentClassroomProvider>
+                <PostProvider>
+                  <CommentProvider>
+                    <AuthModalProvider>
+                      <div className="min-h-screen bg-gray-50">
+                        {/* Only show Navbar if NOT on landing page */}
+                        {!isLandingPage && <Navbar />}
+                        
+                        <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
+                          <AppRoutes />
+                        </main>
+
+                        {/* Auth Modals */}
+                        <LoginModal />
+                        <RegisterModal />
+
+                        {/* Toast Notifications */}
+                        <Toaster
+                          position="top-right"
+                          richColors
+                          closeButton
+                          duration={3000}
+                          expand={false}
+                          toastOptions={{
+                            style: {
+                              background: '#fff',
+                              color: '#333',
+                            },
+                            className: 'toast-notification',
+                          }}
+                        />
+                      </div>
+                    </AuthModalProvider>
+                  </CommentProvider>
+                </PostProvider>
+              </StudentClassroomProvider>
+            </ProblemProvider>
+          </MaterialProvider>
+        </ClassroomProvider>
       </UserProvider>
     </SocketProvider>
   );

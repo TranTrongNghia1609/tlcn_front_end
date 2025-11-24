@@ -174,7 +174,7 @@ const StudentClassroomsPage = () => {
               <Card
                 key={classroom._id}
                 className="group hover:shadow-xl transition-all cursor-pointer overflow-hidden"
-                onClick={() => navigate(`/student/classroom/${classroom.classCode}`)}
+                onClick={() => navigate(`/classrooms/${classroom.classCode}`)}
               >
 
 
