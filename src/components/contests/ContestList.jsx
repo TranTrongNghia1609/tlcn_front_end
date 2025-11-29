@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/pagination"
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 const ContestList = () => {
   const [contests, setContests] = useState([])
@@ -103,53 +104,57 @@ const ContestList = () => {
           const status = getContestStatus(contest.startTime, contest.endTime)
           
           return (
-            <div
+            <Card
               key={contest._id}
-              className="bg-white rounded-lg border border-purple-100 p-6 cursor-pointer group 
+              className="cursor-pointer group border-gray-200
                          transition-all duration-300 ease-in-out
-                         hover:shadow-xl hover:-translate-y-1 hover:border-purple-300"
+                         hover:shadow-lg hover:-translate-y-1 hover:border-purple-300"
               onClick={() => {navigate(`/contest/${contest.code}`)}}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800 group-hover:text-purple-600 transition-colors">
-                      {contest.title}
-                    </h3>
-                    {contest.isPrivate ? (
-                      <Lock className="w-4 h-4 text-purple-500" />
-                    ) : (
-                      <Unlock className="w-4 h-4 text-blue-500" />
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle className="text-lg group-hover:text-purple-600 transition-colors">
+                        {contest.title}
+                      </CardTitle>
+                      {contest.isPrivate ? (
+                        <Lock className="w-4 h-4 text-purple-500" />
+                      ) : (
+                        <Unlock className="w-4 h-4 text-blue-500" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Mã: <span className="font-mono font-medium text-purple-600">{contest.code}</span>
+                    </p>
+                  </div>
+                  {getStatusBadge(status)}
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className='flex items-center justify-between'> 
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-blue-600" />
+                      <span>Bắt đầu: {formatDate(contest.startTime)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-purple-600" />
+                      <span>Kết thúc: {formatDate(contest.endTime)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    {getHasRegistered(contest) && (
+                      <div className="flex items-center gap-1 text-green-600 font-medium">
+                        <CheckCheck className="w-4 h-4" />
+                        <span className='text-sm'>Đã đăng ký</span>
+                      </div>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Mã: <span className="font-mono font-medium text-purple-600">{contest.code}</span>
-                  </p>
                 </div>
-                {getStatusBadge(status)}
-              </div>
-
-              <div className='flex items-center justify-between'> 
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span>Bắt đầu: {formatDate(contest.startTime)}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-purple-600" />
-                    <span>Kết thúc: {formatDate(contest.endTime)}</span>
-                  </div>
-                </div>
-                <div>
-                  {getHasRegistered(contest) && (
-                    <div className="flex items-center gap-1 text-green-600 font-medium">
-                      <CheckCheck className="w-4 h-4" />
-                      <span className='text-sm'>Đã đăng ký</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )
         })}
 

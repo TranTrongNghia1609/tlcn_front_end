@@ -61,8 +61,8 @@ function SubmissionPieChart({userId}) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Submission Chart</CardTitle>
-        <CardDescription>All submission</CardDescription>
+        <CardTitle>Thống kê bài nộp</CardTitle>
+        <CardDescription>Tất cả bài nộp</CardDescription>
       </CardHeader>
       <CardContent>
         

@@ -147,45 +147,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   if (loading){
     return <div>Loading...</div>;
   }
-  
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Pending':
-        return (
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
-        );
-      case 'Accepted':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'Wrong Answer':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'Time Limit Exceeded':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'Runtime Error':
-        return <AlertCircle className="h-4 w-4 text-orange-500" />;
-      case 'Compilation Error':
-        return <Code className="h-4 w-4 text-purple-500" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />;
-    }
-  };
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      'Pending': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Accepted': 'bg-green-100 text-green-800 border-green-200',
-      'Wrong Answer': 'bg-red-100 text-red-800 border-red-200',
-      'Time Limit Exceeded': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'Runtime Error': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Compilation Error': 'bg-purple-100 text-purple-800 border-purple-200'
-    };
-
-    return (
-      <Badge className={`${variants[status] || 'bg-gray-100 text-gray-800 border-gray-200'} flex items-center gap-1 px-2 py-1`}>
-        {getStatusIcon(status)}
-        <span className="text-xs">{status}</span>
-      </Badge>
-    );
-  };
 
   const handleGetSubmission = async (submission) => {
     submission.isNew = true;
@@ -248,7 +210,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                   <th className="text-left p-2">Attempt</th>
                   <th className="text-left p-2">Status</th>
                   <th className="text-left p-2">Language</th>
-                  <th className="text-left p-2">Runtime</th>
+                  <th className="text-left p-2">Runtime (ms)</th>
                   <th className="text-left p-2">Memory</th>
                   <th className="text-left p-2">Test Cases</th>
                 </tr>
@@ -270,7 +232,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                           {submission.language}
                         </Badge>
                       </td>
-                      <td className="p-2 font-mono">{submission.time}</td>
+                      <td className="p-2 font-mono">{submission.status === 'Time Limit Exceeded' ? currentProblem.time * 1000 : submission.time}</td>
                       <td className="p-2 font-mono">{submission.memory}</td>
                       <td className="p-2">
                         <span className={`font-semibold ${
@@ -319,6 +281,45 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
       </Card>
       
     </div>
+  );
+};
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'Pending':
+      return (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+      );
+    case 'Accepted':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'Wrong Answer':
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    case 'Time Limit Exceeded':
+      return <Clock className="h-4 w-4 text-yellow-500" />;
+    case 'Runtime Error':
+      return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    case 'Compilation Error':
+      return <Code className="h-4 w-4 text-purple-500" />;
+    default:
+      return <AlertCircle className="h-4 w-4 text-gray-500" />;
+  }
+};
+
+export const getStatusBadge = (status) => {
+  const variants = {
+    'Pending': 'bg-blue-100 text-blue-800 border-blue-200',
+    'Accepted': 'bg-green-100 text-green-800 border-green-200',
+    'Wrong Answer': 'bg-red-100 text-red-800 border-red-200',
+    'Time Limit Exceeded': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'Runtime Error': 'bg-orange-100 text-orange-800 border-orange-200',
+    'Compilation Error': 'bg-purple-100 text-purple-800 border-purple-200'
+  };
+
+  return (
+    <Badge className={`${variants[status] || 'bg-gray-100 text-gray-800 border-gray-200'} flex items-center gap-1 px-2 py-1`}>
+      {getStatusIcon(status)}
+      <span className="text-xs">{status}</span>
+    </Badge>
   );
 };
 

@@ -16,6 +16,7 @@ import { contestStore } from '@/zustand/contestStore';
 import { Trophy, List } from 'lucide-react';
 import RankingContest from '@/components/contests/ContestRanking';
 import { useContestRanking } from '@/hooks/useContestRanking';
+import { isContestRunning } from '@/utils/contestHepler';
 
 
 const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
@@ -35,12 +36,10 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   if (isContest) {
     contestId = contest?._id || null;
     contestParticipantId = contest?.userParticipation?.id || null;
-    console.log('Contest ID: ', contestParticipantId);
   }
   // Update tab when submission state changes
   useEffect(() => {
-    console.log('First log: ', currentSubmission);
-    if (currentSubmission && currentSubmission.isNew === true) {
+    if (currentSubmission && currentSubmission.isNew === true){
       setActiveTab("submission");
       // Mark as not new anymore
       currentSubmission.isNew = false;
@@ -134,6 +133,12 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 <History />
                 Submission
               </TabsTrigger>
+              {isContest && (
+                <TabsTrigger value="rankings">
+                  <Trophy className='text-[#a43eda] stroke-[#a43eda]' />
+                    Rankings
+                </TabsTrigger>
+              )}
             </TabsList>
             {isContest && (
               <TabsContent value="contest-problems">
@@ -168,6 +173,17 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 classroomId={classroomId}
                 />
             </TabsContent>
+            {isContest && (
+              <TabsContent value="rankings">
+                <RankingContest 
+                onProblemClick={handleProblemClick}
+                problems={contestProblems}
+                contestId={contestId}
+                isDisplayProblemDetail={true}
+                isRunning={isContestRunning(contest)}
+                contestCode={code} />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
         <div className="h-full min-h-0 overflow-y-auto bg-gray-50">

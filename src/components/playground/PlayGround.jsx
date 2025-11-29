@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeLight } from '@uiw/codemirror-theme-vscode';
 import PreferenceNav from './preferences/PreferenceNav';
@@ -42,8 +42,9 @@ const PlayGround = ({ contestId = null, classroomId = null }) => {
     submissionResult.isNew = true;
     addSubmission(submissionResult);
   }
-
-
+  useEffect(() => {
+    setCode(currentSubmission?.source || currentProblem?.lastSubmission?.source || mapValue[language].code);
+  }, [language, currentProblem, currentSubmission]);
   return (
     <div>
       <div >
@@ -54,7 +55,7 @@ const PlayGround = ({ contestId = null, classroomId = null }) => {
       </div>
       <div className='w-full overflow-auto'>
         <CodeMirror
-          value={currentSubmission?.source || currentProblem?.lastSubmission?.source || code}
+          value={code}
           extensions={mapValue[language].extensions()}
           theme={vscodeLight}
           style={{ fontSize: 16 }}

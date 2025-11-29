@@ -7,7 +7,6 @@ import { Loader2 } from 'lucide-react';
 
 const ProblemDetail = () => {
   const { currentProblem, loading, error } = useProblem();
-  console.log("Current Problem:", currentProblem);
   
   if (loading) {
     return (

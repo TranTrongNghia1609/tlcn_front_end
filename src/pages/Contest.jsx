@@ -23,15 +23,7 @@ function Contest() {
       try {
         const response = await getContestByCode(code);
         const contest = response.data;
-        const problems = contest.problems?.map((item) => ({
-          _id: item.problemId._id,
-          name: item.problemId.name,
-          // Add other fields from problemId if needed
-          difficulty: item.problemId.difficulty,
-          shortId: item.problemId.shortId,
-          order: item.order + 1, // Display order starts from 1
-          point: item.point
-        }));
+        const problems = response.data.problems;
         setContestProblems(problems || []);
         setContest(contest);
         

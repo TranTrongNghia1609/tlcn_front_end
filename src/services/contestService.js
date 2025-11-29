@@ -17,6 +17,17 @@ export const getContestByCode = async (code) => {
   try {
     console.log('Get contest by code:', code);
     const response = await API.get(CONTEST_ENDPOINTS.GET_BY_CODE(code));
+    const problems = response.data.data.problems?.map((item) => ({
+      _id: item.problemId._id,
+      name: item.problemId.name,
+      // Add other fields from problemId if needed
+      difficulty: item.problemId.difficulty,
+      shortId: item.problemId.shortId,
+      order: item.order + 1, // Display order starts from 1
+      point: item.point,
+      noOfSolved: item.noOfSolved || 0,
+    }))
+    response.data.data.problems = problems || [];
     return response.data;
   } catch (error) {
     console.error('Error fetching contest by code:', error);

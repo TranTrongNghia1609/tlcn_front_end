@@ -16,7 +16,6 @@ const SubmissionCalendar = ({ userId, year = 2024 }) => {
   useEffect(() => {
     const fetchSubmissionCalendar = async () => {
       const response = await getSubmissionCalendar(userId);
-      console.log('Data calendar submissions:', response.data);
       setData(response.data);
       setActivityData(transformData(response.data));
       setIsLoading(false);

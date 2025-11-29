@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
+import { useContestRanking } from "@/hooks/useContestRanking";
 const getRankStyle = (index) => {
   switch (index) {
     case 0: // Top 1
@@ -48,10 +49,8 @@ const getRankStyle = (index) => {
   }
 };
 
-function RankingContest({ leaderboard = [], problems = [], contestCode, onProblemClick }) {
+function RankingContest({ problems = [], contestId, contestCode, onProblemClick, isDisplayProblemDetail = false, isRunning = true }) {
   const navigate = useNavigate();
-  console.log('RankingContest leaderboard:', leaderboard);
-
   // Format ngày giờ
   const formatTime = (dateString) => {
     if (!dateString) return "--:--";
@@ -77,6 +76,74 @@ function RankingContest({ leaderboard = [], problems = [], contestCode, onProble
     }
   };
 
+  const { 
+    data: rankingData, 
+    isLoading: isLoadingRank, 
+    isError, 
+    isAutoRefresh, 
+    setIsAutoRefresh,
+    isRefetching // Biến này true khi đang chạy ngầm cập nhật
+  } = useContestRanking(contestId);
+
+  const leaderboard = useMemo(() => {
+    setIsAutoRefresh(isRunning)
+    if (isLoadingRank || isError || !rankingData) return [];
+    return rankingData.data || [];
+  }, [rankingData, isLoadingRank, isError]);
+
+  const problemDetailTableHeader = () => {
+    if (!isDisplayProblemDetail) return null;
+    return problems.map((prob, index) => (
+      <TableHead key={prob._id || index} 
+        className="text-center font-bold text-purple-900/60 min-w-[80px]"
+        >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="text-xs cursor-pointer text-black px-2 py-1 rounded hover:bg-purple-200 hover:text-purple-700 transition-colors"
+                onClick={(e) => handleProblemClick(e, contestCode, prob.shortId)}>
+                {prob.shortId || String.fromCharCode(65 + index)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{prob.name || "Problem Name"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableHead>
+    ))
+  }
+  
+  const problemDetailTableCells = (entry) => {
+    if (!isDisplayProblemDetail) return null;
+    return problems.map((prob) => {
+      const pData = getProblemData(entry, prob._id);
+      const score = pData ? pData.bestScore : 0;
+      const isSolved = score > 0; // Logic đơn giản: > 0 là có làm
+      const isMaxScore = score === prob.point; // Nếu bạn có thông tin max point
+
+      return (
+        <TableCell key={prob._id} className="text-center py-3 border-l border-dashed border-gray-100">
+          <div className="flex flex-col items-center">
+            <span className={cn(
+              "font-mono font-bold text-sm transition-all",
+              isSolved ? "text-purple-600" : "text-gray-300",
+              isMaxScore && "text-green-600 scale-110" // Nếu max điểm thì màu xanh
+            )}>
+              {isSolved ? formatScore(score) : "-"}
+            </span>
+            
+            {/* Hiển thị số lần thử (Attempts) nếu có */}
+            {isSolved && pData.attempts > 0 && (
+              <span className="text-[10px] text-muted-foreground mt-0.5 bg-gray-100 px-1.5 rounded-full">
+                {pData.attempts} try
+              </span>
+            )}
+          </div>
+        </TableCell>
+      );
+    })
+  }
   return (
     <div className="p-2 h-full min-h-0 overflow-hidden">
 
@@ -102,7 +169,7 @@ function RankingContest({ leaderboard = [], problems = [], contestCode, onProble
 
         <CardContent className="p-0 overflow-auto">
           {/* Wrapper div để table có thể scroll ngang trên màn hình nhỏ */}
-          <div className="min-w-[800px]"> 
+          <div className={isDisplayProblemDetail ? "" : "min-w-[800px]"}> 
             <Table>
               <TableHeader className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
                 <TableRow className="hover:bg-transparent border-b border-gray-200 shadow-sm">
@@ -110,25 +177,7 @@ function RankingContest({ leaderboard = [], problems = [], contestCode, onProble
                   <TableHead className="min-w-[200px] font-bold text-black">Contestant</TableHead>
                   
                   {/* Render Dynamic Problem Columns */}
-                  {problems.map((prob, index) => (
-                    <TableHead key={prob._id || index} 
-                      className="text-center font-bold text-purple-900/60 min-w-[80px]"
-                      >
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <span className="text-xs cursor-pointer text-black px-2 py-1 rounded hover:bg-purple-200 hover:text-purple-700 transition-colors"
-                              onClick={(e) => handleProblemClick(e, contestCode, prob.shortId)}>
-                              {prob.shortId || String.fromCharCode(65 + index)}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{prob.name || "Problem Name"}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableHead>
-                  ))}
+                  {problemDetailTableHeader()}
                   <TableHead className="text-center font-bold text-pink-600 w-[100px]">Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -174,33 +223,7 @@ function RankingContest({ leaderboard = [], problems = [], contestCode, onProble
                         </TableCell>
 
                         {/* Dynamic Problem Scores */}
-                        {problems.map((prob) => {
-                          const pData = getProblemData(entry, prob._id);
-                          const score = pData ? pData.bestScore : 0;
-                          const isSolved = score > 0; // Logic đơn giản: > 0 là có làm
-                          const isMaxScore = score === prob.point; // Nếu bạn có thông tin max point
-
-                          return (
-                            <TableCell key={prob._id} className="text-center py-3 border-l border-dashed border-gray-100">
-                              <div className="flex flex-col items-center">
-                                <span className={cn(
-                                  "font-mono font-bold text-sm transition-all",
-                                  isSolved ? "text-purple-600" : "text-gray-300",
-                                  isMaxScore && "text-green-600 scale-110" // Nếu max điểm thì màu xanh
-                                )}>
-                                  {isSolved ? formatScore(score) : "-"}
-                                </span>
-                                
-                                {/* Hiển thị số lần thử (Attempts) nếu có */}
-                                {isSolved && pData.attempts > 0 && (
-                                  <span className="text-[10px] text-muted-foreground mt-0.5 bg-gray-100 px-1.5 rounded-full">
-                                    {pData.attempts} try
-                                  </span>
-                                )}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
+                        {problemDetailTableCells(entry)}
 
                         {/* Total Score */}
                         <TableCell className="text-center py-3">

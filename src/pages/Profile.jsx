@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserInfo from '../components/profile/UserInfo';
 import EditProfile from '../components/profile/EditProfile';
@@ -8,6 +8,8 @@ import SubmissionCalendar from '@/components/submission/SubmissionCalendar';
 import { userService } from '@/services/userService';
 import SubmissionPieChart from '@/components/submission/SubmissionPieChart';
 import DifficultyChart from '@/components/submission/DifficultyChart';
+import SubmissionRecent from '@/components/submission/SubmissionRecent';
+import { authService } from '@/services/authService';
 
 const Profile = () => {
   const { userName } = useParams();
@@ -18,6 +20,9 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
+  const isGoogle = query.get("isGoogle");
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -42,6 +47,16 @@ const Profile = () => {
       }
     };
 
+    const callRefreshToken = async () => {
+      if (isGoogle){
+        try {
+          await authService.refreshToken();
+        } catch (error) {
+          console.error('Error refreshing token:', error);
+        }
+      }
+    }
+    callRefreshToken();
     fetchProfile();
   }, [userName, user, location.pathname]);
 

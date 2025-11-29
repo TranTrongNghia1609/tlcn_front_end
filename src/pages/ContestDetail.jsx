@@ -33,15 +33,7 @@ export default function ContestDetail() {
         // Simulate fetching contest data based on the code from params
         const response = await getContestByCode(code);
         setContest(response.data);
-        const problems = response.data.problems?.map((item) => ({
-          _id: item.problemId._id,
-          name: item.problemId.name,
-          // Add other fields from problemId if needed
-          difficulty: item.problemId.difficulty,
-          shortId: item.problemId.shortId,
-          order: item.order + 1, // Display order starts from 1
-          point: item.point
-        }));
+        const problems = response.data.problems;
         setContestProblems(problems || []);
         setIsLoading(false);
         setIsError(false);
@@ -83,7 +75,9 @@ export default function ContestDetail() {
             <ContestContent />
           </div>
           <div className="lg:col-span-1">
-            <ContestSidebar />
+            <ContestSidebar 
+              contestId={contest._id}
+             />
           </div>
         </div>
       </div>

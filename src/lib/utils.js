@@ -27,7 +27,7 @@ export const languages = [
 ]
 
 const extraSpace = '\n'.repeat(30);
-const CPP_VALUE = '#include<iostream>\nusing namespace std;\nint main(){\n  return 0;\n  cout << "Hello world!"\n}' + extraSpace
+const CPP_VALUE = '#include<iostream>\nusing namespace std;\nint main(){\n  cout << "Hello world!"; \n  return 0; \n}' + extraSpace
 const JS_VALUE = `console.log('Hello world!');` + extraSpace
 const PYTHON_VALUE = `print('Hello world!')` + extraSpace
 export const mapLanguage = () => {
