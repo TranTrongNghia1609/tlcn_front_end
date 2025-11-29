@@ -24,7 +24,6 @@ const CommentItem = ({
   
   // State cho pagination
   const [replies, setReplies] = useState(comment.replies || []);
-  // Backend đã tính sẵn totalReplies đệ quy
   const [totalReplies, setTotalReplies] = useState(comment.totalReplies || 0);
   const [loadedRepliesCount, setLoadedRepliesCount] = useState(comment.loadedRepliesCount || 0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -64,10 +63,10 @@ const CommentItem = ({
 
   const validReplies = getValidReplies(replies);
   const hasRepliesData = validReplies.length > 0 || totalReplies > 0;
-  const remainingRepliesCount = totalReplies - loadedRepliesCount;
+  const remainingRepliesCount = Math.max(0, totalReplies - loadedRepliesCount);
 
   const handleLoadMoreReplies = async () => {
-    if (isLoadingMore || !hasMoreReplies) return;
+    if (isLoadingMore || !hasMoreReplies || remainingRepliesCount <= 0) return;
     
     setIsLoadingMore(true);
     try {
@@ -80,10 +79,21 @@ const CommentItem = ({
 
       const { replies: newReplies, pagination } = response.data;
       
-      setReplies(prev => [...prev, ...newReplies]);
-      setLoadedRepliesCount(pagination.currentSkip + pagination.loadedCount);
-      setTotalReplies(pagination.totalReplies); 
-      setHasMoreReplies(pagination.hasMore);
+      // Chỉ thêm replies mới nếu có
+      if (newReplies && newReplies.length > 0) {
+        setReplies(prev => [...prev, ...newReplies]);
+        setLoadedRepliesCount(prev => prev + newReplies.length);
+      }
+      
+      // Update total từ server
+      if (pagination.totalReplies !== undefined) {
+        setTotalReplies(pagination.totalReplies);
+      }
+      
+      // Kiểm tra còn replies không - fix logic
+      const newLoadedCount = loadedRepliesCount + (newReplies?.length || 0);
+      const hasMore = newLoadedCount < pagination.totalReplies;
+      setHasMoreReplies(hasMore);
       
     } catch (error) {
       console.error('Error loading more replies:', error);
@@ -93,7 +103,7 @@ const CommentItem = ({
   };
 
   const handleShowAllReplies = async () => {
-    if (isLoadingMore) return;
+    if (isLoadingMore || remainingRepliesCount <= 0) return;
     
     setIsLoadingMore(true);
     try {
@@ -106,8 +116,13 @@ const CommentItem = ({
 
       const { replies: newReplies, pagination } = response.data;
       
-      setReplies(prev => [...prev, ...newReplies]);
+      if (newReplies && newReplies.length > 0) {
+        setReplies(prev => [...prev, ...newReplies]);
+      }
+      
+      // Đã load hết
       setLoadedRepliesCount(pagination.totalReplies);
+      setTotalReplies(pagination.totalReplies);
       setHasMoreReplies(false);
       
     } catch (error) {
@@ -156,10 +171,11 @@ const CommentItem = ({
           true
         );
         
-        setReplies(response.data.replies);
-        setTotalReplies(response.data.pagination.totalReplies);
-        setLoadedRepliesCount(response.data.replies.length);
-        setHasMoreReplies(response.data.pagination.hasMore);
+        const { replies: freshReplies, pagination } = response.data;
+        setReplies(freshReplies);
+        setTotalReplies(pagination.totalReplies);
+        setLoadedRepliesCount(freshReplies.length);
+        setHasMoreReplies(freshReplies.length < pagination.totalReplies);
       } catch (error) {
         console.error('Error refreshing replies:', error);
       }
@@ -259,7 +275,7 @@ const CommentItem = ({
         </div>
       </div>
 
-      {/* Toggle Button - Hiển thị totalReplies từ Backend */}
+      {/* Toggle Button */}
       {shouldShowToggleButton && (
         <div className="mt-2 mb-2 ml-2">
           <button
@@ -305,7 +321,8 @@ const CommentItem = ({
                 />
               ))}
 
-              {hasMoreReplies && (
+              {/* Load More Button - Fix điều kiện */}
+              {hasMoreReplies && remainingRepliesCount > 0 && validReplies.length < totalReplies && (
                 <div className="mt-3 mb-2">
                   <div className="flex items-center gap-3">
                     <div className="h-px bg-gray-300 flex-1"></div>
@@ -324,10 +341,11 @@ const CommentItem = ({
                           Loading...
                         </span>
                       ) : (
-                        `View ${Math.min(remainingRepliesCount, 5)} more ${remainingRepliesCount === 1 ? 'reply' : 'replies'}`
+                        `View ${Math.min(remainingRepliesCount, 5)} more ${Math.min(remainingRepliesCount, 5) === 1 ? 'reply' : 'replies'}`
                       )}
                     </button>
 
+                    {/* View All - Chỉ hiện khi còn > 5 replies */}
                     {remainingRepliesCount > 5 && (
                       <>
                         <span className="text-gray-400">|</span>
@@ -346,7 +364,8 @@ const CommentItem = ({
                 </div>
               )}
 
-              {!hasMoreReplies && loadedRepliesCount > 3 && (
+              {/* Collapse Button - Chỉ hiện khi đã load hết và có > 3 replies */}
+              {validReplies.length >= totalReplies && validReplies.length > 3 && (
                 <div className="mt-3 mb-2">
                   <div className="flex items-center gap-3">
                     <div className="h-px bg-gray-300 flex-1"></div>

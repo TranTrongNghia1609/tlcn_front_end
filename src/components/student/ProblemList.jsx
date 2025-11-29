@@ -1,32 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
+
 import { 
   BookOpen, 
   Search,
   CheckCircle2,
   Circle,
-  Clock
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { useStudentClassroom } from '@/context/StudentClassroomContext';
 
-const ProblemList = ({ classCode }) => {
+const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, onRefresh }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
-  
-  const { problems, loading, fetchProblems } = useStudentClassroom();
-
-  // Fetch problems when component mounts
-  useEffect(() => {
-    if (classCode) {
-      fetchProblems(classCode);
-    }
-  }, [classCode]);
-
 
   const safeProblems = Array.isArray(problems) ? problems : [];
 
@@ -37,7 +30,7 @@ const ProblemList = ({ classCode }) => {
     return matchesSearch && matchesDifficulty;
   });
 
-  console.log('📚 Filtered problems:', filteredProblems);
+  console.log('📚 ProblemList - Filtered problems:', filteredProblems.length);
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
@@ -65,6 +58,28 @@ const ProblemList = ({ classCode }) => {
     }
   };
 
+  const getStatusIcon = (progress) => {
+    if (progress?.status === 'completed') {
+      return <CheckCircle2 size={24} className="text-green-600" />;
+    }
+    if (progress?.status === 'attempted') {
+      return <Clock size={24} className="text-yellow-600" />;
+    }
+    return <Circle size={24} className="text-gray-300" />;
+  };
+
+  // Handle navigate with classCode
+  const handleProblemClick = (problem) => {
+    const problemId = problem.shortId || problem._id;
+    navigate(`/classrooms/${classCode}/problems/${problemId}`, {
+      state: { 
+        classCode,
+        classroomId, 
+        fromClassroom: true 
+      }
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -86,6 +101,18 @@ const ProblemList = ({ classCode }) => {
             {filteredProblems.length} bài tập trong lớp học
           </p>
         </div>
+        
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={loading}
+          >
+            <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Làm mới
+          </Button>
+        )}
       </div>
 
       {/* Search & Filter */}
@@ -134,18 +161,12 @@ const ProblemList = ({ classCode }) => {
             <Card
               key={problem._id || problem.shortId}
               className="p-5 hover:shadow-lg transition-all cursor-pointer group"
-              onClick={() => navigate(`/problems/${problem.shortId || problem._id}`)}
+              onClick={() => handleProblemClick(problem)}
             >
               <div className="flex items-start gap-4">
                 {/* Status Icon */}
                 <div className="flex-shrink-0 mt-1">
-                  {problem.status === 'completed' ? (
-                    <CheckCircle2 size={24} className="text-green-600" />
-                  ) : problem.status === 'attempted' ? (
-                    <Clock size={24} className="text-yellow-600" />
-                  ) : (
-                    <Circle size={24} className="text-gray-300" />
-                  )}
+                  {getStatusIcon(problem.progress)}
                 </div>
 
                 {/* Problem Info */}
@@ -165,6 +186,7 @@ const ProblemList = ({ classCode }) => {
                       {getDifficultyLabel(problem.difficulty)}
                     </Badge>
                   </div>
+
                   {/* Meta Info */}
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     {problem.tags && problem.tags.length > 0 && (

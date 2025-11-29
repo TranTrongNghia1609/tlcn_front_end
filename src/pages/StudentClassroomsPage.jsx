@@ -77,7 +77,7 @@ const StudentClassroomsPage = () => {
 
             <Button
               onClick={() => setShowJoinModal(true)}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+              className="bg-blue-600 text-white hover:bg-blue-700"
               size="lg"
             >
               <Plus size={20} className="mr-2" />
@@ -87,10 +87,10 @@ const StudentClassroomsPage = () => {
 
           {/* Stats - Subtle Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border border-purple-200 bg-purple-50/50 hover:shadow-md transition-shadow">
+            <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 p-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <GraduationCap size={24} className="text-purple-600" />
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <GraduationCap size={24} className="text-blue-600" />
                 </div>
                 <div>
                   <p className="text-gray-600 text-sm">Tổng lớp học</p>
@@ -161,7 +161,7 @@ const StudentClassroomsPage = () => {
             {!searchTerm && (
               <Button
                 onClick={() => setShowJoinModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-blue-600"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 <Plus size={18} className="mr-2" />
                 Tham gia lớp học đầu tiên
@@ -174,18 +174,16 @@ const StudentClassroomsPage = () => {
               <Card
                 key={classroom._id}
                 className="group hover:shadow-xl transition-all cursor-pointer overflow-hidden"
-                onClick={() => navigate(`/student/classroom/${classroom.classCode}`)}
+                onClick={() => navigate(`/classrooms/${classroom.classCode}`)}
               >
-
-
                 {/* Content */}
                 <div className="p-3">
                   {/* Header with Class Code Badge */}
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="text-xl font-bold group-hover:text-black-600 transition-colors line-clamp-2 flex-1">
+                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors line-clamp-2 flex-1">
                       {classroom.className}
                     </h3>
-                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-mono flex-shrink-0">
+                    <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-mono flex-shrink-0">
                       {classroom.classCode}
                     </Badge>
                   </div>
@@ -255,7 +253,7 @@ const StudentClassroomsPage = () => {
 
                     <ChevronRight
                       size={20}
-                      className="text-gray-400 group-hover:text-black-600 group-hover:translate-x-1 transition-all"
+                      className="text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"
                     />
                   </div>
                 </div>

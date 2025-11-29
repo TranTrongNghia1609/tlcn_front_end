@@ -19,7 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { contestStore } from "@/zustand/contestStore";
 import { useNavigate, useParams } from "react-router-dom";
-import { cn } from "@/lib/utils"; // Đảm bảo bạn có hàm cn để merge class
+import { cn } from "@/lib/utils"; // Đảm bảo bạn có hàm cn để merge class2
 
 function ProblemContestList({ isStarted = false, onProblemClick, problems = null, announcements }) {
   

@@ -84,7 +84,7 @@ export const CLASSROOM_ENDPOINTS = {
   GET_PROBLEMS: (classCode) => `/classroom/class/${classCode}/problems`,
   ADD_PROBLEM: (classCode) => `/classroom/class/${classCode}/problems`,
   REMOVE_PROBLEM: (classCode, problemShortId) => `/classroom/class/${classCode}/problems/${problemShortId}`,
-  
+  GET_PROBLEMS_WITH_PROGRESS: (classCode) => `/classroom/class/${classCode}/problems/with-progress`,
   // Students Management - ← ALL CHANGED TO classCode
   GET_STUDENTS: (classCode) => `/classroom/class/${classCode}/students`,
   ADD_STUDENT: (classCode) => `/classroom/class/${classCode}/students`,

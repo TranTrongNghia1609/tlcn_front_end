@@ -13,7 +13,7 @@ const classroomService = {
     return response.data;
   },
 
-  getClassroomById: async (id) => {
+  getClassroomById: async (id) => { 
     const response = await apiClient.get(CLASSROOM_ENDPOINTS.GET_BY_ID(id));
     return response.data;
   },
@@ -175,6 +175,13 @@ const classroomService = {
   getProblemSubmissions: async (classCode, problemShortId, params = {}) => {
     const response = await apiClient.get(
       CLASSROOM_ENDPOINTS.GET_PROBLEM_SUBMISSIONS(classCode, problemShortId),
+      { params }
+    );
+    return response.data;
+  },
+  getProblemsWithProgress: async (classCode, params = {}) => {
+    const response = await apiClient.get(
+      CLASSROOM_ENDPOINTS.GET_PROBLEMS_WITH_PROGRESS(classCode),
       { params }
     );
     return response.data;

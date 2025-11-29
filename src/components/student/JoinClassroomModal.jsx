@@ -75,7 +75,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
             <>
               {/* Step 1: Enter Code */}
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Key className="text-white" size={28} />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">Tham gia lớp học</h2>
@@ -148,7 +148,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                   <Button
                     type="submit"
                     disabled={loading || (!classCode && !inviteCode)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
                     {loading ? (
                       <>
@@ -182,7 +182,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                 </p>
 
                 {joinedClassroom && (
-                  <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200 p-6 mb-6">
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 p-6 mb-6">
                     <h3 className="font-bold text-lg mb-2">
                       {joinedClassroom.className}
                     </h3>
@@ -191,7 +191,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                         {joinedClassroom.description}
                       </p>
                     )}
-                    <div className="flex items-center justify-center gap-2 text-sm text-purple-600">
+                    <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
                       <Key size={14} />
                       <span className="font-mono font-semibold">
                         {joinedClassroom.classCode}
@@ -202,7 +202,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
 
                 <Button
                   onClick={handleContinue}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   Tiếp tục
                   <ArrowRight size={16} className="ml-2" />

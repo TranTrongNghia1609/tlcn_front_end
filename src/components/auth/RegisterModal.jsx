@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { useAuth } from '../../context/AuthContext';
@@ -6,21 +6,46 @@ import OTPVerificationModal from './OTPVerificationModal';
 import { toast } from 'sonner';
 
 const RegisterModal = () => {
-  const { isRegisterOpen, closeModals, openLogin } = useAuthModal();
+  const { isRegisterOpen, closeModals, switchToLogin, modalOptions } = useAuthModal();
   const { register } = useAuth();
+  
   const [form, setForm] = useState({
     userName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [registerUserName, setRegisteredUserName] = useState('');
+
+  // ===== Prefill email khi modal mở =====
+  useEffect(() => {
+    if (isRegisterOpen && modalOptions?.prefillEmail) {
+      
+      const emailPrefix = modalOptions.prefillEmail.split('@')[0];
+      
+      setForm(prev => ({
+        ...prev,
+        email: modalOptions.prefillEmail,
+        userName: emailPrefix // Suggest username từ email
+      }));
+    } else if (!isRegisterOpen) {
+      // Reset form khi đóng modal
+      setForm({
+        userName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setError('');
+      setPasswordStrength(0);
+    }
+  }, [isRegisterOpen, modalOptions?.prefillEmail]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -83,6 +108,12 @@ const RegisterModal = () => {
         duration: 5000
       });
 
+      // ===== Gọi onSuccess callback nếu có =====
+      if (modalOptions?.onSuccess && typeof modalOptions.onSuccess === 'function') {
+        modalOptions.onSuccess(response);
+      }
+
+      // Reset form
       setForm({
         userName: '',
         email: '',
@@ -119,7 +150,7 @@ const RegisterModal = () => {
     setRegisteredUserName('');
     
     setTimeout(() => {
-      openLogin();
+      switchToLogin();
     }, 500);
   };
 
@@ -161,6 +192,15 @@ const RegisterModal = () => {
               <p className="text-xs sm:text-sm text-gray-600 text-center px-2">
                 Hãy tạo tài khoản của bạn
               </p>
+              
+              {/* ===== Hiển thị email được mời nếu có ===== */}
+              {modalOptions?.prefillEmail && (
+                <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mt-2 w-full">
+                  <p className="text-sm text-green-800 text-center">
+                    📧 Đăng ký bằng email: <strong>{modalOptions.prefillEmail}</strong>
+                  </p>
+                </div>
+              )}
             </div>
 
             {error && (
@@ -170,9 +210,10 @@ const RegisterModal = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
+              {/* Username field */}
               <div>
                 <label htmlFor="userName" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                  Tên đăng nhập
+                  Tên đăng nhập <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -180,14 +221,19 @@ const RegisterModal = () => {
                   value={form.userName}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={loading}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="username"
                 />
               </div>
 
+              {/* Email field - ===== DISABLED NẾU CÓ PREFILL ===== */}
               <div>
                 <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                  Email
+                  Email <span className="text-red-500">*</span>
+                  {modalOptions?.prefillEmail && (
+                    <span className="text-xs text-gray-500 ml-2">(Email từ lời mời)</span>
+                  )}
                 </label>
                 <input
                   type="email"
@@ -195,14 +241,21 @@ const RegisterModal = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={!!modalOptions?.prefillEmail || loading} // ===== DISABLE NẾU CÓ PREFILL =====
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="nguyenvana@gmail.com"
                 />
+                {modalOptions?.prefillEmail && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    ℹ️ Email này được mời tham gia lớp học
+                  </p>
+                )}
               </div>
 
+              {/* Password field */}
               <div>
                 <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                  Nhập mật khẩu
+                  Nhập mật khẩu <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="password"
@@ -210,7 +263,8 @@ const RegisterModal = () => {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={loading}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Nhập mật khẩu"
                 />
                 {form.password && (
@@ -225,11 +279,15 @@ const RegisterModal = () => {
                     />
                   </div>
                 )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Tối thiểu 6 ký tự
+                </p>
               </div>
 
+              {/* Confirm Password field */}
               <div>
                 <label htmlFor="confirmPassword" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                  Xác nhận mật khẩu
+                  Xác nhận mật khẩu <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="password"
@@ -237,15 +295,17 @@ const RegisterModal = () => {
                   value={form.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={loading}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Nhập lại mật khẩu"
                 />
               </div>
 
+              {/* Submit button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2 sm:py-2.5 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2 sm:py-2.5 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-4"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -260,10 +320,12 @@ const RegisterModal = () => {
                 )}
               </button>
 
+              {/* Divider */}
               <p className="text-xs text-gray-500 flex items-center justify-center mt-3">
                 — Hoặc đăng ký với —
               </p>
 
+              {/* Social buttons */}
               <div className="flex flex-col gap-1.5 sm:gap-2 mt-2">
                 <a
                   href={`${import.meta.env.VITE_API_BASE_URL}/auth/google`}
@@ -276,8 +338,9 @@ const RegisterModal = () => {
 
                 <button
                   type="button"
-                  className="flex items-center justify-center bg-gray-900 border border-gray-800 rounded-md py-2 sm:py-2.5 text-white hover:bg-gray-800 transition text-xs sm:text-sm cursor-pointer"
+                  className="flex items-center justify-center bg-gray-900 border border-gray-800 rounded-md py-2 sm:py-2.5 text-white hover:bg-gray-800 transition text-xs sm:text-sm cursor-pointer disabled:opacity-50"
                   onClick={() => toast.info("GitHub Sign-In chưa được triển khai")}
+                  disabled={loading}
                 >
                   <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   <span className="hidden sm:inline">Đăng ký với GitHub</span>
@@ -285,12 +348,14 @@ const RegisterModal = () => {
                 </button>
               </div>
 
+              {/* Already have account */}
               <p className="text-xs sm:text-sm text-center text-gray-700 mt-3 sm:mt-4">
                 Bạn đã có tài khoản?{' '}
                 <button
                   type="button"
-                  onClick={openLogin}
-                  className="underline text-purple-500 hover:text-pink-500 transition cursor-pointer"
+                  onClick={switchToLogin}
+                  disabled={loading}
+                  className="underline text-purple-500 hover:text-pink-500 transition cursor-pointer disabled:opacity-50"
                 >
                   Đăng nhập
                 </button>

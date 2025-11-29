@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 const PostCard = ({ post, onUpdate, onDelete }) => {
   const { user } = useUser();
   const { toggleLike, bookmarkPost, updatePost } = usePost();
-  const { getCommentsCount, loadPostComments, createComment } = useComment();
+  const { createComment } = useComment();
   
   const [showModal, setShowModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
@@ -23,27 +23,18 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
   const [localPost, setLocalPost] = useState(() => ({
     ...post,
     isLiked: Boolean(post.isLiked), 
-    likesCount: post.likesCount || 0
+    likesCount: post.likesCount || 0,
+    commentsCount: post.commentsCount || 0
   }));
 
   useEffect(() => {
     setLocalPost(prev => ({
       ...post,
       isLiked: Boolean(post.isLiked),
-      likesCount: post.likesCount || 0
+      likesCount: post.likesCount || 0,
+      commentsCount: post.commentsCount || 0
     }));
   }, [post]);
-
-  useEffect(() => {
-    if (post._id) {
-      loadPostComments(post._id);
-    }
-  }, [post._id, loadPostComments]);
-
-  const contextCommentsCount = getCommentsCount(post._id);
-  const realTimeCommentsCount = contextCommentsCount !== undefined
-    ? contextCommentsCount
-    : localPost.commentsCount || 0;
 
   const handleLike = async () => {
     if (!user || isLiking) return;
@@ -58,6 +49,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     try {
       setIsLiking(true);
 
+      // Optimistic update
       setLocalPost(prev => ({
         ...prev,
         isLiked: newLikeState,
@@ -77,27 +69,33 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         }));
       }
     } catch (error) {
-      console.error(' PostCard toggleLike error:', error);
+      console.error('PostCard toggleLike error:', error);
 
+      // Rollback on error
       setLocalPost(prev => ({
         ...prev,
         isLiked: currentLikeState,
         likesCount: currentLikesCount
       }));
 
-      alert(`Failed to ${currentLikeState ? 'unlike' : 'like'} post. Please try again.`);
+      toast.error(`Không thể ${currentLikeState ? 'bỏ thích' : 'thích'} bài viết. Vui lòng thử lại.`);
     } finally {
       setIsLiking(false);
     }
   };
 
   const handleBookmark = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để lưu bài viết');
+      return;
+    }
 
     try {
       await bookmarkPost(post._id);
+      toast.success('Đã lưu bài viết');
     } catch (error) {
       console.error('Error bookmarking post:', error);
+      toast.error('Không thể lưu bài viết');
     }
   };
 
@@ -110,7 +108,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
       });
     } catch (error) {
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      toast.success('Đã sao chép link!');
     }
   };
 
@@ -128,9 +126,14 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
       const updatedPost = await updatePost(post._id, updateData);
       setLocalPost(updatedPost);
       setIsEditing(false);
+      toast.success('Cập nhật bài viết thành công!');
+      
+      if (onUpdate) {
+        onUpdate(updatedPost);
+      }
     } catch (error) {
       console.error('Error updating post:', error);
-      alert('Failed to update post. Please try again.');
+      toast.error('Không thể cập nhật bài viết. Vui lòng thử lại.');
     } finally {
       setIsUpdating(false);
     }
@@ -152,7 +155,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     if (!content.trim() || submitting) return;
 
     if (!user) {
-      toast.error('Please login to post a comment');
+      toast.error('Vui lòng đăng nhập để bình luận');
       return;
     }
 
@@ -163,13 +166,24 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         content: content.trim(),
         parentCommentId: null
       });
-      toast.success('Comment posted successfully!');
       
-      setTimeout(() => {
-        loadPostComments(post._id, 1, { sortBy: 'oldest', limit: 10 });
-      }, 500);
+      // Update local comments count
+      setLocalPost(prev => ({
+        ...prev,
+        commentsCount: (prev.commentsCount || 0) + 1
+      }));
+
+      // Notify parent to update the main post list if needed
+      if (onUpdate) {
+        onUpdate({
+          ...localPost,
+          commentsCount: (localPost.commentsCount || 0) + 1
+        });
+      }
+      
+      toast.success('Đã đăng bình luận!');
     } catch (error) {
-      toast.error(error.message || 'Failed to post comment.');
+      toast.error(error.message || 'Không thể đăng bình luận.');
     } finally {
       setSubmitting(false);
     }
@@ -201,10 +215,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
               onToggleExpanded={handleToggleExpanded}
             />
             <PostActions
-              post={{
-                ...localPost,
-                commentsCount: realTimeCommentsCount
-              }}
+              post={localPost}
               onLike={handleLike}
               onToggleComments={handleToggleComments}
               onBookmark={handleBookmark}
@@ -226,7 +237,6 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         onEdit={handleEdit}
         onDelete={onDelete}
         isLiking={isLiking}
-        realTimeCommentsCount={realTimeCommentsCount}
         onCreateComment={handleCreateComment}
         submitting={submitting}
       />
