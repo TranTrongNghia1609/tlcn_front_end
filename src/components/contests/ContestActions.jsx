@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { registerToContest } from '@/services/contestService'
 import { contestStore } from '@/zustand/contestStore'
 import { Play, MessageCircle, ExternalLink } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 const CONTEST_STATUS = {
   "ongoing": {
     lable: "Tham gia ngay",
@@ -35,6 +36,7 @@ const CONTEST_STATUS = {
 export default function ContestActions() {
   const contest = contestStore((state) => state.contest)
   const setContest = contestStore((state) => state.setContest)
+  const navigate = useNavigate();
   const getAction = () => {
     const now = new Date()
     const startTime = new Date(contest.startTime)
@@ -45,7 +47,7 @@ export default function ContestActions() {
       return !contest.userParticipation.isRegistered ? CONTEST_STATUS.register : CONTEST_STATUS.registered;
     }
     else if (now <= endTime){
-      return !contest.userParticipation.isRegistered ? CONTEST_STATUS.expired : CONTEST_STATUS.ongoing;
+      return !contest.userParticipation.isRegistered ? CONTEST_STATUS.register : CONTEST_STATUS.ongoing;
     }
     else {
       if (contest.userParticipation === null || contest.userParticipation.mode === 'official'){
@@ -72,13 +74,15 @@ export default function ContestActions() {
       try {
         const response = await registerToContest(contest._id);
         alert('Đăng ký cuộc thi thành công!');
-        // Optionally, update the contest state to reflect the registration
-        setContest({...contest, userParticipation: { ...contest.userParticipation, isRegistered: true }});
+        window.location.reload();
 
       } catch (error) {
         console.error('Error registering to contest:', error);
         alert('Đăng ký cuộc thi thất bại. Vui lòng thử lại.');
       }
+    }
+    else if (action.type == 1){
+      navigate(`/contest/${contest.code}/problem/${contest.problems[0].shortId}`);
     }
   }
   return (

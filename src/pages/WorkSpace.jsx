@@ -118,11 +118,6 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                     <List className='text-[#a43eda] stroke-[#a43eda]' />
                     Problems
                   </TabsTrigger>
-
-                  <TabsTrigger value="rankings">
-                    <Trophy className='text-[#a43eda] stroke-[#a43eda]' />
-                    Rankings
-                  </TabsTrigger>
                 </>
               )}
               <TabsTrigger value="statement">
@@ -146,6 +141,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                   isStarted={true}
                   problems={contestProblems}
                   onProblemClick={handleProblemClick}
+                  currentProblemId={id}
                   announcements={[
                     {
                       time: "2025-11-22T10:30:00",
@@ -157,13 +153,6 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                     }
                   ]} />
               </TabsContent>)}
-            <TabsContent value="rankings">
-              <RankingContest
-                onProblemClick={handleProblemClick}
-                leaderboard={leaderboard}
-                problems={contestProblems}
-                contestCode={code} />
-            </TabsContent>
             <TabsContent value="statement">
               <ProblemDetail />
             </TabsContent>

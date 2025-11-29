@@ -1,4 +1,3 @@
-'use client'
 import ContestHeader from '@/components/contests/ContestHeader'
 import ContestActions from '../components/contests/ContestActions';
 import ContestContent from '../components/contests/ContestContent'
