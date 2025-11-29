@@ -1,38 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PostCard from '../components/home/PostCard';
 import CreatePost from '../components/home/CreatePost';
 import Sidebar from '../components/home/Sidebar';
 import { useUser } from '../context/UserContext';
 import { getPosts } from '../services/postService';
 import OnboardingModal from "@/components/auth/OnboardingModel.jsx";
+import { Loader2 } from 'lucide-react';
 
 const Home = ({isShowOnboarding = false}) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, following, trending
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [filter, setFilter] = useState('all');
   const [onboarding, setOnboarding] = useState(isShowOnboarding);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  
+  const observerTarget = useRef(null);
 
   useEffect(() => {
-    fetchPosts();
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+    fetchPosts(1, true);
   }, [filter]);
 
-  const fetchPosts = async () => {
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, loading, loadingMore, page]);
+
+  const fetchPosts = async (pageNum = 1, isInitial = false) => {
     try {
-      setLoading(true);
-      const response = await getPosts({ filter, page: 1, limit: 10 });
-      setPosts(response.data.posts);
+      if (isInitial) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await getPosts({ 
+        filter, 
+        page: pageNum, 
+        limit: 10 
+      });
+
+      const newPosts = response.data.posts;
+      const meta = response.data.meta;
+      
+      // Calculate if has more posts
+      const totalPages = Math.ceil(meta.total / meta.limit);
+      const hasMorePosts = meta.page < totalPages;
+
+      if (isInitial) {
+        setPosts(newPosts);
+      } else {
+        setPosts(prev => [...prev, ...newPosts]);
+      }
+
+      setHasMore(hasMorePosts);
+      
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
+  const loadMorePosts = useCallback(() => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPosts(nextPage, false);
+  }, [page, filter]);
+
   const handleNewPost = (newPost) => {
-    getPosts();
+    // Add new post to beginning of list
+    setPosts(prev => [newPost, ...prev]);
   };
-  
 
   const handlePostUpdate = (updatedPost) => {
     setPosts(prev => prev.map(post => 
@@ -60,9 +122,12 @@ const Home = ({isShowOnboarding = false}) => {
                 Chia sẻ hành trình học lập trình của bạn, thảo luận về các vấn đề và học hỏi cùng nhau
               </p>
             </div>
-            <OnboardingModal open={onboarding}
-             onClose={() => setOnboarding(false)}
+
+            <OnboardingModal 
+              open={onboarding}
+              onClose={() => setOnboarding(false)}
             />
+
             {/* Create Post */}
             {user && (
               <CreatePost onPostCreated={handleNewPost} />
@@ -91,28 +156,59 @@ const Home = ({isShowOnboarding = false}) => {
 
             {/* Posts List */}
             <div className="space-y-6">
-              {loading ? (
-                // Loading skeleton
+              {loading && posts.length === 0 ? (
+                // Initial Loading skeleton
                 Array.from({ length: 3 }).map((_, index) => (
                   <div key={index} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/6"></div>
+                      </div>
+                    </div>
                     <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
                     <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
                     <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                   </div>
                 ))
               ) : posts.length > 0 ? (
-                posts.map(post => (
-                  <PostCard
-                    key={post._id}
-                    post={post}
-                    onUpdate={handlePostUpdate}
-                    onDelete={handlePostDelete}
-                  />
-                ))
+                <>
+                  {posts.map(post => (
+                    <PostCard
+                      key={post._id}
+                      post={post}
+                      onUpdate={handlePostUpdate}
+                      onDelete={handlePostDelete}
+                    />
+                  ))}
+
+                  {/* Loading More Indicator */}
+                  {loadingMore && (
+                    <div className="flex justify-center py-8">
+                      <div className="flex items-center gap-2 text-blue-600">
+                        <Loader2 size={20} className="animate-spin" />
+                        <span>Đang tải thêm bài viết...</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Intersection Observer Target */}
+                  {hasMore && !loadingMore && (
+                    <div ref={observerTarget} className="h-10" />
+                  )}
+
+                  {/* End of List */}
+                  {!hasMore && posts.length > 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      🎉 Bạn đã xem hết tất cả bài viết
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                  <div className="text-gray-400 text-lg mb-2">No posts yet</div>
-                  <p className="text-gray-500">Be the first to share something!</p>
+                  <div className="text-gray-400 text-lg mb-2">Chưa có bài viết nào</div>
+                  <p className="text-gray-500">Hãy là người đầu tiên chia sẻ!</p>
                 </div>
               )}
             </div>

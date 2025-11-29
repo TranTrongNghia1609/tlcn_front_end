@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
+
 import { 
   BookOpen, 
   Search,
@@ -14,7 +16,7 @@ import {
 } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-const ProblemList = ({ classCode, problems = [], loading = false, onRefresh }) => {
+const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, onRefresh }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
@@ -66,11 +68,16 @@ const ProblemList = ({ classCode, problems = [], loading = false, onRefresh }) =
     return <Circle size={24} className="text-gray-300" />;
   };
 
-  // ✅ Handle navigate with classCode
+  // Handle navigate with classCode
   const handleProblemClick = (problem) => {
     const problemId = problem.shortId || problem._id;
-    // Navigate to: /classrooms/:classCode/problems/:problemId
-    navigate(`/classrooms/${classCode}/problems/${problemId}`);
+    navigate(`/classrooms/${classCode}/problems/${problemId}`, {
+      state: { 
+        classCode,
+        classroomId, 
+        fromClassroom: true 
+      }
+    });
   };
 
   if (loading) {

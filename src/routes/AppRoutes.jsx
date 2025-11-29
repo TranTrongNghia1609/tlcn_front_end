@@ -14,7 +14,7 @@ import StudentClassroomsPage from "@/pages/StudentClassroomsPage";
 import StudentClassroomDetailPage from "@/pages/StudentClassroomDetailPage";
 import { useAuth } from '@/context/AuthContext';
 import Contests from "@/pages/Contests";
-
+import EditProfilePage from "@/pages/EditProfilePage";
 const StudentRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -76,10 +76,12 @@ const AppRoutes = () => {
       <Route path="/problemset" element={<Problems />} />
       <Route path="/problemset/problem/:id" element={<WorkSpace />} />
       <Route path="/problems/:id" element={<WorkSpace />} />
+      <Route path="/profile/edit" element={<EditProfilePage />} />
 
       {/* Profile Routes */}
       <Route path="/profile" element={<Profile />} />
       <Route path="/profile/:username" element={<Profile />} />
+
       <Route path="/contests" element={<Contests />} />
       <Route path="/contest/:code" element={<ContestDetail />} />
       <Route path="/contest/:code/problem/:id" element={<Contest />} />

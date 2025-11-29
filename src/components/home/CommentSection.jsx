@@ -48,7 +48,6 @@ const CommentSection = ({ postId, hideCommentForm = false }) => {
   };
 
   useEffect(() => {
-    //Chỉ update từ context nếu KHÔNG có optimistic update
     if (contextComments && contextComments.length > 0 && !isOptimisticUpdateRef.current) {
       const normalizedComments = contextComments
         .map(comment => normalizeComment(comment))

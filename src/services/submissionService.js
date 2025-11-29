@@ -1,13 +1,21 @@
 import { SUBMISSION_ENDPOINTS } from "@/config/endpoints";
 import API from "@/utils/api"
 
-export const submitCode = async (problemId, code, language, contestId = null) => {
+export const submitCode = async (problemId, code, language, contestId = null, classroomId = null) => {
   try{
-    const response = await API.post(`/submissions/${problemId}`, {
+    const payload = {
       source: code,
-      language: language, 
-      contest: contestId
-    });
+      language: language,
+      
+    };
+    if (contestId) {
+      payload.contest = contestId;
+    }
+    
+    if (classroomId) {
+      payload.classroom = classroomId;
+    }
+    const response = await API.post(`/submissions/${problemId}`, payload);
     return response.data;
   }
   catch (error){
@@ -33,17 +41,38 @@ export const getSubmission  = async (userId, problemId) => {
   }
 }
 
-export const getSubmissionByUserId = async (userId, problemId = null, page = 1, contestParticipant = null, language = 'all', ) => {
+export const getSubmissionByUserId = async (
+  userId, 
+  problemId = null, 
+  page = 1, 
+  contestParticipant = null, 
+  language = 'all', 
+  classroomId = null,
+  excludeClassroom = false
+) => {
   try{
-    console.log('Problem ID in service:', problemId);
-    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_BY_USER_ID(userId), {
-      params: {
-        problemId: problemId, 
-        language: language,
-        page: page,
-        contestParticipant: contestParticipant
-      }
+    console.log('📥 getSubmissionByUserId params:', {
+      userId,
+      problemId,
+      page,
+      contestParticipant,
+      language,
+      classroomId,
+      excludeClassroom
     });
+    const params ={
+      problemId: problemId, 
+      language: language,
+      page: page,
+      contestParticipant: contestParticipant,
+    };
+    if (classroomId) {
+      params.classroomId = classroomId;
+    } else if (excludeClassroom === true) {
+      params.excludeClassroom = 'true';
+    }
+    console.log('Problem ID in service:', problemId);
+    const response = await API.get(SUBMISSION_ENDPOINTS.GET_SUBMISSION_BY_USER_ID(userId), {params});
     console.log('Submissions by user response:', response.data.data);
     return response.data;
   }

@@ -91,7 +91,7 @@ const JoinClassroomPage = () => {
       toast.success("Tham gia lớp học thành công!");
       
       setTimeout(() => {
-        navigate(`/student/classroom/${inviteData.classCode}`);
+        navigate(`/classrooms/${inviteData.classCode}`);
       }, 1000);
     } catch (error) {
       console.error(" Error joining classroom:", error);

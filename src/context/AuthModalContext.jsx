@@ -10,7 +10,6 @@ export const AuthModalProvider = ({ children }) => {
   const [modalOptions, setModalOptions] = useState({
     prefillEmail: '',
     onSuccess: null,
-    // ===== THÊM: Lưu pending action sau khi login =====
     pendingAction: null // { type: 'joinClassroom', data: { classCode, token } }
   });
 

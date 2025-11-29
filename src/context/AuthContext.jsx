@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     try {
 
       const token = authService.getToken();
-      // ✅ Kiểm tra có access token không
+      //  Kiểm tra có access token không
       if (!token) {
         const response = await authService.getCurrentUser();
         const userData = response.data?.user || response.user || response;
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('❌ CheckAuth error:', error);
 
-      // ✅ Clear access token nếu không thể authenticate
+      //  Clear access token nếu không thể authenticate
       authService.removeToken();
       setUser(null);
       setIsAuthenticated(false);
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
     
 
-      // ✅ Check if token was saved
+      // Check if token was saved
       const savedToken = authService.getToken();
 
       const userData = response.data?.user || response.user || response;
@@ -208,7 +208,7 @@ export const AuthProvider = ({ children }) => {
 
       
 
-      // ✅ Check if token was saved
+      // Check if token was saved
       const savedToken = authService.getToken();
    
 

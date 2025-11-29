@@ -1,50 +1,114 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { User, MapPinHouse, Mail } from 'lucide-react';
+import { User, MapPinHouse, Mail, Calendar, School, Edit } from 'lucide-react';
 
-const UserInfo = ({ profileData }) => {
-  const { user } = useAuth();
-  const isOwner = profileData.isOwner || (user && user._id === profileData._id);
+const UserInfo = ({ profileData, onEditProfile }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Chưa cập nhật';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+  };
 
   return (
-    <div className='p-4 flex space-y-8 flex-col'>
-      <div className='space-y-8 flex-col items-center justinty-center flex'>
-        <div className='flex space-x-4'>
-          <div className='h-20 w-20 flex-shrink-0'>
+    <div className='p-6'>
+      <div className='space-y-6'>
+        {/* Profile Header */}
+        <div className='flex flex-col items-center text-center'>
+          {/* Avatar */}
+          <div className='mb-4'>
             <img 
               src={profileData.avatar} 
               alt={profileData.userName}
-              className='h-full w-full object-cover rounded-full'
+              className='h-32 w-32 object-cover rounded-full border-4 border-blue-100 shadow-lg'
             />
           </div>
 
-          <div>
-            <div className='flex space-x-2'>
-              <User size='20px'/>
-              <p className='font-bold'>{profileData.userName}</p>
+          {/* Username */}
+          <div className='mb-2'>
+            <p className='font-bold text-gray-900 text-2xl'>{profileData.userName}</p>
+          </div>
+
+          {/* Full Name */}
+          <div className='mb-4'>
+            <p className='text-gray-600 text-lg'>{profileData.fullName || 'Chưa cập nhật'}</p>
+          </div>
+        </div>
+
+        {/* Info List */}
+        <div className='space-y-4 pt-4 border-t'>
+          {/* Email */}
+          <div className='flex items-start gap-3'>
+            <Mail size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Email</p>
+              <p className='text-gray-900 break-all'>{profileData.email}</p>
             </div>
-            <div className='flex space-x-2 mt-2'>
-              <Mail size='20px'/>
-              <p className='text-gray-500'>{profileData.email}</p>
+          </div>
+
+          {/* Date of Birth */}
+          <div className='flex items-start gap-3'>
+            <Calendar size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Ngày sinh</p>
+              <p className='text-gray-900'>{formatDate(profileData.dob)}</p>
             </div>
-            <div className='flex space-x-2 mt-2'>
-              <MapPinHouse size={'20px'}/>
-              <p className='text-gray-500 text-sm'>Vietnam</p>
+          </div>
+
+          {/* School */}
+          <div className='flex items-start gap-3'>
+            <School size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Trường học</p>
+              <p className='text-gray-900'>{profileData.School || 'Chưa cập nhật'}</p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className='flex items-start gap-3'>
+            <MapPinHouse size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Quốc gia</p>
+              <p className='text-gray-900'>Vietnam</p>
             </div>
           </div>
         </div>
         
-        {isOwner && (
-          <Button className={'w-2/3 bg-violet-600/80 hover:bg-violet-600 text-white cursor-pointer'}>
-            Edit Profile
-          </Button>
+        {/* Edit Button */}
+        {profileData.isOwner && (
+          <div className='pt-4 border-t'>
+            <Button 
+              onClick={onEditProfile}
+              className='w-full bg-blue-600 hover:bg-blue-700 text-white'
+              type="button"
+            >
+              <Edit size={18} className="mr-2" />
+              Chỉnh sửa thông tin
+            </Button>
+          </div>
         )}
-      </div>
 
-      {/* language */}
-      <div className=''>
-        <div>Languages</div>
+        {/* Languages Section */}
+        <div className='pt-6 border-t'>
+          <h3 className="text-base font-semibold mb-3 text-gray-900">Ngôn ngữ lập trình</h3>
+          <div className="flex flex-wrap gap-2">
+            {profileData.languages?.length > 0 ? (
+              profileData.languages.map((lang, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                >
+                  {lang}
+                </span>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">Chưa có ngôn ngữ nào</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

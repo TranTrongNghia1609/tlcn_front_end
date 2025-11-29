@@ -143,7 +143,7 @@ export const useStudentClassroomData = (classCode) => {
         loading: false,
         error: null,
       };
-
+      console.log(newState);
 
 
       setState(prev => ({ ...prev, ...newState }));

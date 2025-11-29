@@ -41,7 +41,7 @@ const PostEditor = ({ value, onChange, placeholder = "Chia sẻ suy nghĩ của 
     },
     editorProps: {
       attributes: {
-        // ✅ Class 'post-editor-content' sẽ match với CSS rules
+        //   Class 'post-editor-content' sẽ match với CSS rules
         class: 'prose prose-sm focus:outline-none min-h-[200px] p-4 post-editor-content',
         'data-placeholder': placeholder,
       },

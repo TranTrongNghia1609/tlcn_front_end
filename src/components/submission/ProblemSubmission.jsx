@@ -32,7 +32,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useProblem } from '@/context/ProblemContext';
 import { submissionsStore } from '@/zustand/store';
 import { useSocket } from '@/context/SocketContext';
-const ProblemSubmissions = ({contestParticipant=null}) => {
+const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [timeRange, setTimeRange] = useState('all');
   // const [submissions, setProblemSubmissions] = useState([]);
@@ -46,12 +46,40 @@ const ProblemSubmissions = ({contestParticipant=null}) => {
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
   const { socket, isConnected, emit, on, off } = useSocket();
 
+  console.log('📋 ProblemSubmission - Props:', {
+    contestParticipant,
+    classroomId
+  });
   useEffect(()=>{
     const fetchProblemSubmission = async () => {
       console.log('Fetching submissions for user:', user);
       console.log('Fetching page: ', pageActive);
+      console.log('📥 problemId:', currentProblem._id);
+      console.log('📥 contestParticipant:', contestParticipant);
+      console.log('📥 classroomId:', classroomId); // ✅ Log classroomId
       if (isAuthenticated && !loading){
-        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive, contestParticipant);
+        let shouldExcludeClassroom = false;
+        
+        if (contestParticipant) {
+          // Nếu là contest, không exclude (contest có thể có hoặc không có classroom)
+          shouldExcludeClassroom = false;
+        } else if (classroomId) {
+          // Nếu có classroomId, lấy submissions trong classroom đó
+          shouldExcludeClassroom = false;
+        } else {
+          // Nếu không có classroomId và không phải contest
+          // => Đang ở trang problem bình thường => chỉ lấy public submissions
+          shouldExcludeClassroom = true;
+        }
+
+        const response = await getSubmissionByUserId(
+          user.id, 
+          currentProblem._id, 
+          pageActive, 
+          contestParticipant, 
+          'all' ,
+          classroomId, 
+          shouldExcludeClassroom);
         setProblemSubmissions(response.data.content);
         setProblemSubmissionPagination(response.data);
 
@@ -59,7 +87,7 @@ const ProblemSubmissions = ({contestParticipant=null}) => {
       }
     }
     fetchProblemSubmission();
-  }, [pageActive]);
+  }, [pageActive, classroomId]);
 
   useEffect(()=>{
     console.log('Submission get from component', submissions);

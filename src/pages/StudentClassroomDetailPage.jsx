@@ -48,10 +48,11 @@ const StudentClassroomDetailPage = () => {
     error,
     refresh,
   } = useStudentClassroomData(classCode);
-
   const handleTabChange = (tab) => {
     console.log('📑 Switching to tab:', tab);
     setActiveTab(tab);
+      console.log(classroom);
+
   };
 
   const handleLeaveClassroomClick = () => {
@@ -65,16 +66,28 @@ const StudentClassroomDetailPage = () => {
       toast.success('Đã rời khỏi lớp học thành công');
       navigate('/classrooms');
     } catch (error) {
-      console.error('❌ Error leaving classroom:', error);
+      console.error(' Error leaving classroom:', error);
       toast.error('Không thể rời lớp học. Vui lòng thử lại!');
       setIsLeaving(false);
       setShowLeaveModal(false);
     }
   };
 
-  // ✅ Handle navigate to problem with classCode
+  // Handle navigate to problem with classCode
   const handleNavigateToProblem = (problemId) => {
-    navigate(`/classrooms/${classCode}/problems/${problemId}`);
+    console.log('🎯 Navigating to problem:', {
+      classCode,
+      classroomId: classroom?._id,
+      problemId
+    });
+    
+    navigate(`/classrooms/${classCode}/problems/${problemId}`, {
+      state: {
+        classCode,
+        classroomId: classroom?._id, // ✅ Truyền classroomId
+        fromClassroom: true
+      }
+    });
   };
 
   const safeProblems = Array.isArray(problems) ? problems : [];
@@ -96,11 +109,7 @@ const StudentClassroomDetailPage = () => {
       label: 'Tài liệu',
       icon: FileText,
     },
-    {
-      id: 'submissions',
-      label: 'Lịch sử nộp',
-      icon: Clock,
-    },
+    
     {
       id: 'leaderboard',
       label: 'Bảng điểm',
@@ -171,7 +180,7 @@ const StudentClassroomDetailPage = () => {
         <Card className="p-6">
           <div className="flex items-start gap-6">
             {/* Class Icon */}
-            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex-shrink-0 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-200">
               <GraduationCap size={40} className="text-white" />
             </div>
 
@@ -181,7 +190,7 @@ const StudentClassroomDetailPage = () => {
                 <h1 className="text-2xl font-bold text-gray-900">
                   {classroom.className}
                 </h1>
-                <div className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg font-mono text-sm font-semibold">
+                <div className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg font-mono text-sm font-semibold">
                   {classroom.classCode}
                 </div>
               </div>
@@ -233,7 +242,7 @@ const StudentClassroomDetailPage = () => {
                   <img
                     src={classroom.owner.avatar || '/default-avatar.png'}
                     alt={classroom.owner.fullName}
-                    className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-purple-200"
+                    className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-blue-200"
                   />
                   <p className="text-xs text-gray-500 mb-1">Giảng viên</p>
                   <p className="text-sm font-semibold text-gray-900 mb-1">
@@ -260,8 +269,8 @@ const StudentClassroomDetailPage = () => {
                       className={cn(
                         'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all text-sm',
                         isActive
-                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
                       )}
                     >
                       <div className="flex items-center gap-2.5">
@@ -304,13 +313,14 @@ const StudentClassroomDetailPage = () => {
                   <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <BookOpen size={20} className="text-purple-600" />
+                        <BookOpen size={20} className="text-blue-600" />
                         Bài tập gần đây
                       </h3>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setActiveTab('problems')}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
                       </Button>
@@ -322,7 +332,7 @@ const StudentClassroomDetailPage = () => {
                         {safeProblems.slice(0, 3).map((problem) => (
                           <div
                             key={problem._id}
-                            className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                            className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border-blue-200 border border-transparent cursor-pointer transition-all"
                             onClick={() => handleNavigateToProblem(problem.shortId || problem._id)}
                           >
                             <div className="flex items-center justify-between">
@@ -331,7 +341,7 @@ const StudentClassroomDetailPage = () => {
                                 <span className="text-green-600 text-sm">✓ Hoàn thành</span>
                               )}
                               {problem.progress?.status === 'attempted' && (
-                                <span className="text-yellow-600 text-sm">⏱ Đang làm</span>
+                                <span className="text-blue-600 text-sm">⏱ Đang làm</span>
                               )}
                             </div>
                           </div>
@@ -351,6 +361,7 @@ const StudentClassroomDetailPage = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setActiveTab('materials')}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
                       </Button>
@@ -362,7 +373,7 @@ const StudentClassroomDetailPage = () => {
                         {safeMaterials.slice(0, 3).map((material) => (
                           <div
                             key={material._id}
-                            className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                            className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border-blue-200 border border-transparent cursor-pointer transition-all"
                           >
                             <div className="flex items-center gap-2">
                               <FileText size={16} className="text-blue-600 flex-shrink-0" />
@@ -381,6 +392,7 @@ const StudentClassroomDetailPage = () => {
             {activeTab === 'problems' && (
               <ProblemList
                 classCode={classCode}
+                classroomId={classroom._id}
                 problems={safeProblems}
                 loading={loading}
                 onRefresh={refresh}

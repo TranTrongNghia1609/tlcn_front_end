@@ -68,7 +68,7 @@ const LoginModal = () => {
             
             // Navigate to classroom detail
             setTimeout(() => {
-              navigate(`/student/classroom/${classCode}`);
+              navigate(`/classrooms/${classCode}`);
             }, 1000);
             
           } catch (error) {
