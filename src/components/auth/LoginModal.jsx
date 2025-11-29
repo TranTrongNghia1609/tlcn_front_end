@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
+import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '../../context/AuthModalContext';
 import { useAuth } from '../../context/AuthContext';
+import classroomService from '@/services/classroomService';
+import { toast } from 'sonner';
+
 const LoginModal = () => {
-  const { isLoginOpen, closeModals, switchToRegister } = useAuthModal();
+  const { isLoginOpen, closeModals, switchToRegister, modalOptions } = useAuthModal();
   const [username, setUsername] = useState('');
   const { login } = useAuth();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Prefill email khi modal mở
+  useEffect(() => {
+    if (isLoginOpen && modalOptions.prefillEmail) {
+      setUsername(modalOptions.prefillEmail);
+    }
+  }, [isLoginOpen, modalOptions.prefillEmail]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,33 +31,86 @@ const LoginModal = () => {
     }
     setLoading(true);
     setError('');
+    
     try {
       const credentials = {
         userName: username.trim(),
         password: password
-      }
+      };
       const response = await login(credentials);
-      console.log('Login successful: ', response);
-      closeModals();
+      
+      // Reset form
       setUsername('');
       setPassword('');
       setError('');
-      window.location.reload();
+
+      // ===== XỬ LÝ PENDING ACTION SAU KHI LOGIN =====
+      if (modalOptions.pendingAction) {
+        const { type, data } = modalOptions.pendingAction;
+        
+        if (type === 'joinClassroom') {
+          const { classCode, token } = data;
+          
+          // Close modal trước
+          closeModals();
+          
+          // Show loading toast
+          const toastId = toast.loading('Đang tham gia lớp học...');
+          
+          try {
+            // Join classroom
+            await classroomService.joinClassroomByToken(classCode, token);
+            
+            toast.success('Tham gia lớp học thành công!', {
+              id: toastId,
+              duration: 3000
+            });
+            
+            // Navigate to classroom detail
+            setTimeout(() => {
+              navigate(`/classrooms/${classCode}`);
+            }, 1000);
+            
+          } catch (error) {
+            console.error('Error joining classroom:', error);
+            toast.error(error.response?.data?.message || 'Lỗi khi tham gia lớp học', {
+              id: toastId,
+              duration: 4000
+            });
+          }
+          
+          return; // Dừng execution
+        }
+      }
+
+      // ===== GỌI onSuccess CALLBACK NẾU CÓ =====
+      if (modalOptions.onSuccess && typeof modalOptions.onSuccess === 'function') {
+        modalOptions.onSuccess(response);
+      }
+
+      // Close modal
+      closeModals();
+
+      // Navigate to home (nếu không có callback custom)
+      if (!modalOptions.onSuccess && !modalOptions.pendingAction) {
+        navigate('/home');
+      }
+     
     } catch (error) {
       console.error('Login error', error);
-      setError(error.message || 'Đăng nhập không thành công')
+      setError(error.message || 'Đăng nhập không thành công');
     } finally {
       setLoading(false);
     }
-    
   };
+
   const handleClose = () => {
-      closeModals();
-      setUsername('');
-      setPassword('');
-      setError('');
-      setLoading(false);
-    };
+    closeModals();
+    setUsername('');
+    setPassword('');
+    setError('');
+    setLoading(false);
+  };
 
   return (
     <Modal isOpen={isLoginOpen} onClose={handleClose}>
@@ -55,12 +120,30 @@ const LoginModal = () => {
         </div>
 
         <div className="relative z-10">
-          {/* Header - responsive text sizes */}
+          {/* Header */}
           <div className="flex flex-col items-center space-y-1 sm:space-y-2 mb-4 sm:mb-6">
-            <h2 className="text-2xl sm:text-3xl font-extrabold gradient-text-dark">Welcome</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold gradient-text-dark">Chào mừng</h2>
             <p className="text-xs sm:text-sm text-gray-600 text-center px-2">
-              Your account is protected with secure authentication.
+              Tài khoản của bạn được bảo vệ bằng xác thực an toàn.
             </p>
+            
+            {/* Hiển thị email được mời nếu có */}
+            {modalOptions.prefillEmail && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mt-2">
+                <p className="text-sm text-blue-800">
+                  Đăng nhập bằng email: <strong>{modalOptions.prefillEmail}</strong>
+                </p>
+              </div>
+            )}
+            
+            {/* ===== HIỂN thị PENDING ACTION NẾU CÓ ===== */}
+            {modalOptions.pendingAction?.type === 'joinClassroom' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mt-2">
+                <p className="text-sm text-green-800">
+                  🎓 Sau khi đăng nhập, bạn sẽ tự động tham gia lớp học
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Error message */}
@@ -70,12 +153,12 @@ const LoginModal = () => {
             </p>
           )}
 
-          {/* Form with responsive spacing */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-5">
             {/* Email field */}
             <div>
               <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Username
+                Tên đăng nhập hoặc Email
               </label>
               <input
                 type="text"
@@ -85,14 +168,14 @@ const LoginModal = () => {
                 required
                 disabled={loading}
                 className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white border border-gray-300 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="you@example.com"
+                placeholder="Tên đăng nhập hoặc email"
               />
             </div>
 
             {/* Password field */}
             <div className="relative">
               <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-gray-700 text-left mb-1 sm:mb-2">
-                Password
+                Mật khẩu
               </label>
               <input
                 type={showPassword ? "text" : "password"}
@@ -122,11 +205,11 @@ const LoginModal = () => {
               </div>
             </div>
 
-            {/* Submit button - responsive padding */}
+            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2.5 sm:py-3 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2.5 sm:py-3 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base disabled:opacity-50"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -141,14 +224,14 @@ const LoginModal = () => {
               )}
             </button>
 
-            {/* Forgot/Signup links - responsive layout */}
+            {/* Forgot/Signup links */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 mt-2 text-xs sm:text-sm">
               <button
                 type="button"
                 className="text-purple-600 hover:underline"
                 disabled={loading}
               >
-                Forgot Password?
+                Quên mật khẩu?
               </button>
               <button
                 type="button"
@@ -156,16 +239,15 @@ const LoginModal = () => {
                 className="text-pink-600 hover:underline"
                 disabled={loading}
               >
-                Sign Up
+                Đăng ký
               </button>
             </div>
           </form>
 
-          {/* Social Sign-In - responsive spacing and sizing */}
+          {/* Social Sign-In */}
           <div className="mt-4 sm:mt-6 text-center space-y-2 sm:space-y-3">
             <p className="text-xs text-gray-500">— or sign in with —</p>
 
-            {/* Social buttons - responsive layout */}
             <div className="space-y-2 sm:space-y-3">
               {/* Google */}
               <a
@@ -173,7 +255,7 @@ const LoginModal = () => {
                 className="w-full flex items-center justify-center gap-2 bg-white text-black py-2 sm:py-2.5 rounded-md font-medium border border-gray-200 shadow-sm hover:scale-[1.02] transition text-xs sm:text-sm"
               >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sign in with Google</span>
+                <span className="hidden sm:inline">Đăng nhập với Google</span>
                 <span className="sm:hidden">Google</span>
               </a>
 
@@ -184,7 +266,7 @@ const LoginModal = () => {
                 disabled={loading}
               >
                 <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Sign in with GitHub</span>
+                <span className="hidden sm:inline">Đăng nhập với GitHub</span>
                 <span className="sm:hidden">GitHub</span>
               </button>
             </div>

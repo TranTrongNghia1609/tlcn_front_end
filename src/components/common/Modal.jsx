@@ -1,4 +1,3 @@
-import { faTruckMedical } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 
 const Modal = ({ 
@@ -12,7 +11,6 @@ const Modal = ({
   className = "",
   size = "default"
  }) => {
-  if (!isOpen) return null;
   const sizeClasses = {
     sm: "max-w-sm",
     md: "max-w-md", 
@@ -24,29 +22,39 @@ const Modal = ({
     "5xl": "max-w-5xl",
     default: "max-w-md"
   };
+
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget && closeOnBackdrop) {
       onClose();
     }
   };
+
   React.useEffect(() => {
-  const originalStyle = window.getComputedStyle(document.body).overflow;
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-      onClose();
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      // Add modal-open class to body
+      document.body.classList.add('modal-open');
+      // Add event listener for Escape key
+      document.addEventListener('keydown', handleEscape);
+    } else {
+      // Remove modal-open class from body
+      document.body.classList.remove('modal-open');
     }
-  };
 
-  if (isOpen) {
-    document.addEventListener('keydown', handleEscape);
-    document.body.style.overflow = 'hidden';
-  }
+    // Cleanup function
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
 
-  return () => {
-    document.removeEventListener('keydown', handleEscape);
-    document.body.style.overflow = originalStyle || 'auto';
-  };
-}, [isOpen, onClose]);
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       {/* Backdrop */}
@@ -62,7 +70,7 @@ const Modal = ({
         ${className}
       `}>
         
-     
+        {/* Header with Title */}
         {title && (
           <div className="bg-white rounded-t-lg px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
@@ -79,7 +87,7 @@ const Modal = ({
           </div>
         )}
 
-       
+        {/* Close button without title */}
         {!title && showCloseButton && (
           <button
             onClick={onClose}
@@ -91,7 +99,7 @@ const Modal = ({
           </button>
         )}
 
-     
+        {/* Content */}
         <div className={title ? "bg-white rounded-b-lg" : "bg-white rounded-lg"}>
           {children}
         </div>

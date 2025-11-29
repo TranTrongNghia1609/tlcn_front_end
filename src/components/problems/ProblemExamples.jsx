@@ -71,7 +71,14 @@ const ProblemExamples = ({ examplesInput = [], examplesOutput = [] }) => {
                     }
                   </Button>
                 </div>
-                <pre className="bg-background p-3 rounded-md text-sm overflow-auto whitespace-pre-wrap">{input}</pre>
+                <pre className="bg-background p-3 rounded-md text-sm overflow-auto whitespace-pre-wrap">
+                  <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath]}
+                      rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
+                  >
+                    {input?.replace(/\\n/g, '\n').replace(/\n/g, '  \n')}
+                  </ReactMarkdown>
+                </pre>
               </div>
 
               {/* Example Output */}
@@ -98,7 +105,7 @@ const ProblemExamples = ({ examplesInput = [], examplesOutput = [] }) => {
                         remarkPlugins={[remarkGfm, remarkMath]}
                         rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}
                     >
-                      {examplesOutput[index]?.replace(/\\n/g, '\n')}
+                      {examplesOutput[index]?.replace(/\\n/g, '\n').replace(/\n/g, '  \n')}
                     </ReactMarkdown>
                   </pre>
                 </div>

@@ -1,70 +1,81 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Upload, Loader2 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
-import ImageUpload from '../common/ImageUpload';
 
-const AvatarUpload = () => {
-  const { user, updateAvatar, uploading } = useUser();
+const AvatarUpload = ({ currentAvatar, onAvatarChange }) => {
+  const { uploading, updateAvatar } = useUser();
 
-  const handleAvatarUpload = async (file) => {
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file ảnh');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Kích thước ảnh không được vượt quá 2MB');
+      return;
+    }
+
     try {
-      
-      await updateAvatar(file);
-      alert('Avatar updated successfully!');
-      
+      const result = await updateAvatar(file);
+      if (result?.avatar && onAvatarChange) {
+        onAvatarChange(result.avatar);
+      }
+      toast.success('Cập nhật ảnh đại diện thành công!');
     } catch (error) {
-      console.error('Failed to save avatar:', error);
-      alert(`Failed to update avatar: ${error.message || 'Unknown error'}`);
-    } finally {
-      // setUploading(false);
+      console.error('Failed to upload avatar:', error);
+      toast.error('Không thể cập nhật ảnh đại diện');
     }
   };
 
-  const handleUploadError = (error) => {
-    alert(`Upload failed: ${error}`);
-  };
-
   return (
-    <div className="flex items-start space-x-6">
-      <div className="relative">
-        <img
-          src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.userName || 'User')}&size=120&background=2563eb&color=fff`}
-          alt="Avatar"
-          className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-lg"
-        />
-        {uploading && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-            <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex-1">
-        <h3 className="text-xl font-semibold mb-2">Profile Picture</h3>
-        <p className="text-gray-600 mb-4">
-          Upload a new avatar. Recommended size is 200x200px.
+    <div className="flex-1">
+      <div className="space-y-2">
+        <p className="text-sm text-gray-600">
+          Tải ảnh đại diện mới. Kích thước khuyến nghị: 200x200px
+        </p>
+        <p className="text-xs text-gray-500">
+          Định dạng: JPG, PNG. Tối đa 2MB
         </p>
         
-        <ImageUpload
-          onUpload={handleAvatarUpload}
-          onUploadError={handleUploadError}
-          folder="online_judge/avatars"
-          maxSize={2 * 1024 * 1024} // 2MB
-          className="max-w-sm"
-        >
-          <button 
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 shadow-lg"
+        <div className="pt-2">
+          <input
+            type="file"
+            id="avatar-upload"
+            accept="image/*"
+            onChange={handleFileChange}
             disabled={uploading}
-          >
-            {uploading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Uploading...</span>
-              </div>
-            ) : (
-              'Upload New Avatar'
-            )}
-          </button>
-        </ImageUpload>
+            className="hidden"
+          />
+          <label htmlFor="avatar-upload">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              asChild
+            >
+              <span className="cursor-pointer">
+                {uploading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    Đang tải...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} className="mr-2" />
+                    Chọn ảnh
+                  </>
+                )}
+              </span>
+            </Button>
+          </label>
+        </div>
       </div>
     </div>
   );

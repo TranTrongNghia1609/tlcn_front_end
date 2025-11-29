@@ -32,7 +32,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useProblem } from '@/context/ProblemContext';
 import { submissionsStore } from '@/zustand/store';
 import { useSocket } from '@/context/SocketContext';
-const ProblemSubmissions = () => {
+const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [timeRange, setTimeRange] = useState('all');
   // const [submissions, setProblemSubmissions] = useState([]);
@@ -40,26 +40,54 @@ const ProblemSubmissions = () => {
   const { user, isAuthenticated } = useAuth();
   const { currentProblem, loading } = useProblem(); 
   const [ pageActive, setPageActive ] = useState(1);
-  const fetchSubmissions = submissionsStore((state) => state.fetchSubmissions)
+  const setProblemSubmissions = submissionsStore((state) => state.setProblemSubmissions)
   const submissions = submissionsStore((state) => state.submissions);
   const setCurrentSubmission = submissionsStore((state) => state.setCurrentSubmission);
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
   const { socket, isConnected, emit, on, off } = useSocket();
 
+  console.log('📋 ProblemSubmission - Props:', {
+    contestParticipant,
+    classroomId
+  });
   useEffect(()=>{
     const fetchProblemSubmission = async () => {
       console.log('Fetching submissions for user:', user);
       console.log('Fetching page: ', pageActive);
+      console.log('📥 problemId:', currentProblem._id);
+      console.log('📥 contestParticipant:', contestParticipant);
+      console.log('📥 classroomId:', classroomId); // ✅ Log classroomId
       if (isAuthenticated && !loading){
-        const response = await getSubmissionByUserId(user.id, currentProblem._id, pageActive);
-        // setProblemSubmissions(response.data.content);
+        let shouldExcludeClassroom = false;
+        
+        if (contestParticipant) {
+          // Nếu là contest, không exclude (contest có thể có hoặc không có classroom)
+          shouldExcludeClassroom = false;
+        } else if (classroomId) {
+          // Nếu có classroomId, lấy submissions trong classroom đó
+          shouldExcludeClassroom = false;
+        } else {
+          // Nếu không có classroomId và không phải contest
+          // => Đang ở trang problem bình thường => chỉ lấy public submissions
+          shouldExcludeClassroom = true;
+        }
+
+        const response = await getSubmissionByUserId(
+          user.id, 
+          currentProblem._id, 
+          pageActive, 
+          contestParticipant, 
+          'all' ,
+          classroomId, 
+          shouldExcludeClassroom);
+        setProblemSubmissions(response.data.content);
         setProblemSubmissionPagination(response.data);
 
-        await fetchSubmissions(user.id, currentProblem._id, pageActive);
+        // await fetchSubmissions(user.id, currentProblem._id, pageActive);
       }
     }
     fetchProblemSubmission();
-  }, [pageActive]);
+  }, [pageActive, classroomId]);
 
   useEffect(()=>{
     console.log('Submission get from component', submissions);
@@ -119,45 +147,7 @@ const ProblemSubmissions = () => {
   if (loading){
     return <div>Loading...</div>;
   }
-  
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Pending':
-        return (
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
-        );
-      case 'Accepted':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'Wrong Answer':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'Time Limit Exceeded':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'Runtime Error':
-        return <AlertCircle className="h-4 w-4 text-orange-500" />;
-      case 'Compilation Error':
-        return <Code className="h-4 w-4 text-purple-500" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />;
-    }
-  };
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      'Pending': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Accepted': 'bg-green-100 text-green-800 border-green-200',
-      'Wrong Answer': 'bg-red-100 text-red-800 border-red-200',
-      'Time Limit Exceeded': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'Runtime Error': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Compilation Error': 'bg-purple-100 text-purple-800 border-purple-200'
-    };
-
-    return (
-      <Badge className={`${variants[status] || 'bg-gray-100 text-gray-800 border-gray-200'} flex items-center gap-1 px-2 py-1`}>
-        {getStatusIcon(status)}
-        <span className="text-xs">{status}</span>
-      </Badge>
-    );
-  };
 
   const handleGetSubmission = async (submission) => {
     submission.isNew = true;
@@ -220,7 +210,7 @@ const ProblemSubmissions = () => {
                   <th className="text-left p-2">Attempt</th>
                   <th className="text-left p-2">Status</th>
                   <th className="text-left p-2">Language</th>
-                  <th className="text-left p-2">Runtime</th>
+                  <th className="text-left p-2">Runtime (ms)</th>
                   <th className="text-left p-2">Memory</th>
                   <th className="text-left p-2">Test Cases</th>
                 </tr>
@@ -242,7 +232,7 @@ const ProblemSubmissions = () => {
                           {submission.language}
                         </Badge>
                       </td>
-                      <td className="p-2 font-mono">{submission.time}</td>
+                      <td className="p-2 font-mono">{submission.status === 'Time Limit Exceeded' ? currentProblem.time * 1000 : submission.time}</td>
                       <td className="p-2 font-mono">{submission.memory}</td>
                       <td className="p-2">
                         <span className={`font-semibold ${
@@ -291,6 +281,45 @@ const ProblemSubmissions = () => {
       </Card>
       
     </div>
+  );
+};
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'Pending':
+      return (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
+      );
+    case 'Accepted':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'Wrong Answer':
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    case 'Time Limit Exceeded':
+      return <Clock className="h-4 w-4 text-yellow-500" />;
+    case 'Runtime Error':
+      return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    case 'Compilation Error':
+      return <Code className="h-4 w-4 text-purple-500" />;
+    default:
+      return <AlertCircle className="h-4 w-4 text-gray-500" />;
+  }
+};
+
+export const getStatusBadge = (status) => {
+  const variants = {
+    'Pending': 'bg-blue-100 text-blue-800 border-blue-200',
+    'Accepted': 'bg-green-100 text-green-800 border-green-200',
+    'Wrong Answer': 'bg-red-100 text-red-800 border-red-200',
+    'Time Limit Exceeded': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'Runtime Error': 'bg-orange-100 text-orange-800 border-orange-200',
+    'Compilation Error': 'bg-purple-100 text-purple-800 border-purple-200'
+  };
+
+  return (
+    <Badge className={`${variants[status] || 'bg-gray-100 text-gray-800 border-gray-200'} flex items-center gap-1 px-2 py-1`}>
+      {getStatusIcon(status)}
+      <span className="text-xs">{status}</span>
+    </Badge>
   );
 };
 
