@@ -53,56 +53,6 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const handleProblemClick = () => {
     setActiveTab("statement");
   };
-
-  const mockData = [
-    {
-      "id": "6921e631b8625a9081022887",
-      "user": {
-        "_id": "68ab4a62bfdd306a660ebca0",
-        "userName": "nghiadz",
-        "fullName": "Thanh Binh",
-        "avatar": "https://res.cloudinary.com/da0zhlez4/image/upload/v1757432359/user_avatars/avatar_68ab4a62bfdd306a660ebca0_1757432356545.jpg"
-      },
-      "contestId": "6921df8c660f3c2f7d1833e8",
-      "joinedAt": "2025-11-22 23:34:57",
-      "mode": "official",
-      "startTime": "2025-11-22 23:37:00",
-      "endTime": "2025-11-28 19:05:00",
-      "score": 30.76923076923077,
-      "lastBestSubmissionScoreAt": "2025-11-23 00:42:53",
-      "problemScores": [
-        {
-          "problemId": "68e3f7867676197a43699cc3",
-          "bestScore": 30.76923076923077,
-          "bestSubmissionId": "6921e7bfb8625a90810228bc",
-          "attempts": 2,
-          "lastSubmittedAt": "2025-11-22T16:41:37.389Z",
-          "_id": "6921e7a1b8625a90810228b6"
-        }
-      ],
-    },
-    // Thêm user giả khác để test Top 2, Top 3
-    {
-      "id": "2",
-      "user": { "userName": "coder_pro", "fullName": "Le Minh" },
-      "mode": "practice",
-      "score": 25.50,
-      "lastBestSubmissionScoreAt": "2025-11-23 00:50:00"
-    }
-  ];
-  const {
-    data: rankingData,
-    isLoading: isLoadingRank,
-    isError,
-    isAutoRefresh,
-    setIsAutoRefresh,
-    isRefetching // Biến này true khi đang chạy ngầm cập nhật
-  } = useContestRanking(contestId);
-
-  const leaderboard = useMemo(() => {
-    if (isLoadingRank || isError || !rankingData) return [];
-    return rankingData.data || [];
-  }, [rankingData, isLoadingRank, isError]);
   return (
     <div className='h-[calc(100vh-88px)] min-h-0 overflow-hidden fixed left-0 right-0'>
       <Split className="split h-full min-h-0" minSize={200}>
@@ -113,12 +63,10 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
             className="bg-gray-50">
             <TabsList>
               {isContest && (
-                <>
-                  <TabsTrigger value="contest-problems">
-                    <List className='text-[#a43eda] stroke-[#a43eda]' />
-                    Problems
-                  </TabsTrigger>
-                </>
+                <TabsTrigger value="contest-problems">
+                  <List className='text-[#a43eda] stroke-[#a43eda]' />
+                  Problems
+                </TabsTrigger>
               )}
               <TabsTrigger value="statement">
                 <Description />

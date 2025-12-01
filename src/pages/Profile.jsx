@@ -117,6 +117,12 @@ const Profile = () => {
                 onEditProfile={handleEditProfile}
               />
             </Card>
+
+            <div className='mt-4'>
+              <SubmissionPieChart 
+                userId={profileData._id}
+              />
+            </div>
           </div>
 
           {/* Right Side - Charts or Edit Profile */}
@@ -129,22 +135,18 @@ const Profile = () => {
               />
             ) : (
               <>
-                <div className='flex md:flex-row flex-col items-stretch justify-center mb-4 gap-4'>
-                  <div className='md:w-1/2'>
-                    <SubmissionPieChart userId={profileData._id} />
-                  </div>
-                  <div className='md:w-1/2'>
-                    <DifficultyChart userId={profileData._id} />
-                  </div>
-                </div>
+              <div className='flex-1 md:mt-0 mt-4 space-y-3'>
+                <SubmissionRecent
+                  userId={profileData._id}
+                />
                 <SubmissionCalendar userId={profileData._id} year={2024} />
+              </div>
               </>
             )}
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )};
 
 export default Profile;
