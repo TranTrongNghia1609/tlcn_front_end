@@ -24,7 +24,8 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     ...post,
     isLiked: Boolean(post.isLiked), 
     likesCount: post.likesCount || 0,
-    commentsCount: post.commentsCount || 0
+    commentsCount: post.commentsCount || 0,
+    codeSnippet: post.codeSnippet || ''
   }));
 
   useEffect(() => {
@@ -32,7 +33,8 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
       ...post,
       isLiked: Boolean(post.isLiked),
       likesCount: post.likesCount || 0,
-      commentsCount: post.commentsCount || 0
+      commentsCount: post.commentsCount || 0,
+      codeSnippet: post.codeSnippet || ''
     }));
   }, [post]);
 

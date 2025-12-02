@@ -6,7 +6,7 @@ import { useUser } from '../../../context/UserContext';
 const PostHeader = ({ post, onEdit, onDelete }) => {
   const { user } = useUser();
   const [showMenu, setShowMenu] = useState(false);
-  
+
   const isOwner = user?._id === post.author._id;
 
   return (
@@ -33,17 +33,20 @@ const PostHeader = ({ post, onEdit, onDelete }) => {
                   <span className="text-gray-400 italic">edited</span>
                 </>
               )}
-              {post.tags && post.tags.length > 0 && (
+              {post.hashtags && post.hashtags.length > 0 && (
                 <>
                   <span>•</span>
-                  <div className="flex space-x-1">
-                    {post.tags.slice(0, 2).map(tag => (
-                      <span key={tag} className="text-blue-600 hover:text-blue-700 cursor-pointer">
+                  <div className="flex flex-wrap gap-1">
+                    {post.hashtags.slice(0, 3).map(tag => (
+                      <span
+                        key={tag}
+                        className="text-blue-600 hover:text-blue-700 hover:underline cursor-pointer text-xs bg-blue-50 px-2 py-0.5 rounded-full"
+                      >
                         #{tag}
                       </span>
                     ))}
-                    {post.tags.length > 2 && (
-                      <span className="text-gray-400">+{post.tags.length - 2}</span>
+                    {post.hashtags.length > 3 && (
+                      <span className="text-gray-400 text-xs">+{post.hashtags.length - 3}</span>
                     )}
                   </div>
                 </>
@@ -64,7 +67,7 @@ const PostHeader = ({ post, onEdit, onDelete }) => {
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
               {isOwner ? (
                 <>
-                  <button 
+                  <button
                     onClick={() => {
                       onEdit();
                       setShowMenu(false);
@@ -74,7 +77,7 @@ const PostHeader = ({ post, onEdit, onDelete }) => {
                     <PencilIcon className="w-4 h-4" />
                     <span>Edit Post</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       onDelete(post._id);
                       setShowMenu(false);

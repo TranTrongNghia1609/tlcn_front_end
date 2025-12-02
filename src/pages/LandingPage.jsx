@@ -69,7 +69,7 @@ const LandingPage = () => {
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-8 selectable-text leading-relaxed">
                 Nền tảng luyện tập lập trình hàng đầu với hơn{' '}
-                <span className="font-bold text-blue-600">5,000+</span> bài tập
+                <span className="font-bold text-blue-600">300+</span> bài tập
               </p>
               <p className="text-lg text-gray-500 mb-10 selectable-text">
                 Nâng cao kỹ năng thuật toán, chuẩn bị phỏng vấn và tham gia các kỳ thi lập trình
@@ -78,7 +78,7 @@ const LandingPage = () => {
               <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                 <Button
                   size="lg"
-                  onClick={() => navigate('/problems')}
+                  onClick={() => navigate('/problemset')}
                   className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-6 hover-lift cursor-pointer"
                 >
                   Bắt đầu luyện tập
@@ -89,7 +89,7 @@ const LandingPage = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => navigate('/explore')}
+                  onClick={() => navigate('/home')}
                   className="text-lg px-8 py-6 hover:border-blue-600 hover:text-blue-600 cursor-pointer"
                 >
                   Khám phá
@@ -510,7 +510,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate('/explore')}
+              onClick={() => navigate('/home')}
               className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-12 py-6 cursor-pointer"
             >
               Khám phá ngay

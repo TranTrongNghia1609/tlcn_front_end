@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import PostCard from '../components/home/PostCard';
 import CreatePost from '../components/home/CreatePost';
 import Sidebar from '../components/home/Sidebar';
 import { useUser } from '../context/UserContext';
-import { getPosts } from '../services/postService';
+import { getPosts, getPostDetails } from '../services/postService';
 import OnboardingModal from "@/components/auth/OnboardingModel.jsx";
 import { Loader2 } from 'lucide-react';
 
 const Home = ({isShowOnboarding = false}) => {
   const { user } = useUser();
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -16,8 +18,73 @@ const Home = ({isShowOnboarding = false}) => {
   const [onboarding, setOnboarding] = useState(isShowOnboarding);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [highlightedPostId, setHighlightedPostId] = useState(null);
   
   const observerTarget = useRef(null);
+  const postRefs = useRef({});
+
+  // Handle scroll to post from notification
+  useEffect(() => {
+    const scrollToPostId = location.state?.scrollToPostId;
+    const shouldHighlight = location.state?.highlightPost;
+
+    if (scrollToPostId && posts.length > 0) {
+      // Check if post exists in current list
+      const postExists = posts.some(p => p._id === scrollToPostId);
+      
+      if (postExists) {
+        // Post exists, scroll to it
+        setTimeout(() => {
+          const postElement = postRefs.current[scrollToPostId];
+          if (postElement) {
+            postElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            
+            if (shouldHighlight) {
+              setHighlightedPostId(scrollToPostId);
+              setTimeout(() => setHighlightedPostId(null), 3000);
+            }
+          }
+        }, 100);
+      } else {
+        // Post doesn't exist, fetch and add it
+        fetchAndAddPost(scrollToPostId, shouldHighlight);
+      }
+
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, posts]);
+
+  const fetchAndAddPost = async (postId, shouldHighlight) => {
+    try {
+      const response = await getPostDetails(postId);
+      const fetchedPost = response.data;
+      
+      // Add to top of posts list
+      setPosts(prev => [fetchedPost, ...prev]);
+      
+      // Scroll after post is added
+      setTimeout(() => {
+        const postElement = postRefs.current[postId];
+        if (postElement) {
+          postElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          
+          if (shouldHighlight) {
+            setHighlightedPostId(postId);
+            setTimeout(() => setHighlightedPostId(null), 3000);
+          }
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    }
+  };
 
   useEffect(() => {
     setPosts([]);
@@ -119,7 +186,7 @@ const Home = ({isShowOnboarding = false}) => {
                 Cộng đồng lập trình
               </h1>
               <p className="text-gray-600">
-                Chia sẻ hành trình học lập trình của bạn, thảo luận về các vấn đề và học hỏi cùng nhau
+                Xem thông báo về các cuộc thi, những bài viết kiến thức chia sẻ các thuật toán
               </p>
             </div>
 
@@ -127,11 +194,6 @@ const Home = ({isShowOnboarding = false}) => {
               open={onboarding}
               onClose={() => setOnboarding(false)}
             />
-
-            {/* Create Post */}
-            {user && (
-              <CreatePost onPostCreated={handleNewPost} />
-            )}
 
             {/* Filter Tabs */}
             <div className="bg-white rounded-lg shadow-sm mb-6">
@@ -175,12 +237,21 @@ const Home = ({isShowOnboarding = false}) => {
               ) : posts.length > 0 ? (
                 <>
                   {posts.map(post => (
-                    <PostCard
+                    <div 
                       key={post._id}
-                      post={post}
-                      onUpdate={handlePostUpdate}
-                      onDelete={handlePostDelete}
-                    />
+                      ref={el => postRefs.current[post._id] = el}
+                      className={`transition-all duration-500 ${
+                        highlightedPostId === post._id 
+                          ? 'ring-4 ring-blue-500 ring-opacity-50 rounded-lg' 
+                          : ''
+                      }`}
+                    >
+                      <PostCard
+                        post={post}
+                        onUpdate={handlePostUpdate}
+                        onDelete={handlePostDelete}
+                      />
+                    </div>
                   ))}
 
                   {/* Loading More Indicator */}
