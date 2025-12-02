@@ -99,6 +99,7 @@ const PostDetailModal = ({
             <PostContent
               post={post}
               isExpanded={true}
+              onToggleExpanded={null}
             />
             
             <PostActions
