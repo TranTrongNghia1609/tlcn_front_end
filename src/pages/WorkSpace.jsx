@@ -23,6 +23,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const [activeTab, setActiveTab] = useState("statement");
   const { id, solutionId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const contest = contestStore((state) => state.contest);
   let contestParticipantId = null;
   let contestId = null;
@@ -86,7 +87,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 Statement
               </TabsTrigger>
               <TabsTrigger value="solutions">
-                <Lightbulb className='w-4 h-4 mr-2' />
+                <Lightbulb className='w-4 h-4 text-yellow-500' />
                 Solutions
               </TabsTrigger>
               

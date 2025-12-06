@@ -4,10 +4,10 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { toast } from 'sonner';
-import { 
-  ThumbsUp, 
-  ThumbsDown, 
-  Eye, 
+import {
+  ThumbsUp,
+  ThumbsDown,
+  Eye,
   MessageSquare,
   Clock,
   TrendingUp,
@@ -50,7 +50,7 @@ const ProblemSolutions = ({ problemShortId }) => {
       const response = await solutionService.getSolutionsByProblem(problemShortId, {
         sort: sortBy
       });
-      
+
       const solutionsData = response?.data?.items || [];
       console.log('Solutions loaded:', solutionsData);
       setSolutions(solutionsData);
@@ -75,15 +75,35 @@ const ProblemSolutions = ({ problemShortId }) => {
   };
 
   const handleVote = async (solutionId, voteType, e) => {
-    e.stopPropagation();
-    try {
-      await solutionService.voteSolution(solutionId, voteType);
-      toast.success(voteType === 'upvote' ? 'Đã upvote' : 'Đã downvote');
-      loadSolutions();
-    } catch (error) {
-      toast.error('Vui lòng đăng nhập để vote');
-    }
-  };
+  e.stopPropagation();
+  try {
+    const response = await solutionService.voteSolution(solutionId, voteType);
+    
+    // Update local state immediately
+    setSolutions(prevSolutions =>
+      prevSolutions.map(sol =>
+        sol._id === solutionId
+          ? {
+              ...sol,
+              upvoteCount: response.data.upvoteCount,
+              downvoteCount: response.data.downvoteCount,
+              voteScore: response.data.voteScore,
+              userVote: response.data.userVote
+            }
+          : sol
+      )
+    );
+
+    const message = response.data.userVote 
+      ? (response.data.userVote === 'upvote' ? 'Đã upvote' : 'Đã downvote')
+      : 'Đã bỏ vote';
+    
+    toast.success(message);
+  } catch (error) {
+    console.error('❌ Vote error:', error);
+    toast.error(error.response?.data?.message || 'Vui lòng đăng nhập để vote');
+  }
+};
 
   const getApproachColor = (approach) => {
     const colors = {
@@ -120,8 +140,8 @@ const ProblemSolutions = ({ problemShortId }) => {
   if (selectedSolutionId) {
     return (
       <div className="h-full">
-        <SolutionDetail 
-          solutionId={selectedSolutionId} 
+        <SolutionDetail
+          solutionId={selectedSolutionId}
           problemShortId={problemShortId}
           onBack={handleBackToList}
         />
@@ -219,29 +239,7 @@ const ProblemSolutions = ({ problemShortId }) => {
           >
             <div className="flex gap-4">
               {/* Vote Section */}
-              <div className="flex flex-col items-center gap-2 pt-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 hover:bg-green-50"
-                  onClick={(e) => handleVote(solution._id, 'upvote', e)}
-                >
-                  <ThumbsUp className="w-4 h-4 text-gray-600 hover:text-green-600" />
-                </Button>
-                
-                <span className="font-semibold text-gray-900 text-lg">
-                  {solution.voteScore || 0}
-                </span>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 hover:bg-red-50"
-                  onClick={(e) => handleVote(solution._id, 'downvote', e)}
-                >
-                  <ThumbsDown className="w-4 h-4 text-gray-600 hover:text-red-600" />
-                </Button>
-              </div>
+              
 
               {/* Content Section */}
               <div className="flex-1 min-w-0">
@@ -283,29 +281,80 @@ const ProblemSolutions = ({ problemShortId }) => {
 
                 {/* Complexity Tags */}
                 <div className="flex gap-3 mb-3">
-                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 rounded text-xs">
-                    <span className="text-gray-600">Time:</span>
-                    <code className="font-mono font-semibold text-blue-700">
-                      {solution.complexity?.time || 'N/A'}
-                    </code>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 rounded text-xs">
+                    <span className="text-gray-600">Time: 
+                      <span className="font-mono font-semibold text-blue-700"> {solution.complexity?.time || 'N/A'}</span>
+                    </span>
+                   
                   </div>
-                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 rounded text-xs">
-                    <span className="text-gray-600">Space:</span>
-                    <code className="font-mono font-semibold text-purple-700">
-                      {solution.complexity?.space || 'N/A'}
-                    </code>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded text-xs">
+                    <span className="text-gray-600">Space: 
+                      <span className="font-mono font-semibold text-green-700"> {solution.complexity?.space || 'N/A'}</span>
+                   
+                    </span>
+                    
                   </div>
                 </div>
 
                 {/* Stats */}
                 <div className="flex items-center gap-4 text-sm text-gray-600">
+                  {/* Vote buttons */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0 ${
+                        solution.userVote === 'upvote'
+                          ? 'bg-green-100 hover:bg-green-200'
+                          : 'hover:bg-green-50'
+                      }`}
+                      onClick={(e) => handleVote(solution._id, 'upvote', e)}
+                    >
+                      <ThumbsUp
+                        className={`w-4 h-4 ${
+                          solution.userVote === 'upvote'
+                            ? 'text-green-600 fill-green-600'
+                            : 'text-gray-600 hover:text-green-600'
+                        }`}
+                      />
+                    </Button>
+
+                    <span className="font-semibold text-gray-900 min-w-[2rem] text-center">
+                      {solution.voteScore || 0}
+                    </span>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0 ${
+                        solution.userVote === 'downvote'
+                          ? 'bg-red-100 hover:bg-red-200'
+                          : 'hover:bg-red-50'
+                      }`}
+                      onClick={(e) => handleVote(solution._id, 'downvote', e)}
+                    >
+                      <ThumbsDown
+                        className={`w-4 h-4 ${
+                          solution.userVote === 'downvote'
+                            ? 'text-red-600 fill-red-600'
+                            : 'text-gray-600 hover:text-red-600'
+                        }`}
+                      />
+                    </Button>
+                  </div>
+
+                  <span className="text-gray-300">|</span>
+
+                  {/* Views */}
                   <span className="flex items-center gap-1.5">
                     <Eye className="w-4 h-4" />
-                    {solution.viewCount || 0} views
+                    {solution.viewCount || 0}
                   </span>
+
+                  {/* Comments */}
                   <span className="flex items-center gap-1.5">
                     <MessageSquare className="w-4 h-4" />
-                    {solution.commentCount || 0} comments
+                    {solution.commentCount || 0}
                   </span>
                 </div>
 
@@ -313,9 +362,9 @@ const ProblemSolutions = ({ problemShortId }) => {
                 {solution.tags && solution.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {solution.tags.slice(0, 3).map((tag, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="outline" 
+                      <Badge
+                        key={index}
+                        variant="outline"
                         className="text-xs bg-gray-50 hover:bg-gray-100"
                       >
                         {tag}
@@ -330,10 +379,7 @@ const ProblemSolutions = ({ problemShortId }) => {
                 )}
               </div>
 
-              {/* Arrow */}
-              <div className="flex items-center">
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </div>
+            
             </div>
           </div>
         ))}

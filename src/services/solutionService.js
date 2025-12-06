@@ -15,9 +15,15 @@ export const solutionService = {
     return response.data;
   },
 
-  // Get solution by ID
+  // Get solution by ID (without comments)
   getSolutionById: async (id) => {
     const response = await api.get(`${BASE_URL}/${id}`);
+    return response.data;
+  },
+
+  // Get comments for solution (with pagination)
+  getSolutionComments: async (id, params = {}) => {
+    const response = await api.get(`${BASE_URL}/${id}/comments`, { params });
     return response.data;
   },
 

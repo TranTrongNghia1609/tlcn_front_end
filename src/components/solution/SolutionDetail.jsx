@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,27 +16,20 @@ import {
   ThumbsDown,
   Eye,
   MessageSquare,
-  Clock,
   ArrowLeft,
-  Code2,
-  Share2,
-  Bookmark,
-  Send,
-  Star
+  Code2
 } from 'lucide-react';
 import solutionService from '@/services/solutionService';
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import CommentSectionSolutions from './CommentSectionSolutions';
 
 const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
   const [userVote, setUserVote] = useState(null);
 
   useEffect(() => {
@@ -50,15 +42,20 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
     try {
       setLoading(true);
       const response = await solutionService.getSolutionById(solutionId);
-      setSolution(response.data);
-      setComments(response.data.comments || []);
-      if (user) {
-        const upvoted = response.data.votes?.upvotes?.includes(user._id);
-        const downvoted = response.data.votes?.downvotes?.includes(user._id);
-        setUserVote(upvoted ? 'upvote' : downvoted ? 'downvote' : null);
-      }
+      const solutionData = response.data;
+      
+      setSolution(solutionData);
+      setUserVote(solutionData.userVote || null);
+      
+      console.log('✅ Solution loaded:', {
+        id: solutionData._id,
+        userVote: solutionData.userVote,
+        upvoteCount: solutionData.upvoteCount,
+        downvoteCount: solutionData.downvoteCount,
+        totalComments: solutionData.totalComments
+      });
     } catch (error) {
-      console.error('Load solution error:', error);
+      console.error('❌ Load solution error:', error);
       toast.error('Không thể tải solution');
     } finally {
       setLoading(false);
@@ -80,39 +77,39 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
     }
 
     try {
-      await solutionService.voteSolution(solutionId, voteType);
+      const response = await solutionService.voteSolution(solutionId, voteType);
       
-      if (userVote === voteType) {
-        setUserVote(null);
-        toast.success('Đã bỏ vote');
-      } else {
-        setUserVote(voteType);
-        toast.success(voteType === 'upvote' ? 'Đã upvote' : 'Đã downvote');
-      }
+      setSolution(prev => ({
+        ...prev,
+        upvoteCount: response.data.upvoteCount,
+        downvoteCount: response.data.downvoteCount,
+        voteScore: response.data.voteScore
+      }));
       
-      loadSolution();
+      setUserVote(response.data.userVote);
+      
+      const message = response.data.userVote 
+        ? (response.data.userVote === 'upvote' ? 'Đã upvote' : 'Đã downvote')
+        : 'Đã bỏ vote';
+      
+      toast.success(message);
+      
+      console.log('✅ Vote updated:', {
+        userVote: response.data.userVote,
+        upvoteCount: response.data.upvoteCount,
+        downvoteCount: response.data.downvoteCount
+      });
     } catch (error) {
-      toast.error('Không thể vote');
+      console.error('❌ Vote error:', error);
+      toast.error(error.response?.data?.message || 'Không thể vote');
     }
   };
 
-  const handleSubmitComment = async () => {
-    if (!newComment.trim()) {
-      toast.error('Vui lòng nhập comment');
-      return;
-    }
-
-    try {
-      setSubmittingComment(true);
-      await solutionService.addComment(solutionId, { content: newComment });
-      toast.success('Đã thêm comment');
-      setNewComment('');
-      loadSolution();
-    } catch (error) {
-      toast.error('Không thể thêm comment');
-    } finally {
-      setSubmittingComment(false);
-    }
+  const handleCommentCountUpdate = (newCount) => {
+    setSolution(prev => ({
+      ...prev,
+      totalComments: newCount
+    }));
   };
 
   const getApproachColor = (approach) => {
@@ -162,7 +159,7 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
   }
 
   return (
-    <div className="bg-gray-50 h-full flex flex-col relative">
+    <div className="bg-gray-50 h-full flex flex-col">
       {/* Header - Fixed */}
       <div className="flex-shrink-0 bg-white border-b">
         <div className="px-6 py-4">
@@ -170,9 +167,9 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="mb-4"
+            className="mb-4 cursor-pointer" 
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-2 " />
             Quay lại Solutions
           </Button>
 
@@ -180,54 +177,42 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
             {solution.title}
           </h1>
 
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={solution.author?.avatar} />
-                  <AvatarFallback>
-                    {solution.author?.fullName?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {solution.author?.fullName || 'Anonymous'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatTimeAgo(solution.createdAt)}
-                  </p>
-                </div>
-              </div>
-
-              <Separator orientation="vertical" className="h-8" />
-
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                {solution.viewCount || 0}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                {comments.length}
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={solution.author?.avatar} />
+                <AvatarFallback>
+                  {solution.author?.fullName?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-gray-900">
+                  {solution.author?.fullName || 'Anonymous'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formatTimeAgo(solution.createdAt)}
+                </p>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Bookmark className="w-4 h-4" />
-              </Button>
+            <Separator orientation="vertical" className="h-8" />
+
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              {solution.viewCount || 0}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              {solution.totalComments || 0}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content - Scrollable with padding for footer */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        <div className="max-w-5xl mx-auto px-6 py-6">
+      {/* Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-6 py-6 pb-24">
           <div className="space-y-6">
             {/* Solution Content Card */}
             <Card className="p-6">
@@ -236,14 +221,14 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
                   {solution.approach.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                 </Badge>
 
-                <div className="flex items-center gap-1 px-3 py-1 bg-blue-50 rounded-md border border-blue-200">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 rounded-md border border-blue-200">
                   <span className="text-sm text-gray-700">Time:</span>
                   <code className="font-mono font-semibold text-blue-700 text-sm">
                     {solution.complexity?.time || 'N/A'}
                   </code>
                 </div>
 
-                <div className="flex items-center gap-1 px-3 py-1 bg-purple-50 rounded-md border border-purple-200">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-50 rounded-md border border-purple-200">
                   <span className="text-sm text-gray-700">Space:</span>
                   <code className="font-mono font-semibold text-purple-700 text-sm">
                     {solution.complexity?.space || 'N/A'}
@@ -379,141 +364,57 @@ const SolutionDetail = ({ solutionId, problemShortId, onBack }) => {
             </Card>
 
             {/* Comments Section */}
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                Comments ({comments.length})
-              </h3>
-
-              {/* Add Comment */}
-              {user ? (
-                <div className="mb-6">
-                  <Textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Viết comment của bạn..."
-                    className="mb-3 min-h-[100px]"
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleSubmitComment}
-                      disabled={submittingComment || !newComment.trim()}
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      {submittingComment ? 'Đang gửi...' : 'Gửi comment'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-gray-600">Đăng nhập để thảo luận</p>
-                </div>
-              )}
-
-              <Separator className="my-6" />
-
-              {/* Comments List */}
-              <div className="space-y-6">
-                {comments.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">
-                    Chưa có comment nào. Hãy là người đầu tiên!
-                  </p>
-                ) : (
-                  comments.map((comment) => (
-                    <div key={comment._id} className="flex gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={comment.author?.avatar} />
-                        <AvatarFallback>
-                          {comment.author?.fullName?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm">
-                            {comment.author?.fullName || 'Anonymous'}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatTimeAgo(comment.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {comment.content}
-                        </p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Button variant="ghost" size="sm" className="h-7 text-xs">
-                            <ThumbsUp className="w-3 h-3 mr-1" />
-                            {comment.likes || 0}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs">
-                            Reply
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </Card>
+            <CommentSectionSolutions
+              solutionId={solutionId}
+              user={user}
+              onCommentCountUpdate={handleCommentCountUpdate}
+            />
           </div>
         </div>
       </div>
 
-      {/* Sticky Footer Bar - Contained within solution detail */}
+      {/* Sticky Footer Bar */}
       <div className="sticky bottom-0 left-0 right-0 bg-white border-t shadow-lg z-10">
         <div className="px-6 py-3">
-          <div className="flex items-center justify-between">
-            {/* Left side - Vote buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant={userVote === 'upvote' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleVote('upvote')}
-                className={`gap-2 ${
-                  userVote === 'upvote' 
-                    ? 'bg-green-600 hover:bg-green-700 text-white' 
-                    : 'hover:bg-green-50 hover:text-green-600 hover:border-green-300'
-                }`}
-              >
-                <ThumbsUp className="w-4 h-4" />
-                <span className="font-semibold">{solution.upvoteCount || 0}</span>
-              </Button>
+          <div className="flex items-center gap-4">
+            {/* Vote buttons */}
+            <Button
+              variant={userVote === 'upvote' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleVote('upvote')}
+              className={`gap-2 ${
+                userVote === 'upvote' 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'hover:bg-green-50 hover:text-green-600 hover:border-green-300'
+              }`}
+            >
+              <ThumbsUp className="w-4 h-4" />
+              <span className="font-semibold">{solution.voteScore || 0}</span>
+            </Button>
 
-              <Button
-                variant={userVote === 'downvote' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleVote('downvote')}
-                className={`gap-2 ${
-                  userVote === 'downvote' 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'hover:bg-red-50 hover:text-red-600 hover:border-red-300'
-                }`}
-              >
-                <ThumbsDown className="w-4 h-4" />
-              </Button>
+            <Button
+              variant={userVote === 'downvote' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleVote('downvote')}
+              className={`gap-2 ${
+                userVote === 'downvote' 
+                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  : 'hover:bg-red-50 hover:text-red-600 hover:border-red-300'
+              }`}
+            >
+              <ThumbsDown className="w-4 h-4" />
+            </Button>
 
-              <Separator orientation="vertical" className="h-8 mx-2" />
+            <Separator orientation="vertical" className="h-8" />
 
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <MessageSquare className="w-4 h-4" />
-                <span className="font-medium">{comments.length}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Eye className="w-4 h-4" />
-                <span className="font-medium">{solution.viewCount || 0}</span>
-              </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <MessageSquare className="w-4 h-4" />
+              <span className="font-medium">{solution.totalComments || 0}</span>
             </div>
 
-            {/* Right side - Actions */}
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Star className="w-4 h-4 mr-2" />
-                Favorite
-              </Button>
-              <Button variant="outline" size="sm">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Eye className="w-4 h-4" />
+              <span className="font-medium">{solution.viewCount || 0}</span>
             </div>
           </div>
         </div>  

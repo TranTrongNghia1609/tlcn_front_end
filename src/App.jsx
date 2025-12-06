@@ -25,8 +25,10 @@ const AppContent = () => {
   const { loading } = useAuth();
   const location = useLocation();
   
-  // Check if current route is landing page
+  // Check if current route is landing page or workspace/problem page
   const isLandingPage = location.pathname === '/';
+  const isWorkspacePage = location.pathname.includes('/problem/') || 
+                          location.pathname.includes('/contest/');
 
   if (loading) {
     return <LoadingSpinner />;
@@ -49,12 +51,15 @@ const AppContent = () => {
                         <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
                           <AppRoutes />
                         </main>
-                        <Footer/>
+                        
+                        {/* Only show Footer if NOT on workspace/problem page */}
+                        {!isWorkspacePage && <Footer />}
 
                         {/* Auth Modals */}
                         <LoginModal />
                         <RegisterModal />
-                         <ForgotPasswordModal />
+                        <ForgotPasswordModal />
+                        
                         {/* Toast Notifications */}
                         <Toaster
                           position="top-right"
