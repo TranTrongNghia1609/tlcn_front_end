@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     checkAuth();
 
-    // ✅ Listen for logout events từ interceptor
+    //  Listen for logout events từ interceptor
     const handleLogout = () => {
       setUser(null);
       setIsAuthenticated(false);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // ✅ Thử lấy thông tin user (sẽ auto refresh nếu access token expired)
+      // Thử lấy thông tin user (sẽ auto refresh nếu access token expired)
       const response = await authService.getCurrentUser();
       const userData = response.data?.user || response.user || response;
 
@@ -136,10 +136,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Forgot Password Step 1: Send OTP
-  const sendForgotPasswordOTP = async (email) => {
+  const sendForgotPasswordOTP = async (userName) => {
     try {
-      const response = await authService.sendForgotPasswordOTP(email);
-      setPendingPasswordReset({ email, ...response });
+      const response = await authService.sendForgotPasswordOTP(userName);
+      setPendingPasswordReset({ userName, ...response });
       return response;
     } catch (error) {
       throw error;
@@ -149,8 +149,11 @@ export const AuthProvider = ({ children }) => {
   // Forgot Password Step 2: Verify OTP
   const verifyForgotPasswordOTP = async (otp) => {
     try {
+      if (!pendingPasswordReset?.userName) {
+        throw new Error('Không có thông tin để xác thực OTP');
+      }
       const response = await authService.verifyForgotPasswordOTP({
-        email: pendingPasswordReset.email,
+        userName: pendingPasswordReset.userName,
         otp: otp
       });
       return response;
@@ -160,13 +163,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Reset Password
-  const resetPassword = async (newPassword, resetToken) => {
+  const resetPassword = async (newPassword) => {
     try {
+      if (!pendingPasswordReset?.userName) {
+        throw new Error('Không có thông tin để đặt lại mật khẩu');
+      }
       const response = await authService.resetPassword({
-        password: newPassword,
-        token: resetToken
+        userName: pendingPasswordReset.userName,
+        newPassword: newPassword
       });
       setPendingPasswordReset(null);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+  const resendForgotPasswordOTP = async () => {
+    try {
+      if (!pendingPasswordReset?.userName) {
+        throw new Error('Không có username để gửi OTP');
+      }
+      const response = await authService.resendForgotPasswordOTP(pendingPasswordReset.userName);
       return response;
     } catch (error) {
       throw error;
@@ -258,6 +275,7 @@ export const AuthProvider = ({ children }) => {
     sendForgotPasswordOTP,
     verifyForgotPasswordOTP,
     resetPassword,
+    resendForgotPasswordOTP,
     pendingPasswordReset,
   };
 

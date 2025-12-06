@@ -17,6 +17,8 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { CommentProvider } from '@/context/CommentContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { Toaster } from 'sonner';
+import ForgotPasswordModal from './components/auth/ForgotPasswordModal';
+import Footer from './components/layout/Footer';
 import '@/index.css'
 
 const AppContent = () => {
@@ -47,11 +49,12 @@ const AppContent = () => {
                         <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
                           <AppRoutes />
                         </main>
+                        <Footer/>
 
                         {/* Auth Modals */}
                         <LoginModal />
                         <RegisterModal />
-
+                         <ForgotPasswordModal />
                         {/* Toast Notifications */}
                         <Toaster
                           position="top-right"

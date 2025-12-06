@@ -77,6 +77,8 @@ const AppRoutes = () => {
       {/* Problem Routes */}
       <Route path="/problemset" element={<Problems />} />
       <Route path="/problemset/problem/:id" element={<WorkSpace />} />
+      <Route path="/problemset/problem/:id/solutions" element={<WorkSpace />} />
+      <Route path="/problemset/problem/:id/solutions/:solutionId" element={<WorkSpace />} />
       <Route path="/problems/:id" element={<WorkSpace />} />
       <Route path="/profile/edit" element={<EditProfilePage />} />
 

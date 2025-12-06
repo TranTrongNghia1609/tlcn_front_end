@@ -13,16 +13,15 @@ import { submissionsStore } from '@/zustand/store';
 import { Card } from '@/components/ui/card';
 import ProblemContestList from '@/components/contests/ContestProblemList';
 import { contestStore } from '@/zustand/contestStore';
-import { Trophy, List } from 'lucide-react';
+import { Trophy, List, Lightbulb } from 'lucide-react';
 import RankingContest from '@/components/contests/ContestRanking';
 import { useContestRanking } from '@/hooks/useContestRanking';
 import { isContestRunning } from '@/utils/contestHepler';
-
-
+import ProblemSolutions from '@/components/solution/ProblemSolutions';
 const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const currentSubmission = submissionsStore((state) => state.currentSubmission);
   const [activeTab, setActiveTab] = useState("statement");
-  const { id } = useParams();
+  const { id, solutionId } = useParams();
   const location = useLocation();
   const contest = contestStore((state) => state.contest);
   let contestParticipantId = null;
@@ -39,7 +38,9 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   }
   // Update tab when submission state changes
   useEffect(() => {
-    if (currentSubmission && currentSubmission.isNew === true){
+    if (location.pathname.includes('/solutions')) {
+      setActiveTab("solutions");
+    }else if (currentSubmission && currentSubmission.isNew === true){
       setActiveTab("submission");
       // Mark as not new anymore
       currentSubmission.isNew = false;
@@ -47,7 +48,19 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
     else {
       setActiveTab("statement");
     }
-  }, [currentSubmission]);
+  }, [location.pathname,currentSubmission]);
+  
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    
+    // Update URL based on tab
+    if (value === 'solutions') {
+      navigate(`/problemset/problem/${id}/solutions`, { replace: true });
+    } else if (value === 'statement') {
+      navigate(`/problemset/problem/${id}`, { replace: true });
+    }
+    // Other tabs don't change URL
+  };
 
   // Add handler to switch to statement tab when problem is clicked
   const handleProblemClick = () => {
@@ -59,7 +72,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
         <div className="h-full min-h-0 overflow-y-auto">
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="bg-gray-50">
             <TabsList>
               {isContest && (
@@ -72,6 +85,11 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 <Description />
                 Statement
               </TabsTrigger>
+              <TabsTrigger value="solutions">
+                <Lightbulb className='w-4 h-4 mr-2' />
+                Solutions
+              </TabsTrigger>
+              
               <TabsTrigger value="submission">
                 <History />
                 Submission
@@ -110,6 +128,10 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 classroomId={classroomId}
                 />
             </TabsContent>
+            <TabsContent value="solutions">
+              <ProblemSolutions problemShortId={id} />
+            </TabsContent>
+            
             {isContest && (
               <TabsContent value="rankings">
                 <RankingContest 

@@ -5,7 +5,7 @@ const AuthModalContext = createContext();
 export const AuthModalProvider = ({ children }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false); 
   // Modal options (prefillEmail, onSuccess callback, etc.)
   const [modalOptions, setModalOptions] = useState({
     prefillEmail: '',
@@ -32,6 +32,11 @@ export const AuthModalProvider = ({ children }) => {
     setIsRegisterOpen(true);
     setIsLoginOpen(false);
   };
+  const openForgotPassword = (options = {}) => { 
+    closeModals();
+    setModalOptions(options);
+    setIsForgotPasswordOpen(true);
+  };
 
   // Generic openModal function
   const openModal = (type, options = {}) => {
@@ -57,6 +62,7 @@ export const AuthModalProvider = ({ children }) => {
   const closeModals = () => {
     setIsLoginOpen(false);
     setIsRegisterOpen(false);
+    setIsForgotPasswordOpen(false);
     // Clear options after closing
     setTimeout(() => {
       setModalOptions({
@@ -66,18 +72,25 @@ export const AuthModalProvider = ({ children }) => {
       });
     }, 300); // Delay to allow modal close animation
   };
+  const switchToForgotPassword = () => { // ← ADDED
+    closeModals();
+    openForgotPassword(modalOptions);
+  };
 
   return (
     <AuthModalContext.Provider value={{
       isLoginOpen,
       isRegisterOpen,
+      isForgotPasswordOpen,
       modalOptions,
       openLogin,
       openRegister,
+      openForgotPassword,
       openModal,
       closeModals,
       switchToRegister,
-      switchToLogin
+      switchToLogin,
+      switchToForgotPassword
     }}>
       {children}
     </AuthModalContext.Provider>

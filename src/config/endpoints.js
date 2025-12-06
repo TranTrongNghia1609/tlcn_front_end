@@ -8,7 +8,8 @@ export const AUTH_ENDPOINTS = {
   ME: '/auth/me',          
   FORGOT_PASSWORD_SEND_OTP: '/auth/forgot-password/send-otp',
   FORGOT_PASSWORD_VERIFY_OTP: '/auth/forgot-password/verify-otp',
-  RESET_PASSWORD: '/auth/reset',
+  FORGOT_PASSWORD_RESET: '/auth/forgot-password/reset',
+  FORGOT_PASSWORD_RESEND_OTP: '/auth/forgot-password/resend-otp',
   ONBOARDING: '/auth/onboarding'
 };
 export const USER_ENDPOINTS = {
