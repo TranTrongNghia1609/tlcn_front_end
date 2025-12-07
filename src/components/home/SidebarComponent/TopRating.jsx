@@ -1,61 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { TrophyIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { getUserRating } from '@/services/userService';
+import { useNavigate } from 'react-router-dom';
 
 const TopRating = () => {
   const [topUsers, setTopUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Mock data cho demo
-  const mockTopUsers = [
-    { 
-      _id: '1', 
-      userName: 'alice_dev', 
-      fullName: 'Alice Johnson', 
-      avatar: null, 
-      rating: 2450,
-      solvedProblems: 342
-    },
-    { 
-      _id: '2', 
-      userName: 'bob_coder', 
-      fullName: 'Bob Smith', 
-      avatar: null, 
-      rating: 2398,
-      solvedProblems: 298
-    },
-    { 
-      _id: '3', 
-      userName: 'charlie_algo', 
-      fullName: 'Charlie Brown', 
-      avatar: null, 
-      rating: 2301,
-      solvedProblems: 267
-    },
-    { 
-      _id: '4', 
-      userName: 'diana_prog', 
-      fullName: 'Diana Wilson', 
-      avatar: null, 
-      rating: 2156,
-      solvedProblems: 234
-    },
-    { 
-      _id: '5', 
-      userName: 'eve_tech', 
-      fullName: 'Eve Davis', 
-      avatar: null, 
-      rating: 2089,
-      solvedProblems: 198
-    }
-  ];
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulate loading
     setLoading(true);
-    setTimeout(() => {
-      setTopUsers(mockTopUsers);
+    const fetchRating = async () => {
+      const response = await getUserRating();
+      setTopUsers(response.data);
       setLoading(false);
-    }, 1000);
+    }
+    fetchRating();
   }, []);
 
   const getRatingColor = (rating) => {
@@ -123,9 +83,9 @@ const TopRating = () => {
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {user.fullName || user.userName}
                     </p>
-                    <div className={`text-sm font-bold ${getRatingColor(user.rating)}`}>
+                    {/* <div className={`text-sm font-bold ${getRatingColor(user.rating)}`}>
                       {user.rating}
-                    </div>
+                    </div> */}
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -133,7 +93,7 @@ const TopRating = () => {
                       {badge.text}
                     </span>
                     <p className="text-xs text-gray-500">
-                      {user.solvedProblems} solved
+                      {user.acceptedCount} solved
                     </p>
                   </div>
                 </div>
@@ -145,8 +105,9 @@ const TopRating = () => {
 
       {/* View All Button */}
       <div className="mt-4 pt-4 border-t border-gray-100">
-        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
-          View Leaderboard
+        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+          onClick={() => navigate('/leaderboard')}>
+          Xem bảng xếp dạng
         </button>
       </div>
     </div>

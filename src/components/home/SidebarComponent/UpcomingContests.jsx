@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarIcon, CodeBracketIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { getUpcomingContests } from '@/services/homeService';
 
 const UpcomingContests = () => {
   const [upcomingContests, setUpcomingContests] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   // Mock data cho demo
   const mockUpcomingContests = [
     {
@@ -37,15 +39,24 @@ const UpcomingContests = () => {
   useEffect(() => {
     // Simulate loading
     setLoading(true);
-    setTimeout(() => {
-      setUpcomingContests(mockUpcomingContests);
+    const fetchUpcomingContests = async () => {
+      const response = await getUpcomingContests();
+      setUpcomingContests(response.data);
+      // console.log(response.data[0].problems.length);
       setLoading(false);
-    }, 1000);
+    }
+    fetchUpcomingContests();
   }, []);
 
-  const formatDuration = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+  const formatDuration = (milliseconds) => {
+    let second = milliseconds /1000;
+    const day = Math.floor(second / (3600 * 24));
+    second = second % (3600 * 24);
+    const hours = Math.floor(second / 60);
+    const mins = second % 60;
+    if (day > 0){
+      return `${day}d ${hours}h ${mins}m`;
+    }
     if (hours > 0) {
       return `${hours}h ${mins}m`;
     }
@@ -71,7 +82,7 @@ const UpcomingContests = () => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center space-x-2 mb-4">
         <CalendarIcon className="w-5 h-5 text-red-500" />
-        <h3 className="font-semibold text-gray-900">Upcoming Contests</h3>
+        <h3 className="font-semibold text-gray-900">Kỳ thi sắp diễn ra</h3>
       </div>
       
       {loading ? (
@@ -107,18 +118,18 @@ const UpcomingContests = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <div className="">
+                <div className="flex items-center justify-between text-xs text-gray-500">
                   <span className="flex items-center space-x-1">
                     <CodeBracketIcon className="w-3 h-3" />
-                    <span>{contest.problemsCount} problems</span>
+                    <span>{contest.problems.length} problems</span>
                   </span>
-                  <span>{contest.participants} registered</span>
+                  <span>{contest?.noOfParticipants || 0} registered</span>
                 </div>
                 
-                <div className="text-xs font-medium text-orange-600">
+                {/* <div className="text-xs font-medium text-orange-600">
                   {getTimeUntilStart(contest.startTime)}
-                </div>
+                </div> */}
               </div>
 
               {/* Progress bar for time until start */}
@@ -143,14 +154,12 @@ const UpcomingContests = () => {
         </div>
       )}
 
-      {/* View All Button */}
-      {upcomingContests.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
-            View All Contests
-          </button>
-        </div>
-      )}
+      <div className="mt-4 pt-4 border-t border-gray-100">
+        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium" 
+          onClick={() => navigate('/contests')}>
+          Xem tất cả
+        </button>
+      </div>
     </div>
   );
 };
