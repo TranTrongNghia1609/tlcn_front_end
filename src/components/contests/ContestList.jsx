@@ -11,9 +11,13 @@ import {
 } from "@/components/ui/pagination"
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import contestCover1 from '@/assets/contest-cover-1.png';
+import contestCover2 from '@/assets/contest-cover-2.png';
+import contestCover3 from '@/assets/contest-cover-3.png';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
-const ContestList = () => {
+const imageList = [contestCover1, contestCover2, contestCover3];
+const ContestList = ({filter}) => {
   const [contests, setContests] = useState([])
   const [loading, setLoading] = useState(true)
   const [contestPagination, setContestPagination] = useState()
@@ -21,11 +25,11 @@ const ContestList = () => {
   const navigate = useNavigate();
   useEffect(() => {
     fetchContests()
-  }, [pageActive])
+  }, [pageActive, filter])
 
   const fetchContests = async () => {
     try {
-      const params = { page: pageActive}
+      const params = { page: pageActive, status: filter?.status, type: filter?.type }
       const data = await getContests(params)
       setContests(data.data.content)
       setContestPagination(data.data)
@@ -93,14 +97,14 @@ const ContestList = () => {
 
   return (
     <div className="space-y-3">
-      <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6">
+      {/* <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Danh sách cuộc thi
         </h2>
-      </div>
+      </div> */}
 
       <div className="space-y-2">
-        {contests.map((contest) => {
+        {contests.map((contest, idx) => {
           const status = getContestStatus(contest.startTime, contest.endTime)
           
           return (
@@ -108,9 +112,31 @@ const ContestList = () => {
               key={contest._id}
               className="cursor-pointer group border-gray-200
                          transition-all duration-300 ease-in-out
-                         hover:shadow-lg hover:-translate-y-1 hover:border-purple-300"
+                         hover:shadow-lg hover:-translate-y-1 hover:border-purple-300
+                         relative"
               onClick={() => {navigate(`/contest/${contest.code}`)}}
             >
+              {/* Ảnh ở góc phải - bị crop bởi đường line */}
+              <div 
+                className="absolute top-0 right-0 w-2/5 h-full"
+                style={{
+                  clipPath: "polygon(40% 0, 100% 0, 100% 100%, 0% 100%)"
+                }}
+              >
+                <img 
+                  src={imageList[idx % 3]}
+                  alt="Background"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Overlay để làm tối ảnh nếu cần */}
+              <div 
+                className="absolute top-0 right-0 w-2/5 h-full bg-black/10"
+                style={{
+                  clipPath: "polygon(40% 0, 100% 0, 100% 100%, 0% 100%)"
+                }}
+              />
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

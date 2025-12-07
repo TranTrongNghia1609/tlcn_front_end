@@ -1,5 +1,6 @@
 import { CONTEST_ENDPOINTS } from "@/config/endpoints";
 import API from "@/utils/api"
+import { getUpcomingContests } from './homeService';
 
 export const getContests = async (params = null) => {
   try {
