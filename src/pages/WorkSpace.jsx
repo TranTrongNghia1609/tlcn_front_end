@@ -86,14 +86,16 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 <Description />
                 Statement
               </TabsTrigger>
-              <TabsTrigger value="solutions">
-                <Lightbulb className='w-4 h-4 text-yellow-500' />
-                Solutions
-              </TabsTrigger>
+              
               
               <TabsTrigger value="submission">
                 <History />
                 Submission
+              </TabsTrigger>
+
+              <TabsTrigger value="solutions">
+                <Lightbulb className='w-4 h-4 text-yellow-500' />
+                Solutions
               </TabsTrigger>
               {isContest && (
                 <TabsTrigger value="rankings">

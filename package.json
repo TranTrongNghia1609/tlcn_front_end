@@ -50,7 +50,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.7",
     "framer-motion": "^12.23.12",
-    "katex": "^0.16.22",
+    "katex": "^0.16.25",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.542.0",
