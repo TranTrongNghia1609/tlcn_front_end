@@ -72,7 +72,11 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
 
     if (onProblemClick) onProblemClick();
   };
-
+  const checkingLocked = () => {
+    if (!isStarted) return true;
+    return contest.userParticipation?.id === null;
+  }
+  const isLocked = checkingLocked();
   const problemListSection = () => {
     return (
       <div className="p-2">
@@ -93,7 +97,6 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
             </TableHeader>
             <TableBody>
               {problems.map((problem, index) => {
-                const isLocked = !isStarted;
                 const isHighlighted = !isLocked && currentProblemId && problem.shortId === currentProblemId;
                 
                 return (

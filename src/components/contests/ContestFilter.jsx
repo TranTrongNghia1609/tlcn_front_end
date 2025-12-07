@@ -1,7 +1,28 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Calendar, Trophy, Users } from 'lucide-react'
 
-const ContestSideBar = () => {
+const ContestSideBar = ({ onFilterChange }) => {
+  const [filters, setFilters] = useState({
+    status: [],
+    type: 'all' // Đổi thành string vì radio chỉ chọn 1 giá trị
+  })
+
+  const handleStatusChange = (status) => {
+    const newStatus = filters.status.includes(status)
+      ? filters.status.filter(s => s !== status)
+      : [...filters.status, status]
+    
+    const newFilters = { ...filters, status: newStatus }
+    setFilters(newFilters)
+    onFilterChange?.(newFilters)
+  }
+
+  const handleTypeChange = (type) => {
+    const newFilters = { ...filters, type }
+    setFilters(newFilters)
+    onFilterChange?.(newFilters)
+  }
+
   return (
     <div className="space-y-4">
       {/* Filter by Status */}
@@ -12,23 +33,32 @@ const ContestSideBar = () => {
         </h3>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-0" 
+            <input
+              value="upcoming"
+              type="checkbox"
+              checked={filters.status.includes('upcoming')}
+              onChange={() => handleStatusChange('upcoming')}
+              className="rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
             />
             <span className="text-sm group-hover:text-blue-600 transition-colors">Sắp diễn ra</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="rounded text-purple-600 focus:ring-purple-500 focus:ring-offset-0" 
+            <input
+              value="ongoing"
+              type="checkbox"
+              checked={filters.status.includes('ongoing')}
+              onChange={() => handleStatusChange('ongoing')}
+              className="rounded text-purple-600 focus:ring-purple-500 focus:ring-offset-0"
             />
             <span className="text-sm group-hover:text-purple-600 transition-colors">Đang diễn ra</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="rounded text-gray-600 focus:ring-gray-500 focus:ring-offset-0" 
+            <input
+              value="ended"
+              type="checkbox"
+              checked={filters.status.includes('ended')}
+              onChange={() => handleStatusChange('ended')}
+              className="rounded text-gray-600 focus:ring-gray-500 focus:ring-offset-0"
             />
             <span className="text-sm group-hover:text-gray-600 transition-colors">Đã kết thúc</span>
           </label>
@@ -43,16 +73,35 @@ const ContestSideBar = () => {
         </h3>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-0" 
+            <input
+              type="radio"
+              name="contestType"
+              value="all"
+              checked={filters.type === 'all'}
+              onChange={() => handleTypeChange('all')}
+              className="text-gray-600 focus:ring-gray-500 focus:ring-offset-0"
+            />
+            <span className="text-sm group-hover:text-gray-600 transition-colors">Tất cả</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="radio"
+              name="contestType"
+              value="public"
+              checked={filters.type === 'public'}
+              onChange={() => handleTypeChange('public')}
+              className="text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
             />
             <span className="text-sm group-hover:text-blue-600 transition-colors">Công khai</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="rounded text-purple-600 focus:ring-purple-500 focus:ring-offset-0" 
+            <input
+              type="radio"
+              name="contestType"
+              value="private"
+              checked={filters.type === 'private'}
+              onChange={() => handleTypeChange('private')}
+              className="text-purple-600 focus:ring-purple-500 focus:ring-offset-0"
             />
             <span className="text-sm group-hover:text-purple-600 transition-colors">Riêng tư</span>
           </label>
