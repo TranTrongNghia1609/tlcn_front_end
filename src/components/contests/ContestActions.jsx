@@ -3,6 +3,11 @@ import { registerToContest } from '@/services/contestService'
 import { contestStore } from '@/zustand/contestStore'
 import { Play, MessageCircle, ExternalLink } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import Swal from 'sweetalert2'
+import Modal from '../common/Modal'
+import { Input } from '../ui/input'
+import { useState } from 'react'
+import { toast } from 'sonner'
 const CONTEST_STATUS = {
   "ongoing": {
     lable: "Tham gia ngay",
@@ -36,6 +41,8 @@ const CONTEST_STATUS = {
 export default function ContestActions() {
   const contest = contestStore((state) => state.contest)
   const setContest = contestStore((state) => state.setContest)
+  const [password, setPassword] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const getAction = () => {
     const now = new Date()
@@ -72,13 +79,24 @@ export default function ContestActions() {
   const handleClick = async () => {
     if (action.type == 2){
       try {
-        const response = await registerToContest(contest._id);
-        alert('Đăng ký cuộc thi thành công!');
-        window.location.reload();
+        if (contest.isPrivate){
+          if (!isModalOpen){
+            setIsModalOpen(true);
+            return;
+          }
+          const response = await registerToContest(contest._id, {password});
+          toast.success('Đăng ký cuộc thi thành công!');
+          window.location.reload();
+        }
+        else{
+          const response = await registerToContest(contest._id);
+          toast.success('Đăng ký cuộc thi thành công!');
+          window.location.reload();
+        }
 
       } catch (error) {
         console.error('Error registering to contest:', error);
-        alert('Đăng ký cuộc thi thất bại. Vui lòng thử lại.');
+        toast.error('Đăng ký cuộc thi thất bại!');
       }
     }
     else if (action.type == 1){
@@ -87,6 +105,25 @@ export default function ContestActions() {
   }
   return (
     <div className="flex items-center gap-3">
+      <Modal isOpen={isModalOpen}>
+        <div className='p-10 space-y-4'>
+          <h3 className='text-center'>Đây là kỳ thi riêng tư, bạn cần nhập mật khẩu trước khi đăng ký</h3>
+          <Input type="password" onChange={(e) => setPassword(e.target.value)}></Input>
+          <div className='flex justify-center gap-4 items-center'>
+            <Button className={'bg-blue-600/90 hover:bg-blue-600 cursor-pointer'}
+              onClick={() => {
+                setIsModalOpen(false);
+                handleClick();
+              }}>
+              Đăng ký</Button>
+            <Button className={'bg-gray-600/90 hover:bg-gray-600 cursor-pointer'}
+              onClick={() => {
+                setIsModalOpen(false);
+              }}>
+              Huỷ</Button>
+          </div>
+        </div>
+      </Modal>
       <Button
         className={`cursor-pointer gap-2 rounded-full px-6 ${action.style}`}
         variant="ghost"
