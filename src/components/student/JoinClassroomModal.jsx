@@ -66,50 +66,26 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
         <Card className="max-w-md w-full p-6 relative">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             <X size={20} />
           </button>
 
           {step === 1 ? (
             <>
-              {/* Step 1: Enter Code */}
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Key className="text-white" size={28} />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">Tham gia lớp học</h2>
                 <p className="text-gray-600">
-                  Nhập mã lớp học hoặc mã mời để tham gia
+                  Nhập mã mời để tham gia
                 </p>
               </div>
 
               <form onSubmit={handleJoin} className="space-y-4">
-                <div>
-                  <Label>Mã lớp học (Class Code)</Label>
-                  <Input
-                    placeholder="VD: CS101-2024"
-                    value={classCode}
-                    onChange={(e) => {
-                      setClassCode(e.target.value.toUpperCase());
-                      setInviteCode(''); // Clear invite code
-                    }}
-                    className="font-mono"
-                    disabled={loading || !!inviteCode}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Mã lớp học công khai được giảng viên cung cấp
-                  </p>
-                </div>
+              
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">HOẶC</span>
-                  </div>
-                </div>
 
                 <div>
                   <Label>Mã mời (Invite Code)</Label>
@@ -140,7 +116,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                     type="button"
                     variant="outline"
                     onClick={handleClose}
-                    className="flex-1"
+                    className="flex-1 cursor-pointer hover:bg-gray-100"
                     disabled={loading}
                   >
                     Hủy
@@ -148,7 +124,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                   <Button
                     type="submit"
                     disabled={loading || (!classCode && !inviteCode)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 cursor-pointer"
                   >
                     {loading ? (
                       <>

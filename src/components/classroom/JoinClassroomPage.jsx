@@ -123,7 +123,7 @@ const JoinClassroomPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-50">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">Đang xác thực lời mời...</p>
@@ -170,7 +170,7 @@ const JoinClassroomPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
             <Mail className="w-6 h-6" />
           </div>
@@ -250,13 +250,13 @@ const JoinClassroomPage = () => {
                     </div>
                     <button
                       onClick={handleRegister}
-                      className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-medium"
+                      className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 font-medium cursor-pointer"
                     >
                       Đăng ký ngay
                     </button>
                     <button
                       onClick={handleLogin}
-                      className="w-full px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium"
+                      className="w-full px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium cursor-pointer"
                     >
                       Đã có tài khoản? Đăng nhập
                     </button>

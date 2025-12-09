@@ -15,7 +15,8 @@ import {
   ChevronRight,
   ArrowLeft,
   Plus,
-  Edit
+  Edit,
+  RefreshCw
 } from 'lucide-react';
 import solutionService from '@/services/solutionService';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -31,6 +32,7 @@ const ProblemSolutions = ({ problemShortId }) => {
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingBest, setLoadingBest] = useState(false);
+  const [filterMySolution, setFilterMySolution] = useState(false);
   const [sortBy, setSortBy] = useState('votes');
   const [selectedSolutionId, setSelectedSolutionId] = useState(null);
   const [userSolution, setUserSolution] = useState(null); // Track user's solution
@@ -58,7 +60,7 @@ const ProblemSolutions = ({ problemShortId }) => {
     try {
       setLoading(true);
       const response = await solutionService.getSolutionsByProblem(problemShortId, {
-        sort: sortBy
+        sortBy
       });
 
       const solutionsData = response?.data?.items || [];
@@ -82,6 +84,9 @@ const ProblemSolutions = ({ problemShortId }) => {
       setLoading(false);
     }
   };
+  const filteredSolutions = filterMySolution && user
+    ? solutions.filter(sol => sol.author?._id === user.id || sol.author?.id === user.id)
+    : solutions;
 
   const handleSolutionClick = (solutionId) => {
     // Update URL and show detail view
@@ -293,7 +298,7 @@ const ProblemSolutions = ({ problemShortId }) => {
                 className={`cursor-pointer gap-2 ${userSolution
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : 'bg-green-600 hover:bg-green-700'
-                  }` }
+                  }`}
               >
                 {loadingBest ? (
                   <>
@@ -311,8 +316,10 @@ const ProblemSolutions = ({ problemShortId }) => {
                     Share My Solution
                   </>
                 )}
+
               </Button>
             )}
+
           </div>
 
           {/* Sort Tabs */}
@@ -321,9 +328,8 @@ const ProblemSolutions = ({ problemShortId }) => {
               variant={sortBy === 'votes' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setSortBy('votes')}
-              className={`gap-2 cursor-pointer transition ${
-                sortBy === 'votes' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
-              }`}
+              className={`gap-2 cursor-pointer transition ${sortBy === 'votes' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
+                }`}
             >
               <TrendingUp className="w-4 h-4" />
               Top
@@ -332,9 +338,8 @@ const ProblemSolutions = ({ problemShortId }) => {
               variant={sortBy === 'recent' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setSortBy('recent')}
-              className={`gap-2 cursor-pointer transition ${
-                sortBy === 'recent' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
-              }`}
+              className={`gap-2 cursor-pointer transition ${sortBy === 'recent' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
+                }`}
             >
               <Clock className="w-4 h-4" />
               Recent
@@ -343,174 +348,246 @@ const ProblemSolutions = ({ problemShortId }) => {
               variant={sortBy === 'views' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setSortBy('views')}
-              className={`gap-2 cursor-pointer transition ${
-                sortBy === 'views' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
-              }`}
+              className={`gap-2 cursor-pointer transition ${sortBy === 'views' ? 'bg-blue-600 text-white hover:bg-blue-700' : ''
+                }`}
             >
               <Eye className="w-4 h-4" />
               Most Viewed
             </Button>
+            {user && userSolution && (
+              <>
+                <div className="w-px h-8 bg-gray-300 mx-1" />
+
+                {/* My Solution Filter */}
+                <Button
+                  variant={filterMySolution ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFilterMySolution(!filterMySolution)}
+                  className={`gap-2 cursor-pointer transition ${filterMySolution ? 'bg-purple-600 text-white hover:bg-purple-700' : ''
+                    }`}
+                >
+                  <Edit className="w-4 h-4" />
+                  My Solution
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Solutions List - Scrollable */}
       <div className="flex-1 overflow-y-auto divide-y">
-        {solutions.map((solution) => {
-          const isUserSolution = user && (
-            solution.author?._id === user.id ||
-            solution.author?.id === user.id
-          );
+        {filteredSolutions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <p className="text-lg font-medium">Không tìm thấy solution</p>
+            {filterMySolution && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setFilterMySolution(false)}
+                className="mt-4"
+              >
+                Xem tất cả solutions
+              </Button>
+            )}
+          </div>
+        ) : (
+          filteredSolutions.map((solution) => {
+            const isUserSolution = user && (
+              solution.author?._id === user.id ||
+              solution.author?.id === user.id
+            );
 
-          return (
-            <div
-              key={solution._id}
-              className={`px-6 py-5 hover:bg-gray-50 cursor-pointer transition-colors ${isUserSolution ? 'bg-blue-50/30 border-l-4 border-l-blue-500' : ''
-                }`}
-              onClick={() => handleSolutionClick(solution._id)}
-            >
-              <div className="flex gap-4">
-                {/* Content Section */}
-                <div className="flex-1 min-w-0">
-                  {/* Title with badge if user's solution */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
-                      {solution.title}
-                    </h3>
-                    {isUserSolution && (
-                      <Badge className="bg-blue-500 text-white text-xs">
-                        Your Solution
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Meta Info */}
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-3">
-                    {/* Author */}
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-6 h-6">
-                        <AvatarImage src={solution.author?.avatar} />
-                        <AvatarFallback className="text-xs">
-                          {solution.author?.fullName?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-gray-800">
-                        {solution.author?.fullName || 'Anonymous'}
-                      </span>
-                    </div>
-
-                    <span className="text-gray-400">•</span>
-
-                    {/* Time */}
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {formatTimeAgo(solution.createdAt)}
-                    </span>
-
-                    <span className="text-gray-400">•</span>
-
-                    {/* Approach */}
-                    <Badge className={`${getApproachColor(solution.approach)} text-xs`}>
-                      {formatApproachName(solution.approach)}
-                    </Badge>
-                  </div>
-
-                  {/* Complexity Tags */}
-                  <div className="flex gap-3 mb-3">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 rounded text-xs">
-                      <span className="text-gray-600">Time:
-                        <span className="font-mono font-semibold text-blue-700"> {solution.complexity?.time || 'N/A'}</span>
-                      </span>
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded text-xs">
-                      <span className="text-gray-600">Space:
-                        <span className="font-mono font-semibold text-green-700"> {solution.complexity?.space || 'N/A'}</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    {/* Vote buttons */}
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 w-8 p-0 ${solution.userVote === 'upvote'
-                          ? 'bg-green-100 hover:bg-green-200'
-                          : 'hover:bg-green-50'
-                          }`}
-                        onClick={(e) => handleVote(solution._id, 'upvote', e)}
-                      >
-                        <ThumbsUp
-                          className={`w-4 h-4 ${solution.userVote === 'upvote'
-                            ? 'text-green-600 fill-green-600'
-                            : 'text-gray-600 hover:text-green-600'
-                            }`}
-                        />
-                      </Button>
-
-                      <span className="font-semibold text-gray-900 min-w-[2rem] text-center">
-                        {solution.voteScore || 0}
-                      </span>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 w-8 p-0 ${solution.userVote === 'downvote'
-                          ? 'bg-red-100 hover:bg-red-200'
-                          : 'hover:bg-red-50'
-                          }`}
-                        onClick={(e) => handleVote(solution._id, 'downvote', e)}
-                      >
-                        <ThumbsDown
-                          className={`w-4 h-4 ${solution.userVote === 'downvote'
-                            ? 'text-red-600 fill-red-600'
-                            : 'text-gray-600 hover:text-red-600'
-                            }`}
-                        />
-                      </Button>
-                    </div>
-
-                    <span className="text-gray-300">|</span>
-
-                    {/* Views */}
-                    <span className="flex items-center gap-1.5">
-                      <Eye className="w-4 h-4" />
-                      {solution.viewCount || 0}
-                    </span>
-
-                    {/* Comments */}
-                    <span className="flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4" />
-                      {solution.commentCount || 0}
-                    </span>
-                  </div>
-
-                  {/* Tags */}
-                  {solution.tags && solution.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      {solution.tags.slice(0, 3).map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs bg-gray-50 hover:bg-gray-100"
-                        >
-                          {tag}
+            return (
+              <div
+                key={solution._id}
+                className={`px-6 py-5 hover:bg-gray-50 cursor-pointer transition-colors ${isUserSolution ? 'bg-blue-50/30 border-l-4 border-l-blue-500' : ''
+                  }`}
+                onClick={() => handleSolutionClick(solution._id)}
+              >
+                <div className="flex gap-4">
+                  <div className="flex-1 min-w-0">
+                    {/* Title with badges */}
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                        {solution.title}
+                      </h3>
+                      {isUserSolution && (
+                        <Badge className="bg-blue-500 text-white text-xs">
+                          Your Solution
                         </Badge>
-                      ))}
-                      {solution.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs bg-gray-50">
-                          +{solution.tags.length - 3}
+                      )}
+                      {/* Status badges for user's own solutions */}
+                      {isUserSolution && solution.status === 'pending_review' && (
+                        <Badge className="bg-yellow-500 text-white text-xs">
+                          Pending Review
+                        </Badge>
+                      )}
+                      {isUserSolution && solution.status === 'rejected' && (
+                        <Badge className="bg-red-500 text-white text-xs">
+                          Rejected
+                        </Badge>
+                      )}
+                      {isUserSolution && solution.status === 'hidden' && (
+                        <Badge className="bg-gray-500 text-white text-xs">
+                          Hidden
                         </Badge>
                       )}
                     </div>
-                  )}
+
+                    {/* Show rejection reason if rejected */}
+                    {isUserSolution && solution.status === 'rejected' && solution.rejectionReason && (
+                      <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-800">
+                          <span className="font-semibold">Lý do từ chối:</span> {solution.rejectionReason}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Meta Info */}
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-3">
+                      {/* Author */}
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={solution.author?.avatar} />
+                          <AvatarFallback className="text-xs">
+                            {solution.author?.fullName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-gray-800">
+                          {solution.author?.fullName || 'Anonymous'}
+                        </span>
+                      </div>
+
+                      <span className="text-gray-400">•</span>
+
+                      {/* Time */}
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {formatTimeAgo(solution.createdAt)}
+                      </span>
+
+                      <span className="text-gray-400">•</span>
+
+                      {/* Approach */}
+                      <Badge className={`${getApproachColor(solution.approach)} text-xs`}>
+                        {formatApproachName(solution.approach)}
+                      </Badge>
+                    </div>
+
+                    {/* Rest of the code remains the same... */}
+                    {/* Complexity Tags */}
+                    <div className="flex gap-3 mb-3">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 rounded text-xs">
+                        <span className="text-gray-600">Time:
+                          <span className="font-mono font-semibold text-blue-700"> {solution.complexity?.time || 'N/A'}</span>
+                        </span>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded text-xs">
+                        <span className="text-gray-600">Space:
+                          <span className="font-mono font-semibold text-green-700"> {solution.complexity?.space || 'N/A'}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      {/* Vote buttons */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 w-8 p-0 ${solution.userVote === 'upvote'
+                              ? 'bg-green-100 hover:bg-green-200'
+                              : 'hover:bg-green-50'
+                            }`}
+                          onClick={(e) => handleVote(solution._id, 'upvote', e)}
+                        >
+                          <ThumbsUp
+                            className={`w-4 h-4 ${solution.userVote === 'upvote'
+                                ? 'text-green-600 fill-green-600'
+                                : 'text-gray-600 hover:text-green-600'
+                              }`}
+                          />
+                        </Button>
+
+                        <span className="font-semibold text-gray-900 min-w-[2rem] text-center">
+                          {solution.voteScore || 0}
+                        </span>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 w-8 p-0 ${solution.userVote === 'downvote'
+                              ? 'bg-red-100 hover:bg-red-200'
+                              : 'hover:bg-red-50'
+                            }`}
+                          onClick={(e) => handleVote(solution._id, 'downvote', e)}
+                        >
+                          <ThumbsDown
+                            className={`w-4 h-4 ${solution.userVote === 'downvote'
+                                ? 'text-red-600 fill-red-600'
+                                : 'text-gray-600 hover:text-red-600'
+                              }`}
+                          />
+                        </Button>
+                      </div>
+
+                      <span className="text-gray-300">|</span>
+
+                      {/* Views */}
+                      <span className="flex items-center gap-1.5">
+                        <Eye className="w-4 h-4" />
+                        {solution.viewCount || 0}
+                      </span>
+
+                      {/* Comments */}
+                      <span className="flex items-center gap-1.5">
+                        <MessageSquare className="w-4 h-4" />
+                        {solution.commentCount || 0}
+                      </span>
+                    </div>
+
+                    {/* Tags */}
+                    {solution.tags && solution.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {solution.tags.slice(0, 3).map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs bg-gray-50 hover:bg-gray-100"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {solution.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs bg-gray-50">
+                            +{solution.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    {isUserSolution && solution.status === 'rejected' && (
+                      <div className="mt-3 pt-3 border-t">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/problemset/problem/${id}/resubmit-solution?resubmit=${solution._id}`);
+                          }}
+                          className="bg-orange-600 hover:bg-orange-700 text-white gap-2 w-full sm:w-auto"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          Gửi Lại Solution
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

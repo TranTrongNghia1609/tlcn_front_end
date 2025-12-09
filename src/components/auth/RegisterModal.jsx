@@ -182,12 +182,12 @@ const RegisterModal = () => {
       <Modal isOpen={isRegisterOpen} onClose={handleCloseRegisterModal}>
         <div className="relative bg-white/80 backdrop-blur-md border border-white/30 shadow-xl rounded-xl sm:rounded-2xl w-full px-4 py-6 sm:px-6 md:px-8 sm:py-8 md:py-10 max-h-[90vh] overflow-y-auto">
           <div className="absolute inset-0 pointer-events-none z-0">
-            <div className="flare-bg w-full h-full" />
+            <div className="flare-bg-blue w-full h-full" />
           </div>
 
           <div className="relative z-10">
             <div className="flex flex-col items-center space-y-1 sm:space-y-2 mb-3 sm:mb-4">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold gradient-text-dark text-center">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold gradient-text-blue text-center">
                 Chào mừng đã đến với BNOJ
               </h2>
               <p className="text-xs sm:text-sm text-gray-600 text-center px-2">
@@ -270,7 +270,7 @@ const RegisterModal = () => {
                 />
                 <button
                   type="button"
-                  className="absolute top-8 sm:top-9 right-2 sm:right-3 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  className="absolute top-8 sm:top-9 right-2 sm:right-3 p-1 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   tabIndex={-1}
@@ -320,7 +320,7 @@ const RegisterModal = () => {
                 />
                 <button
                   type="button"
-                  className="absolute top-8 sm:top-9 right-2 sm:right-3 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  className="absolute top-8 sm:top-9 right-2 sm:right-3 p-1 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   disabled={loading}
                   tabIndex={-1}
@@ -343,7 +343,7 @@ const RegisterModal = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-2 sm:py-2.5 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-4"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-800 py-2 sm:py-2.5 rounded-md font-semibold text-white hover:shadow-lg hover:scale-[1.02] transition text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-4"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -367,7 +367,7 @@ const RegisterModal = () => {
               <div className="flex flex-col gap-1.5 sm:gap-2 mt-2">
                 <a
                   href={`${import.meta.env.VITE_API_BASE_URL}/auth/google`}
-                  className="flex items-center justify-center bg-white border border-gray-300 rounded-md py-2 sm:py-2.5 text-gray-700 hover:bg-gray-100 transition text-xs sm:text-sm"
+                  className="flex items-center justify-center bg-white border border-gray-300 rounded-md py-2 sm:py-2.5 text-gray-700 hover:bg-gray-100 transition text-xs sm:text-sm cursor-pointer"
                 >
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   <span className="hidden sm:inline">Đăng ký với Google</span>
@@ -384,7 +384,7 @@ const RegisterModal = () => {
                   type="button"
                   onClick={switchToLogin}
                   disabled={loading}
-                  className="underline text-purple-500 hover:text-pink-500 transition cursor-pointer disabled:opacity-50"
+                  className="underline text-blue-700 hover:text-blue-800 transition cursor-pointer disabled:opacity-50"
                 >
                   Đăng nhập
                 </button>
@@ -392,19 +392,7 @@ const RegisterModal = () => {
             </form>
           </div>
 
-          <style>
-            {`
-              .gradient-text-dark {
-                background: linear-gradient(90deg, #7286ff, #fe7587);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-              }
-              .flare-bg {
-                background: radial-gradient(40% 40% at 50% 50%, rgba(210,32,255,0.4) 0%, rgba(210,32,255,0.1) 40%, transparent 80%);
-                filter: blur(100px);
-              }
-            `}
-          </style>
+        
         </div>
       </Modal>
 

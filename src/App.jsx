@@ -28,7 +28,8 @@ const AppContent = () => {
   // Check if current route is landing page or workspace/problem page
   const isLandingPage = location.pathname === '/';
   const isWorkspacePage = location.pathname.includes('/problem/') || 
-                          location.pathname.includes('/contest/');
+                          location.pathname.includes('/contest/') ||
+                          location.pathname.includes('/classrooms/');
 
   if (loading) {
     return <LoadingSpinner />;
@@ -44,11 +45,11 @@ const AppContent = () => {
                 <PostProvider>
                   <CommentProvider>
                     <AuthModalProvider>
-                      <div className="min-h-screen bg-gray-50">
+                      <div className="min-h-screen bg-gray-50 flex flex-col">
                         {/* Only show Navbar if NOT on landing page */}
                         {!isLandingPage && <Navbar />}
                         
-                        <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
+                        <main className={`flex-1 ${!isLandingPage ? "pt-16 lg:pt-20" : ""}`}>
                           <AppRoutes />
                         </main>
                         

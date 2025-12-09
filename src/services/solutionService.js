@@ -1,6 +1,6 @@
-import api from '../utils/api';
+import api from "../utils/api";
 
-const BASE_URL = '/solutions';
+const BASE_URL = "/solutions";
 
 export const solutionService = {
   // Create solution
@@ -8,10 +8,16 @@ export const solutionService = {
     const response = await api.post(BASE_URL, data);
     return response.data;
   },
+  resubmitSolution: async (id, data) => {
+    const response = await api.put(`${BASE_URL}/${id}/resubmit`, data);
+    return response.data;
+  },
 
   // Get solutions by problem
   getSolutionsByProblem: async (problemShortId, params = {}) => {
-    const response = await api.get(`${BASE_URL}/problem/${problemShortId}`, { params });
+    const response = await api.get(`${BASE_URL}/problem/${problemShortId}`, {
+      params,
+    });
     return response.data;
   },
 
@@ -54,7 +60,7 @@ export const solutionService = {
   // Get vote status for multiple solutions
   getUserVoteStatus: async (solutionIds) => {
     const response = await api.get(`${BASE_URL}/votes/status`, {
-      params: { solutionIds: solutionIds.join(',') }
+      params: { solutionIds: solutionIds.join(",") },
     });
     return response.data;
   },
@@ -67,31 +73,45 @@ export const solutionService = {
 
   // Update comment
   updateComment: async (id, commentId, data) => {
-    const response = await api.put(`${BASE_URL}/${id}/comments/${commentId}`, data);
+    const response = await api.put(
+      `${BASE_URL}/${id}/comments/${commentId}`,
+      data
+    );
     return response.data;
   },
 
   // Delete comment
   deleteComment: async (id, commentId) => {
-    const response = await api.delete(`${BASE_URL}/${id}/comments/${commentId}`);
+    const response = await api.delete(
+      `${BASE_URL}/${id}/comments/${commentId}`
+    );
     return response.data;
   },
 
   // Vote comment
   voteComment: async (id, commentId, voteType) => {
-    const response = await api.post(`${BASE_URL}/${id}/comments/${commentId}/vote`, { voteType });
+    const response = await api.post(
+      `${BASE_URL}/${id}/comments/${commentId}/vote`,
+      { voteType }
+    );
     return response.data;
   },
 
   // Add reply
   addReply: async (id, commentId, data) => {
-    const response = await api.post(`${BASE_URL}/${id}/comments/${commentId}/replies`, data);
+    const response = await api.post(
+      `${BASE_URL}/${id}/comments/${commentId}/replies`,
+      data
+    );
     return response.data;
   },
 
   // Moderate solution (Admin)
   moderateSolution: async (id, action, reason = null) => {
-    const response = await api.patch(`${BASE_URL}/${id}/moderate`, { action, reason });
+    const response = await api.patch(`${BASE_URL}/${id}/moderate`, {
+      action,
+      reason,
+    });
     return response.data;
   },
 
@@ -107,10 +127,10 @@ export const solutionService = {
       const response = await api.get(`${BASE_URL}/check/${problemShortId}`);
       return response.data;
     } catch (error) {
-      console.error('Check solution error:', error);
+      console.error("Check solution error:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default solutionService;

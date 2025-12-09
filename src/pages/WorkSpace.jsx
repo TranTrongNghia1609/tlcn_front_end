@@ -21,7 +21,7 @@ import ProblemSolutions from '@/components/solution/ProblemSolutions';
 const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const currentSubmission = submissionsStore((state) => state.currentSubmission);
   const [activeTab, setActiveTab] = useState("statement");
-  const { id, solutionId } = useParams();
+  const { id ,solutionId, classCode } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const contest = contestStore((state) => state.contest);
@@ -39,28 +39,64 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   }
   // Update tab when submission state changes
   useEffect(() => {
-    if (location.pathname.includes('/solutions')) {
-      setActiveTab("solutions");
-    }else if (currentSubmission && currentSubmission.isNew === true){
+    const pathname = location.pathname;
+    
+    if (pathname.includes('/submission')) {
       setActiveTab("submission");
-      // Mark as not new anymore
-      currentSubmission.isNew = false;
-    }
-    else {
+    } else if (pathname.includes('/solutions')) {
+      setActiveTab("solutions");
+    } else {
       setActiveTab("statement");
     }
-  }, [location.pathname,currentSubmission]);
+
+    // Handle new submission
+    if (currentSubmission && currentSubmission.isNew === true) {
+      setActiveTab("submission");
+      currentSubmission.isNew = false;
+    }
+  }, [location.pathname, currentSubmission]);
   
   const handleTabChange = (value) => {
     setActiveTab(value);
     
-    // Update URL based on tab
-    if (value === 'solutions') {
-      navigate(`/problemset/problem/${id}/solutions`, { replace: true });
-    } else if (value === 'statement') {
-      navigate(`/problemset/problem/${id}`, { replace: true });
+    // Build base URL
+    let baseUrl;
+    if (isContest && code) {
+      // Contest problem - use /contest/:code/problem/:id format
+      baseUrl = `/contest/${code}/problem/${id}`;
+    } else if (classCode) {
+      // Classroom problem
+      baseUrl = `/classrooms/${classCode}/problems/${id}`;
+    } else {
+      // Regular problemset
+      baseUrl = `/problemset/problem/${id}`;
     }
-    // Other tabs don't change URL
+    
+    // Update URL based on tab
+    switch (value) {
+      case 'submission':
+        navigate(`${baseUrl}/submission`, { 
+          replace: true,
+          state: location.state // Preserve state
+        });
+        break;
+      case 'solutions':
+        // Don't navigate to solutions in contest
+        if (!isContest) {
+          navigate(`${baseUrl}/solutions`, { 
+            replace: true,
+            state: location.state
+          });
+        }
+        break;
+      case 'statement':
+      default:
+        navigate(baseUrl, { 
+          replace: true,
+          state: location.state
+        });
+        break;
+    }
   };
 
   // Add handler to switch to statement tab when problem is clicked
@@ -93,10 +129,12 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 Submission
               </TabsTrigger>
 
-              <TabsTrigger value="solutions">
-                <Lightbulb className='w-4 h-4 text-yellow-500' />
-                Solutions
-              </TabsTrigger>
+              {!isContest && (
+                <TabsTrigger value="solutions">
+                  <Lightbulb className='w-4 h-4 text-yellow-500' />
+                  Solutions
+                </TabsTrigger>
+              )}
               {isContest && (
                 <TabsTrigger value="rankings">
                   <Trophy className='text-[#a43eda] stroke-[#a43eda]' />
@@ -131,9 +169,11 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 classroomId={classroomId}
                 />
             </TabsContent>
-            <TabsContent value="solutions">
-              <ProblemSolutions problemShortId={id} />
-            </TabsContent>
+            {!isContest && (
+              <TabsContent value="solutions">
+                <ProblemSolutions problemShortId={id} />
+              </TabsContent>
+            )}
             
             {isContest && (
               <TabsContent value="rankings">
@@ -153,6 +193,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
             <PlayGround
               contestId={isContest ? contestId : null} 
                classroomId={classroomId}
+               onSubmitSuccess={() => handleTabChange('submission')} 
               />
           </Card>
         </div>

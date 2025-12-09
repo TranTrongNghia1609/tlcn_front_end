@@ -109,8 +109,8 @@ const Navbar = () => {
                 <button 
                   onClick={openRegister}
                   className="px-4 py-2 font-medium 
-                  text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700
-                  hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 
+                  text-white bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700
+                  hover:to-blue-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 
                   transition-all duration-300 cursor-pointer"
                 >
                   Đăng kí

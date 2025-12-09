@@ -169,24 +169,24 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerification
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="relative bg-white/90 backdrop-blur-md border border-white/30 shadow-xl rounded-xl sm:rounded-2xl w-full max-w-md mx-auto px-6 py-8">
         <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="flare-bg w-full h-full" />
+          <div className="flare-bg-blue w-full h-full" />
         </div>
 
         <div className="relative z-10">
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center mb-4 shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold gradient-text-blue mb-2">
               Xác thực Email
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 font-medium">
               Chúng tôi đã gửi mã xác thực 6 số đến
             </p>
-            <p className="text-sm font-medium text-blue-600 break-all">
+            <p className="text-sm font-bold text-blue-700 break-all">
               {email}
             </p>
           </div>
@@ -205,7 +205,7 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerification
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   disabled={loading}
-                  className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:opacity-50"
+                  className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors disabled:bg-gray-100 disabled:opacity-50"
                 />
               ))}
             </div>
@@ -214,7 +214,7 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerification
             <button
               type="submit"
               disabled={loading || otp.join('').length !== 6}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 rounded-lg font-bold hover:shadow-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -232,14 +232,14 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerification
 
           {/* Resend Section */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-600 font-medium mb-2">
               Không nhận được mã?
             </p>
             <button
               type="button"
               onClick={handleResendOTP}
               disabled={countdown > 0 || resendLoading}
-              className="text-blue-600 font-medium hover:text-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-blue-700 font-bold hover:text-blue-900 hover:underline transition-colors disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
             >
               {resendLoading ? (
                 <span className="flex items-center justify-center">
@@ -259,20 +259,11 @@ const OTPVerificationModal = ({ isOpen, onClose, email, userName, onVerification
 
           {/* Help Text */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 font-medium">
               Kiểm tra thư mục spam nếu không thấy email
             </p>
           </div>
         </div>
-
-        <style>
-          {`
-            .flare-bg {
-              background: radial-gradient(40% 40% at 50% 50%, rgba(59,130,246,0.3) 0%, rgba(147,51,234,0.2) 40%, transparent 80%);
-              filter: blur(60px);
-            }
-          `}
-        </style>
       </div>
     </Modal>
   );

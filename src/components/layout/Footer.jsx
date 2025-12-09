@@ -11,9 +11,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* About Section */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold gradient-text">BNOJ</h3>
+            <h3 className="text-xl font-bold text-blue-600">BNOJ</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Nền tảng học lập trình trực tuyến hàng đầu với hàng nghìn bài tập và thử thách thú vị.
+              Nền tảng học lập trình trực tuyến với các bài tập và kì thi thú vị.
             </p>
             <div className="flex space-x-4">
               {/* Social Links */}
@@ -67,7 +67,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-gray-900">Liên kết nhanh</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/problems" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+                <Link to="/problemset" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
                   Danh sách bài tập
                 </Link>
               </li>
@@ -82,7 +82,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+                <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors text-sm">
                   Giới thiệu
                 </Link>
               </li>
@@ -185,7 +185,7 @@ const Footer = () => {
             </button>
           </div>
 
-          {/* Made with Love */}
+          {/* Made with Love */}  
           <div className="mt-6 text-center">
             <p className="text-gray-500 text-xs flex items-center justify-center space-x-1">
               <span>Made with</span>
@@ -195,16 +195,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <style>
-        {`
-          .gradient-text {
-            background: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          }
-        `}
-      </style>
+      
     </footer>
   );
 };
