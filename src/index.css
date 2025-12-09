@@ -137,6 +137,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -340,4 +341,292 @@
 body.modal-open {
   overflow: hidden !important;
   padding-right: 0 !important;
+}
+/* ========================================
+   MARKDOWN PREVIEW STYLING
+   Used by: SolutionDetail, EditMySolution, ShareMySolution, ResubmitSolution, SolutionForm
+   ======================================== */
+
+/* Inline code styling */
+.markdown-preview code:not(pre code) {
+  background-color: rgba(253, 230, 138, 0.5);
+  color: #b45309;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-weight: 500;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  white-space: nowrap;
+}
+
+/* Headers styling */
+.markdown-preview h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #3b82f6;
+  color: #111827;
+}
+
+.markdown-preview h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.markdown-preview h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+/* Paragraph and text */
+.markdown-preview p {
+  margin: 1rem 0;
+  line-height: 1.75;
+  color: #374151;
+}
+
+/* Lists */
+.markdown-preview ul, .markdown-preview ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+  line-height: 1.75;
+}
+
+.markdown-preview ul {
+  list-style-type: disc;
+}
+
+.markdown-preview ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.markdown-preview li {
+  margin: 0.5rem 0;
+  color: #374151;
+  padding-left: 0.5rem;
+}
+
+.markdown-preview li::marker {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Nested lists */
+.markdown-preview ol ol {
+  list-style-type: lower-alpha;
+  margin-top: 0.25rem;
+}
+
+.markdown-preview ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-preview ul ul {
+  list-style-type: circle;
+  margin-top: 0.25rem;
+}
+
+.markdown-preview ul ul ul {
+  list-style-type: square;
+}
+
+/* Links */
+.markdown-preview a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.markdown-preview a:hover {
+  color: #1d4ed8;
+}
+
+/* Code blocks with line numbers */
+.code-block-wrapper {
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.code-block-header {
+  background: linear-gradient(to right, #1e293b, #334155);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.code-block-content {
+  background: #282c34;
+  position: relative;
+  overflow-x: auto;
+}
+
+.code-block-content pre {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+  display: flex;
+}
+
+.line-numbers {
+  padding: 1rem 0;
+  text-align: right;
+  user-select: none;
+  color: #636d83;
+  background: #21252b;
+  border-right: 1px solid #3e4451;
+  min-width: 3rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.line-numbers span {
+  display: block;
+  padding: 0 0.75rem;
+}
+
+.code-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.code-content code {
+  background: transparent !important;
+  color: #abb2bf !important;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  display: block;
+  white-space: pre;
+}
+
+/* Table styling */
+.markdown-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.markdown-preview thead {
+  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+}
+
+.markdown-preview th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151;
+  border-bottom: 2px solid #d1d5db;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.markdown-preview td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+
+.markdown-preview tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.markdown-preview tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Blockquote */
+.markdown-preview blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Images */
+.markdown-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Math (KaTeX) */
+.markdown-preview .katex {
+  font-size: 1.1em;
+}
+
+.markdown-preview .katex-display {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Horizontal rule */
+.markdown-preview hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+/* Strong and emphasis */
+.markdown-preview strong {
+  font-weight: 700;
+  color: #111827;
+}
+
+.markdown-preview em {
+  font-style: italic;
+}
+/* ========================================
+   BLUE THEME FOR AUTH MODALS
+   ======================================== */
+
+.gradient-text-blue {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.flare-bg-blue {
+  background: radial-gradient(40% 40% at 50% 50%, rgba(37,99,235,0.4) 0%, rgba(29,78,216,0.3) 40%, transparent 80%);
+  filter: blur(100px);
+}
+
+.gradient-button-blue {
+  background: linear-gradient(to right, #2563eb, #1e40af);
+}
+
+.gradient-button-blue:hover {
+  background: linear-gradient(to right, #1d4ed8, #1e3a8a);
 }

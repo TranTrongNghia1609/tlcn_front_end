@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { useNavigate, } from 'react-router-dom';
@@ -251,8 +251,8 @@ const LandingPage = () => {
                       key={index}
                       onClick={() => goToSlide(index)}
                       className={`transition-all ${index === currentImageIndex
-                          ? 'w-8 bg-blue-600'
-                          : 'w-2 bg-white/60 hover:bg-white'
+                        ? 'w-8 bg-blue-600'
+                        : 'w-2 bg-white/60 hover:bg-white'
                         } h-2 rounded-full`}
                     />
                   ))}
@@ -308,7 +308,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               onClick={() => navigate('/problemset')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-700   text-white px-12 py-6 cursor-pointer"
             >
               Xem tất cả bài tập
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 ml-2">
@@ -481,28 +481,32 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white relative overflow-hidden">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-30">
           <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}></div>
         </div>
 
+        {/* Decorative Elements */}
+        <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 blur-xl"></div>
+        <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-200 rounded-full opacity-20 blur-xl"></div>
+
         <div className="relative max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 selectable-text">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 selectable-text text-gray-900">
             Sẵn sàng bắt đầu?
           </h2>
-          <p className="text-xl md:text-2xl mb-10 text-blue-100 selectable-text leading-relaxed">
-            Tham gia cùng hàng nghìn lập trình viên đang học tập và phát triển mỗi ngày
+          <p className="text-xl md:text-2xl mb-10 text-gray-600 selectable-text leading-relaxed">
+            Tham gia cùng các lập trình viên đang học tập và phát triển mỗi ngày
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button
               size="lg"
               onClick={openRegister}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-12 py-6 hover-lift shadow-2xl cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-12 py-6 hover-lift shadow-2xl cursor-pointer"
             >
-              Đăng ký miễn phí
+              Đăng ký ngay
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 ml-2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
               </svg>
@@ -511,81 +515,15 @@ const LandingPage = () => {
               size="lg"
               variant="outline"
               onClick={() => navigate('/home')}
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-12 py-6 cursor-pointer"
+              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white text-lg px-12 py-6 cursor-pointer transition-all"
             >
               Khám phá ngay
             </Button>
           </div>
-          <p className="mt-6 text-blue-100 selectable-text">
-            Không cần thẻ tín dụng • Miễn phí mãi mãi
-          </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-2">
-              <h3 className="text-3xl font-bold text-white mb-4 gradient-text selectable-text">
-                BN Online Judge
-              </h3>
-              <p className="text-gray-400 mb-6 selectable-text leading-relaxed">
-                Nền tảng học tập lập trình hàng đầu, giúp bạn phát triển kỹ năng coding và chuẩn bị cho sự nghiệp IT.
-              </p>
-              <div className="flex gap-4">
-                {['facebook', 'twitter', 'github', 'linkedin'].map((social) => (
-                  <a
-                    key={social}
-                    href="#"
-                    className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer"
-                  >
-                    <span className="sr-only">{social}</span>
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z" />
-                    </svg>
-                  </a>
-                ))}
-              </div>
-            </div>
 
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4 selectable-text">Về chúng tôi</h4>
-              <ul className="space-y-3">
-                {['Giới thiệu', 'Đội ngũ', 'Tuyển dụng', 'Blog'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="hover:text-blue-400 transition-colors cursor-pointer selectable-text">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4 selectable-text">Hỗ trợ</h4>
-              <ul className="space-y-3">
-                {['Trung tâm trợ giúp', 'Liên hệ', 'Điều khoản', 'Chính sách'].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="hover:text-blue-400 transition-colors cursor-pointer selectable-text">
-                      {item}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 selectable-text">
-              © {new Date().getFullYear()} BN Online Judge. All rights reserved.
-            </p>
-            <p className="text-gray-400 selectable-text mt-4 md:mt-0">
-              Made with ❤️ by BN Team
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

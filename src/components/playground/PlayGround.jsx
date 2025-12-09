@@ -6,19 +6,19 @@ import { mapLanguage } from '@/lib/utils.js';
 import { useProblem } from '@/context/ProblemContext';
 import { submitCode } from '@/services/submissionService';
 import { submissionsStore } from '@/zustand/store';
-import { useLocation } from 'react-router-dom';
+import { useLocation,  useParams, useNavigate } from 'react-router-dom';
 
-
-
-const PlayGround = ({ contestId = null, classroomId = null }) => {
+const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { id: problemId, classCode } = useParams();
   const mapValue = mapLanguage();
   const [language, setLanguage] = useState('cpp');
   const [code, setCode] = useState(mapValue[language].code);
   const { currentProblem } = useProblem();
   const currentSubmission = submissionsStore((state) => state.currentSubmission);
   const addSubmission = submissionsStore((state) => state.addSubmission);
-   const effectiveClassroomId = classroomId || location.state?.classroomId;
+  const effectiveClassroomId = classroomId || location.state?.classroomId;
   const fromClassroom = location.state?.fromClassroom;
 
   console.log('🎮 PlayGround - classroomId (prop):', classroomId);
@@ -41,6 +41,25 @@ const PlayGround = ({ contestId = null, classroomId = null }) => {
     const submissionResult = response.data;
     submissionResult.isNew = true;
     addSubmission(submissionResult);
+    let baseUrl;
+      if (classCode) {
+        // Classroom problem
+        baseUrl = `/classrooms/${classCode}/problems/${problemId}`;
+      } else {
+        // Regular problemset
+        baseUrl = `/problemset/problem/${problemId}`;
+      }
+
+      // Navigate to submission tab
+      navigate(`${baseUrl}/submission`, {
+        replace: true,
+        state: location.state // Preserve state
+      });
+
+      // Or use callback if provided
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
   }
   useEffect(() => {
     setCode(currentSubmission?.source || currentProblem?.lastSubmission?.source || mapValue[language].code);

@@ -81,7 +81,32 @@ export const getSubmissionByUserId = async (
     throw error;
   }
 }
+export const getBestSubmissionByUserId = async (userId, problemId, classroomId = null, excludeClassroom = false) => {
+  try {
+    console.log('📥 getBestSubmissionByUserId:', { userId, problemId, classroomId, excludeClassroom });
+    
+    if (!problemId) {
+      throw new Error('Problem ID is required');
+    }
 
+    const params = {
+      problemId
+    };
+    
+    if (classroomId) {
+      params.classroomId = classroomId;
+    } else if (excludeClassroom === true) {
+      params.excludeClassroom = 'true';
+    }
+
+    const response = await API.get(`/submissions/user/best/${userId}`, { params });
+    console.log(' Best submission response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(' Error getting best submission:', error);
+    throw error;
+  }
+};
 
 export const getSubmissionById = async (submissionId) => {
   try{

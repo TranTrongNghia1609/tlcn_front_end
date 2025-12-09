@@ -1,7 +1,7 @@
 function History() {
   return (
     <svg
-      fill="#a43eda"
+      fill="#1d4ed8"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >

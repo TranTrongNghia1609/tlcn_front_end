@@ -42,7 +42,7 @@ export const SocketProvider = ({ children, url }) => {
       console.error('Socket error:', error);
     });
 
-    // ✅ Lắng nghe BROADCAST mới (thay vì new-post-published và new-contest-published)
+    //  Lắng nghe BROADCAST mới (thay vì new-post-published và new-contest-published)
     socketRef.current.on('new-broadcast', (data) => {
       console.log('📢 Received new broadcast:', data);
       setLatestBroadcast(data);

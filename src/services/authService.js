@@ -147,7 +147,7 @@ export const authService = {
         message: error.message
       });
       
-      // ✅ Throw error để AuthContext có thể handle
+      // Throw error để AuthContext có thể handle
       throw error.response?.data || { message: 'Failed to get current user' };
     }
   },
@@ -182,5 +182,44 @@ export const authService = {
     catch (e){
       throw e;
     }
-  }
+  },
+  // Forgot Password - Send OTP
+  sendForgotPasswordOTP: async (userName) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_SEND_OTP, { userName });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Gửi OTP thất bại' };
+    }
+  },
+
+  // Forgot Password - Verify OTP
+  verifyForgotPasswordOTP: async (otpData) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_VERIFY_OTP, otpData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Xác thực OTP thất bại' };
+    }
+  },
+
+  // Forgot Password - Reset Password
+  resetPassword: async (resetData) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_RESET, resetData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Đặt lại mật khẩu thất bại' };
+    }
+  },
+
+  // Forgot Password - Resend OTP
+  resendForgotPasswordOTP: async (userName) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_RESEND_OTP, { userName });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Gửi lại OTP thất bại' };
+    }
+  },
 }

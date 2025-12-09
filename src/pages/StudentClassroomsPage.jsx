@@ -77,7 +77,7 @@ const StudentClassroomsPage = () => {
 
             <Button
               onClick={() => setShowJoinModal(true)}
-              className="bg-blue-600 text-white hover:bg-blue-700"
+              className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
               size="lg"
             >
               <Plus size={20} className="mr-2" />

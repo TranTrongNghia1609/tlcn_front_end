@@ -77,7 +77,7 @@ const Modal = ({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 "
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -91,7 +91,7 @@ const Modal = ({
         {!title && showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 text-gray-400 hover:text-gray-600 transition-colors p-1"
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
           >
             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

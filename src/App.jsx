@@ -17,14 +17,19 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { CommentProvider } from '@/context/CommentContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { Toaster } from 'sonner';
+import ForgotPasswordModal from './components/auth/ForgotPasswordModal';
+import Footer from './components/layout/Footer';
 import '@/index.css'
 
 const AppContent = () => {
   const { loading } = useAuth();
   const location = useLocation();
   
-  // Check if current route is landing page
+  // Check if current route is landing page or workspace/problem page
   const isLandingPage = location.pathname === '/';
+  const isWorkspacePage = location.pathname.includes('/problem/') || 
+                          location.pathname.includes('/contest/') ||
+                          location.pathname.includes('/classrooms/');
 
   if (loading) {
     return <LoadingSpinner />;
@@ -40,18 +45,22 @@ const AppContent = () => {
                 <PostProvider>
                   <CommentProvider>
                     <AuthModalProvider>
-                      <div className="min-h-screen bg-gray-50">
+                      <div className="min-h-screen bg-gray-50 flex flex-col">
                         {/* Only show Navbar if NOT on landing page */}
                         {!isLandingPage && <Navbar />}
                         
-                        <main className={!isLandingPage ? "pt-16 lg:pt-20" : ""}>
+                        <main className={`flex-1 ${!isLandingPage ? "pt-16 lg:pt-20" : ""}`}>
                           <AppRoutes />
                         </main>
+                        
+                        {/* Only show Footer if NOT on workspace/problem page */}
+                        {!isWorkspacePage && <Footer />}
 
                         {/* Auth Modals */}
                         <LoginModal />
                         <RegisterModal />
-
+                        <ForgotPasswordModal />
+                        
                         {/* Toast Notifications */}
                         <Toaster
                           position="top-right"
