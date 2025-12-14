@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import LeaderboardHeader from '@/components/leaderboard/LeaderBoardHeader'
-import LeaderboardTable from '@/components/leaderboard/LeaderboardTable'
+import LeaderboardTable from '@/components/leaderboard/LeaderBoardTable'
 import TopThreeCard from '@/components/leaderboard/TopThreeCard'
 import StatsCard from '@/components/leaderboard/StatsCard'
 import LevelDistributionCard from '@/components/leaderboard/LevelDistributionCard'

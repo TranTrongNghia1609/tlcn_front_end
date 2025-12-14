@@ -45,7 +45,12 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
       setActiveTab("submission");
     } else if (pathname.includes('/solutions')) {
       setActiveTab("solutions");
-    } else {
+    } else if (isContest && pathname.includes('/rankings')){
+      setActiveTab("rankings");
+    } else if (isContest && pathname.includes('contest-problems')){
+      setActiveTab("contest-problems");
+    }
+    else {
       setActiveTab("statement");
     }
 
@@ -89,6 +94,22 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
           });
         }
         break;
+      case 'rankings':
+        if (isContest) {
+          navigate(`${baseUrl}/rankings`, {
+            replace: true,
+            state: location.state
+          });
+        }
+        break;
+      case 'contest-problems':
+        if (isContest) {
+          navigate(`${baseUrl}/contest-problems`, {
+            replace: true,
+            state: location.state
+          });
+        }
+        break;
       case 'statement':
       default:
         navigate(baseUrl, { 
@@ -114,7 +135,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
             <TabsList>
               {isContest && (
                 <TabsTrigger value="contest-problems">
-                  <List className='text-[#a43eda] stroke-[#a43eda]' />
+                  <List className='text-blue-700 stroke-blue-700' />
                   Problems
                 </TabsTrigger>
               )}
@@ -137,7 +158,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
               )}
               {isContest && (
                 <TabsTrigger value="rankings">
-                  <Trophy className='text-[#a43eda] stroke-[#a43eda]' />
+                  <Trophy className='text-blue-600 stroke-blue-600' />
                     Rankings
                 </TabsTrigger>
               )}

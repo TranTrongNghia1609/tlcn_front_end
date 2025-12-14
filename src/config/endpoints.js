@@ -16,7 +16,8 @@ export const USER_ENDPOINTS = {
   UPLOAD_AVATAR: '/users/profile/avatar/upload',    
   UPDATE_PROFILE: '/users/profile/update', 
   CHECK_USERNAME: '/users/username/check',
-  GET_PROFILE: (userName) => `/users/profile/${userName}`
+  GET_PROFILE: (userName) => `/users/profile/${userName}`,
+  GET_RATING: '/users/rating',
 }
 export const PROBLEM_ENDPOINTS = {
   GET_PROLBEM_ID: (id) => `/problems/${id}`,

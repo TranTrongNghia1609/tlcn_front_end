@@ -74,7 +74,7 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
   };
   const checkingLocked = () => {
     if (!isStarted) return true;
-    return contest.userParticipation?.id === null;
+    return contest.userParticipation?.id == null;
   }
   const isLocked = checkingLocked();
   const problemListSection = () => {

@@ -77,3 +77,13 @@ export const userService ={
     }
   }
 }
+
+export const getUserRating = async () => {
+  try {
+    const response = await API.get(USER_ENDPOINTS.GET_RATING);
+    return response.data;
+  } catch (error) {
+    console.error('Get user rating error:', error);
+    throw error.response?.data || { message: 'Failed to fetch user rating' };
+  }
+}

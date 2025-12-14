@@ -126,6 +126,8 @@ const AppRoutes = () => {
       <Route path="/leaderboard" element={<LeaderBoard/>}/>
       <Route path="/contest/:code/problem/:id" element={<Contest />} />
       <Route path="/contest/:code/problem/:id/submission" element={<Contest />} />
+      <Route path="/contest/:code/problem/:id/rankings" element={<Contest />} />
+      <Route path="/contest/:code/problem/:id/contest-problems" element={<Contest />} />
       <Route path="/contest/:code/rankings" element={<Contest />} />
     </Routes>
   );
