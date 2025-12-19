@@ -140,5 +140,35 @@ export const CONTEST_ENDPOINTS = {
   GET_ALL: '/contests',
   GET_BY_CODE: (code) => `/contests/code/${code}`,  // Append contest code when using
   REGISTER_CONTEST: (id) => `/contests/${id}/register`,
+  REGISTER_CLASSROOM_CONTEST: (id) => `/contests/classroom/${id}/register`,
   GET_CONTETS_RANKING: (contestId) => `/contests/${contestId}/ranking`
 }
+export const DISCUSSION_ENDPOINTS = {
+  // Discussion CRUD
+  GET_DISCUSSIONS: (classCode) => `/classroom/class/${classCode}/discussions`,
+  GET_DISCUSSION_BY_ID: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}`,
+  UPDATE_DISCUSSION: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}`,
+  DELETE_DISCUSSION: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}`,
+  
+  // Comments
+  ADD_COMMENT: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments`,
+  EDIT_COMMENT: (classCode, discussionId, commentId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}`,
+  DELETE_COMMENT: (classCode, discussionId, commentId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}`,
+  TOGGLE_COMMENT_LIKE: (classCode, discussionId, commentId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}/like`,
+  
+  // Replies
+  ADD_REPLY: (classCode, discussionId, commentId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}/replies`,
+  EDIT_REPLY: (classCode, discussionId, commentId, replyId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}/replies/${replyId}`,
+  DELETE_REPLY: (classCode, discussionId, commentId, replyId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}/replies/${replyId}`,
+  TOGGLE_REPLY_LIKE: (classCode, discussionId, commentId, replyId) => `/classroom/class/${classCode}/discussions/${discussionId}/comments/${commentId}/replies/${replyId}/like`,
+  
+  // Reactions
+  ADD_REACTION: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}/react`,
+  REMOVE_REACTION: (classCode, discussionId) => `/classroom/class/${classCode}/discussions/${discussionId}/react`,
+  
+  
+};
+export const STATISTICS_ENDPOINTS = {
+  PUBLIC: '/statistics/public',
+
+};

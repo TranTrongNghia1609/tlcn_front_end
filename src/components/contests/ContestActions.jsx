@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { registerToContest } from '@/services/contestService'
+import { registerToContest, registerToClassroomContest } from '@/services/contestService'
 import { contestStore } from '@/zustand/contestStore'
 import { Play, MessageCircle, ExternalLink } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -77,30 +77,68 @@ export default function ContestActions() {
 
   const action = getAction();
   const handleClick = async () => {
-    if (action.type == 2){
+    if (action.type == 2) { // Register
       try {
-        if (contest.isPrivate){
-          if (!isModalOpen){
+        // Check if password is required (for both classroom and public contests)
+        if (contest.isPrivate) {
+          // Need password - show modal if not already shown
+          if (!isModalOpen) {
             setIsModalOpen(true);
             return;
           }
-          const response = await registerToContest(contest._id, {password});
-          toast.success('Đăng ký cuộc thi thành công!');
-          window.location.reload();
+          
+          // Modal is open, proceed with registration
+          if (contest.isClassroomContest) {
+            // ✅ Classroom contest with password
+            const response = await registerToClassroomContest(contest._id, { password });
+            toast.success('Đăng ký kỳ thi thành công!');
+            window.location.reload();
+          } else {
+            // Public contest with password
+            const response = await registerToContest(contest._id, { password });
+            toast.success('Đăng ký cuộc thi thành công!');
+            window.location.reload();
+          }
         }
-        else{
-          const response = await registerToContest(contest._id);
-          toast.success('Đăng ký cuộc thi thành công!');
-          window.location.reload();
+        else {
+          // No password needed
+          if (contest.isClassroomContest) {
+            // ✅ Classroom contest without password
+            const response = await registerToClassroomContest(contest._id);
+            toast.success('Đăng ký kỳ thi thành công!');
+            window.location.reload();
+          } else {
+            // Public contest without password
+            const response = await registerToContest(contest._id);
+            toast.success('Đăng ký cuộc thi thành công!');
+            window.location.reload();
+          }
         }
 
       } catch (error) {
         console.error('Error registering to contest:', error);
-        toast.error('Đăng ký cuộc thi thất bại!');
+        const errorMessage = error.response?.data?.message || 'Đăng ký cuộc thi thất bại!';
+        toast.error(errorMessage);
       }
     }
-    else if (action.type == 1){
+    else if (action.type == 1) { // Join
+      // Navigate with classroom context if available
+       if (contest.isClassroomContest && contest.classCode) {
+      // Classroom contest - use classroom URL format
+      navigate(
+        `/classrooms/${contest.classCode}/contests/${contest.code}/problem/${contest.problems[0].shortId}`,
+        {
+          state: {
+            classroomId: contest.classroomId,
+            classCode: contest.classCode,
+            fromClassroom: true
+          }
+        }
+      );
+    } else {
+      // Public contest - use public URL format
       navigate(`/contest/${contest.code}/problem/${contest.problems[0].shortId}`);
+    }
     }
   }
   return (

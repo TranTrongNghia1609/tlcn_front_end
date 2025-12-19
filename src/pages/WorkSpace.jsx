@@ -21,7 +21,7 @@ import ProblemSolutions from '@/components/solution/ProblemSolutions';
 const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const currentSubmission = submissionsStore((state) => state.currentSubmission);
   const [activeTab, setActiveTab] = useState("statement");
-  const { id ,solutionId, classCode } = useParams();
+  const { id, solutionId, classCode } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const contest = contestStore((state) => state.contest);
@@ -29,7 +29,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   let contestId = null;
   const classroomId = location.state?.classroomId;
   const fromClassroom = location.state?.fromClassroom;
-
+  const isClassroomContest = !!classCode && isContest;
   console.log('🏫 WorkSpace - classroomId:', classroomId);
   console.log('🏫 WorkSpace - fromClassroom:', fromClassroom);
   console.log('🏫 WorkSpace - location.state:', location.state);
@@ -40,14 +40,14 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   // Update tab when submission state changes
   useEffect(() => {
     const pathname = location.pathname;
-    
+
     if (pathname.includes('/submission')) {
       setActiveTab("submission");
     } else if (pathname.includes('/solutions')) {
       setActiveTab("solutions");
-    } else if (isContest && pathname.includes('/rankings')){
+    } else if (isContest && pathname.includes('/rankings')) {
       setActiveTab("rankings");
-    } else if (isContest && pathname.includes('contest-problems')){
+    } else if (isContest && pathname.includes('contest-problems')) {
       setActiveTab("contest-problems");
     }
     else {
@@ -60,27 +60,29 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
       currentSubmission.isNew = false;
     }
   }, [location.pathname, currentSubmission]);
-  
+
   const handleTabChange = (value) => {
     setActiveTab(value);
-    
+
     // Build base URL
     let baseUrl;
-    if (isContest && code) {
-      // Contest problem - use /contest/:code/problem/:id format
+    if (isClassroomContest && classCode && code) {
+      baseUrl = `/classrooms/${classCode}/contests/${code}/problem/${id}`;
+    }
+    else if (isContest && code) {
       baseUrl = `/contest/${code}/problem/${id}`;
-    } else if (classCode) {
-      // Classroom problem
+    }
+    else if (classCode) {
       baseUrl = `/classrooms/${classCode}/problems/${id}`;
-    } else {
-      // Regular problemset
+    }
+    else {
       baseUrl = `/problemset/problem/${id}`;
     }
-    
+
     // Update URL based on tab
     switch (value) {
       case 'submission':
-        navigate(`${baseUrl}/submission`, { 
+        navigate(`${baseUrl}/submission`, {
           replace: true,
           state: location.state // Preserve state
         });
@@ -88,7 +90,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
       case 'solutions':
         // Don't navigate to solutions in contest
         if (!isContest) {
-          navigate(`${baseUrl}/solutions`, { 
+          navigate(`${baseUrl}/solutions`, {
             replace: true,
             state: location.state
           });
@@ -112,7 +114,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
         break;
       case 'statement':
       default:
-        navigate(baseUrl, { 
+        navigate(baseUrl, {
           replace: true,
           state: location.state
         });
@@ -143,8 +145,8 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                 <Description />
                 Statement
               </TabsTrigger>
-              
-              
+
+
               <TabsTrigger value="submission">
                 <History />
                 Submission
@@ -159,7 +161,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
               {isContest && (
                 <TabsTrigger value="rankings">
                   <Trophy className='text-blue-600 stroke-blue-600' />
-                    Rankings
+                  Rankings
                 </TabsTrigger>
               )}
             </TabsList>
@@ -186,25 +188,25 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
             </TabsContent>
             <TabsContent value="submission">
               <MySubmission
-                contestParticipant={contestParticipantId} 
+                contestParticipant={contestParticipantId}
                 classroomId={classroomId}
-                />
+              />
             </TabsContent>
             {!isContest && (
               <TabsContent value="solutions">
                 <ProblemSolutions problemShortId={id} />
               </TabsContent>
             )}
-            
+
             {isContest && (
               <TabsContent value="rankings">
-                <RankingContest 
-                onProblemClick={handleProblemClick}
-                problems={contestProblems}
-                contestId={contestId}
-                isDisplayProblemDetail={true}
-                isRunning={isContestRunning(contest)}
-                contestCode={code} />
+                <RankingContest
+                  onProblemClick={handleProblemClick}
+                  problems={contestProblems}
+                  contestId={contestId}
+                  isDisplayProblemDetail={true}
+                  isRunning={isContestRunning(contest)}
+                  contestCode={code} />
               </TabsContent>
             )}
           </Tabs>
@@ -212,10 +214,10 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
         <div className="h-full min-h-0 overflow-y-auto bg-gray-50">
           <Card className={'m-2 py-4'}>
             <PlayGround
-              contestId={isContest ? contestId : null} 
-               classroomId={classroomId}
-               onSubmitSuccess={() => handleTabChange('submission')} 
-              />
+              contestId={isContest ? contestId : null}
+              classroomId={classroomId}
+              onSubmitSuccess={() => handleTabChange('submission')}
+            />
           </Card>
         </div>
       </Split>

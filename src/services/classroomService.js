@@ -198,6 +198,21 @@ const classroomService = {
     const response = await apiClient.get(CLASSROOM_ENDPOINTS.GET_STATS(classCode));
     return response.data;
   },
+  getExams: async (classCode, params = {}) => {
+    try {
+      const response = await apiClient.get(`/classroom/class/${classCode}/exams`, {
+        params: {
+          status: params.status,
+          page: params.page || 1,
+          size: params.size || 20
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching classroom exams:', error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default classroomService;

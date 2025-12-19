@@ -4,7 +4,7 @@ import ContestContent from '../components/contests/ContestContent'
 import ContestSidebar from '../components/contests/ContestSideBar'
 import { contestStore } from '@/zustand/contestStore'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { getContestByCode } from '@/services/contestService'
 import NotFound from './NotFound';
 
@@ -25,13 +25,26 @@ export default function ContestDetail() {
   const contestProblems = contestStore((state) => state.contestProblems);
   const [isError, setIsError] = useState(false);
   const {code} = useParams();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+
+  const classroomId = location.state?.classroomId;
+  const classCode = location.state?.classCode;
+  const isClassroomContest = !!classroomId || !!classCode;
+  console.log(isClassroomContest);
   useEffect(() => {
     const fetchContestData = async () => {
       try{
         // Simulate fetching contest data based on the code from params
         const response = await getContestByCode(code);
-        setContest(response.data);
+        const contestData = {
+          ...response.data,
+          isClassroomContest, // Flag to indicate if this is classroom contest
+          classroomId,
+          classCode
+        };
+        
+        setContest(contestData);
         const problems = response.data.problems;
         setContestProblems(problems || []);
         setIsLoading(false);
@@ -47,7 +60,7 @@ export default function ContestDetail() {
     }
     console.log('Call');
     fetchContestData();
-  }, [])
+  }, [code, classroomId, classCode])
   if (isLoading){
     return (
       <div className='h-full flex items-center justify-center'>

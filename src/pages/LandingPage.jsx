@@ -4,14 +4,26 @@ import { Card } from '../components/ui/card';
 import { useNavigate, } from 'react-router-dom';
 import { useAuthModal } from '../context/AuthModalContext';
 import HeaderLandingPage from '../components/layout/HeaderLandingPage';
+import { getPublicStatistics } from '@/services/statisticsService';
 import anh1 from '../assets/anh1.jpg';
 import anh2 from '../assets/anh2.jpg';
 import anh3 from '../assets/anh3.jpg';
+import Footer from '@/components/layout/Footer';
 const LandingPage = () => {
   const navigate = useNavigate();
   const { openLogin, openRegister } = useAuthModal();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const [stats, setStats] = useState({
+    users: 0,
+    problems: {
+      total: 0,
+      easy: 0,
+      medium: 0,
+      hard: 0
+    },
+    submissions: 0,
+    contests: 0
+  });
   const images = [anh1, anh2, anh3];
   const navigationSections = [
     { id: 'about', label: 'Giới thiệu' },
@@ -19,6 +31,25 @@ const LandingPage = () => {
     { id: 'features', label: 'Tính năng' },
     { id: 'testimonials', label: 'Nhận xét' }
   ];
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const response = await getPublicStatistics();
+        console.log('📊 Statistics loaded:', response);
+        if (response.success) {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch statistics:', error);
+        // Keep default values on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) =>
@@ -44,6 +75,15 @@ const LandingPage = () => {
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
   };
+  const formatNumber = (num) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M+';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K+';
+    }
+    return num.toString();
+  };
 
 
   return (
@@ -68,8 +108,9 @@ const LandingPage = () => {
                 <span className="text-gray-900">Online Judge</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-8 selectable-text leading-relaxed">
-                Nền tảng luyện tập lập trình hàng đầu với hơn{' '}
-                <span className="font-bold text-blue-600">300+</span> bài tập
+                Nền tảng luyện tập lập trình thú vị với hơn{' '} 
+                <span className="font-bold text-blue-600">{loading ? '...' : formatNumber(stats.problems.total)}
+                  </span> bài tập
               </p>
               <p className="text-lg text-gray-500 mb-10 selectable-text">
                 Nâng cao kỹ năng thuật toán, chuẩn bị phỏng vấn và tham gia các kỳ thi lập trình
@@ -99,15 +140,19 @@ const LandingPage = () => {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-6 mt-12">
                 <div className="text-center hover-lift cursor-pointer">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">100K+</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-1">{loading ? '...' : formatNumber(stats.users)}</div>
                   <div className="text-sm text-gray-600 selectable-text">Người dùng</div>
                 </div>
                 <div className="text-center hover-lift cursor-pointer">
-                  <div className="text-3xl font-bold text-purple-600 mb-1">5K+</div>
+                  <div className="text-3xl font-bold text-purple-600 mb-1"> 
+                    {loading ? '...' : formatNumber(stats.problems.total)}
+                    </div>
                   <div className="text-sm text-gray-600 selectable-text">Bài tập</div>
                 </div>
                 <div className="text-center hover-lift cursor-pointer">
-                  <div className="text-3xl font-bold text-indigo-600 mb-1">2M+</div>
+                  <div className="text-3xl font-bold text-indigo-600 mb-1">
+                    {loading ? '...' : formatNumber(stats.submissions)}
+                    </div>
                   <div className="text-sm text-gray-600 selectable-text">Bài nộp</div>
                 </div>
               </div>
@@ -116,7 +161,7 @@ const LandingPage = () => {
             {/* Right Illustration */}
             <div className="hidden lg:block float-animation">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-3xl transform rotate-6 opacity-20"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 rounded-3xl transform rotate-6 opacity-20"></div>
                 <Card className="relative bg-white p-8 rounded-3xl shadow-2xl border-2 border-gray-100">
                   {/* Code Editor Mock */}
                   <div className="space-y-4">
@@ -276,30 +321,39 @@ const LandingPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {/* Easy */}
             <Card className="p-8 text-center hover-lift bg-white cursor-pointer">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-green-600">E</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 selectable-text">Easy</h3>
-              <p className="text-3xl font-bold text-green-600 mb-2">1,234</p>
+              <p className="text-3xl font-bold text-green-600 mb-2">
+                {loading ? '...' : stats.problems.easy.toLocaleString()}
+              </p>
               <p className="text-gray-600 selectable-text">bài tập cơ bản</p>
             </Card>
 
+            {/* Medium */}
             <Card className="p-8 text-center hover-lift bg-white cursor-pointer">
               <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-yellow-600">M</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 selectable-text">Medium</h3>
-              <p className="text-3xl font-bold text-yellow-600 mb-2">2,456</p>
+              <p className="text-3xl font-bold text-yellow-600 mb-2">
+                {loading ? '...' : stats.problems.medium.toLocaleString()}
+              </p>
               <p className="text-gray-600 selectable-text">bài tập trung bình</p>
             </Card>
 
+            {/* Hard */}
             <Card className="p-8 text-center hover-lift bg-white cursor-pointer">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-red-600">H</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2 selectable-text">Hard</h3>
-              <p className="text-3xl font-bold text-red-600 mb-2">1,310</p>
+              <p className="text-3xl font-bold text-red-600 mb-2">
+                {loading ? '...' : stats.problems.hard.toLocaleString()}
+              </p>
               <p className="text-gray-600 selectable-text">bài tập nâng cao</p>
             </Card>
           </div>
@@ -308,7 +362,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               onClick={() => navigate('/problemset')}
-              className="bg-blue-600 hover:bg-blue-700   text-white px-12 py-6 cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-6 cursor-pointer"
             >
               Xem tất cả bài tập
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 ml-2">
@@ -523,8 +577,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-
     </div>
+    
   );
 };
 

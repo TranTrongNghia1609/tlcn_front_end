@@ -1,14 +1,15 @@
 import { getContestByCode } from '@/services/contestService';
 import { contestStore } from '@/zustand/contestStore';
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import WorkSpace from './WorkSpace';
 import { useSocket } from '@/context/SocketContext';
 import NotFound from './NotFound';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 function Contest() {
-  const { code, id } = useParams();
+  const { code, id, classCode } = useParams();
+  const location = useLocation();
   const contestProblems = contestStore((state) => state.contestProblems);
   const setContestProblems = contestStore((state) => state.setContestProblems);
   const setContest = contestStore((state) => state.setContest);
@@ -16,16 +17,23 @@ function Contest() {
   const { isConnected, on, emit, off } = useSocket();
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const classroomId = location.state?.classroomId;
+  const isClassroomContest = !!classCode;
   useEffect(() => {
     const fetchContestData = async () => {
       setIsLoading(true);
       setIsError(false);
       try {
         const response = await getContestByCode(code);
-        const contest = response.data;
+        const contestData = {
+          ...response.data,
+          isClassroomContest,
+          classroomId: classroomId || response.data.classRoom?._id,
+          classCode: classCode
+        };
         const problems = response.data.problems;
         setContestProblems(problems || []);
-        setContest(contest);
+        setContest(contestData);
         
       }
       catch (error){
@@ -37,7 +45,7 @@ function Contest() {
       }
     }
     fetchContestData();
-  }, [code]);
+  }, [code,classCode, classroomId]);
   if (isLoading){
     return <LoadingSpinner/>;
   }

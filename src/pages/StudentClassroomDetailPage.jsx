@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,8 @@ import {
   Clock,
   GraduationCap,
   LogOut,
-  Home
+  Home,
+  MessageSquare
 } from 'lucide-react';
 import { useStudentClassroom } from '@/context/StudentClassroomContext';
 import ClassroomStats from '@/components/student/ClassroomStats';
@@ -20,8 +21,10 @@ import ProblemList from '@/components/student/ProblemList';
 import MaterialList from '@/components/student/MaterialList';
 import SubmissionHistory from '@/components/student/SubmissionHistory';
 import Leaderboard from '@/components/student/Leaderboard';
+import StudentExamList from '@/components/student/StudentExamList';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import LeaveClassroomModal from '@/components/student/LeaveClassroomModal';
+import DiscussionList from '@/components/student/DiscussionList';
 import { formatDate } from '@/utils/dateHelpers';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -30,13 +33,26 @@ import { useStudentClassroomData } from '@/hooks/useStudentClassroomData';
 const StudentClassroomDetailPage = () => {
   const { classCode } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  
+  //  Determine active tab from pathname
+  const getActiveTabFromPath = () => {
+    const path = location.pathname;
+    if (path.endsWith('/problems')) return 'problems';
+    if (path.endsWith('/exams')) return 'exams';
+    if (path.endsWith('/materials')) return 'materials';
+    if (path.endsWith('/leaderboard')) return 'leaderboard';
+    if (path.endsWith('/discussions')) return 'discussions'; 
+    if (path.endsWith('/overview')) return 'overview';
+    return 'overview'; // Default
+  };
+
+  const [activeTab, setActiveTab] = useState(getActiveTabFromPath());
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
 
   const { leaveClassroom } = useStudentClassroom();
 
-  // Use centralized hook for all data
   const {
     classroom,
     problems,
@@ -48,11 +64,22 @@ const StudentClassroomDetailPage = () => {
     error,
     refresh,
   } = useStudentClassroomData(classCode);
-  const handleTabChange = (tab) => {
-    console.log('📑 Switching to tab:', tab);
-    setActiveTab(tab);
-      console.log(classroom);
 
+  // Update activeTab when location changes
+  useEffect(() => {
+    setActiveTab(getActiveTabFromPath());
+  }, [location.pathname]);
+
+  // Handle tab change with URL navigation
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    
+    // Navigate to appropriate route
+    if (tab === 'overview') {
+      navigate(`/classrooms/${classCode}`);
+    } else {
+      navigate(`/classrooms/${classCode}/${tab}`);
+    }
   };
 
   const handleLeaveClassroomClick = () => {
@@ -66,14 +93,13 @@ const StudentClassroomDetailPage = () => {
       toast.success('Đã rời khỏi lớp học thành công');
       navigate('/classrooms');
     } catch (error) {
-      console.error(' Error leaving classroom:', error);
+      console.error('❌ Error leaving classroom:', error);
       toast.error('Không thể rời lớp học. Vui lòng thử lại!');
       setIsLeaving(false);
       setShowLeaveModal(false);
     }
   };
 
-  // Handle navigate to problem with classCode
   const handleNavigateToProblem = (problemId) => {
     console.log('🎯 Navigating to problem:', {
       classCode,
@@ -84,7 +110,7 @@ const StudentClassroomDetailPage = () => {
     navigate(`/classrooms/${classCode}/problems/${problemId}`, {
       state: {
         classCode,
-        classroomId: classroom?._id, // ✅ Truyền classroomId
+        classroomId: classroom?._id,
         fromClassroom: true
       }
     });
@@ -98,22 +124,37 @@ const StudentClassroomDetailPage = () => {
       id: 'overview',
       label: 'Tổng quan',
       icon: BarChart3,
+      path: ''
     },
     {
       id: 'problems',
       label: 'Bài tập',
       icon: BookOpen,
+      path: 'problems'
     },
+    {
+      id: 'exams',
+      label: 'Kỳ thi',
+      icon: Trophy,
+      path: 'exams'
+    },
+    // {
+    //   id: 'discussions', 
+    //   label: 'Thảo luận',
+    //   icon: MessageSquare,
+    //   path: 'discussions'
+    // },
     {
       id: 'materials',
       label: 'Tài liệu',
       icon: FileText,
+      path: 'materials'
     },
-    
     {
       id: 'leaderboard',
       label: 'Bảng điểm',
-      icon: Trophy,
+      icon: BarChart3,
+      path: 'leaderboard'
     },
   ];
 
@@ -179,12 +220,10 @@ const StudentClassroomDetailPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Card className="p-6">
           <div className="flex items-start gap-6">
-            {/* Class Icon */}
             <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0 flex items-center justify-center shadow-lg shadow-blue-200">
               <GraduationCap size={40} className="text-white" />
             </div>
 
-            {/* Class Details */}
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -201,7 +240,6 @@ const StudentClassroomDetailPage = () => {
                 </p>
               )}
 
-              {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
                 <div className="flex items-center gap-1.5">
                   <Users size={14} />
@@ -235,7 +273,6 @@ const StudentClassroomDetailPage = () => {
         <div className="flex gap-6">
           {/* Sidebar */}
           <div className="w-64 flex-shrink-0 space-y-4">
-            {/* Teacher Info Card */}
             {classroom.owner && (
               <Card className="p-4">
                 <div className="text-center">
@@ -255,7 +292,6 @@ const StudentClassroomDetailPage = () => {
               </Card>
             )}
 
-            {/* Navigation Menu */}
             <Card className="p-3">
               <nav className="space-y-1">
                 {menuItems.map((item) => {
@@ -283,7 +319,6 @@ const StudentClassroomDetailPage = () => {
               </nav>
             </Card>
 
-            {/* Leave Button */}
             <Button
               variant="outline"
               onClick={handleLeaveClassroomClick}
@@ -309,7 +344,6 @@ const StudentClassroomDetailPage = () => {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Recent Problems Preview */}
                   <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -319,7 +353,7 @@ const StudentClassroomDetailPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setActiveTab('problems')}
+                        onClick={() => handleTabChange('problems')}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
@@ -350,7 +384,6 @@ const StudentClassroomDetailPage = () => {
                     )}
                   </Card>
 
-                  {/* Recent Materials Preview */}
                   <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -360,7 +393,7 @@ const StudentClassroomDetailPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setActiveTab('materials')}
+                        onClick={() => handleTabChange('materials')}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
@@ -398,6 +431,22 @@ const StudentClassroomDetailPage = () => {
                 onRefresh={refresh}
               />
             )}
+
+            {/* Exams Tab */}
+            {activeTab === 'exams' && (
+              <StudentExamList 
+                classCode={classCode}
+                classroomId={classroom?._id}
+               />
+            )}
+
+
+            {/* {activeTab === 'discussions' && (
+              <DiscussionList 
+                classCode={classCode}
+                loading={loading}
+              />
+            )} */}
 
             {/* Materials Tab */}
             {activeTab === 'materials' && (

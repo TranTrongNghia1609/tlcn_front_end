@@ -19,6 +19,7 @@ import LeaderBoard from "@/pages/LeaderBoard";
 import ShareMySolutionPage from "@/pages/ShareMySolutionPage";
 import EditMySolutionPage from "@/pages/EditMySolutionPage";
 import ResubmitSolutionPage from "@/pages/solution/ResubmitSolutionPage";
+import StudentDiscussionDetailPage from '@/pages/StudentDiscussionDetailPage';
 const StudentRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -66,6 +67,130 @@ const AppRoutes = () => {
           </StudentRoute>
         }
       />
+      <Route
+        path="/classrooms/:classCode/overview"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/problems"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/exams"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/materials"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+      <Route
+        path="/classrooms/:classCode/discussions"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/discussions/:discussionId"
+        element={
+          <StudentRoute>
+            <StudentDiscussionDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/leaderboard"
+        element={
+          <StudentRoute>
+            <StudentClassroomDetailPage />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+        path="/classrooms/:classCode/contests/:code"
+        element={
+          <StudentRoute>
+            <ContestDetail />
+          </StudentRoute>
+        }
+      />
+
+      <Route
+  path="/classrooms/:classCode/contests/:code/problem/:id"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
+
+<Route
+  path="/classrooms/:classCode/contests/:code/problem/:id/submission"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
+
+<Route
+  path="/classrooms/:classCode/contests/:code/problem/:id/solutions"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
+
+<Route
+  path="/classrooms/:classCode/contests/:code/problem/:id/rankings"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
+
+<Route
+  path="/classrooms/:classCode/contests/:code/problem/:id/contest-problems"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
+
+<Route
+  path="/classrooms/:classCode/contests/:code/rankings"
+  element={
+    <StudentRoute>
+      <Contest />
+    </StudentRoute>
+  }
+/>
 
       <Route
         path="/classrooms/:classCode/problems/:id"
