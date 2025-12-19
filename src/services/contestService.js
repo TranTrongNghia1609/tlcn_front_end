@@ -45,6 +45,15 @@ export const registerToContest = async (id, payload) => {
     throw error;
   }
 }
+export const registerToClassroomContest = async (contestId,  payload = {}) => {
+  try {
+    const response = await API.post(CONTEST_ENDPOINTS.REGISTER_CLASSROOM_CONTEST(contestId), payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error registering to classroom contest:', error);
+    throw error;
+  }
+}
 
 export const getContestRanking = async (contestId, params = null) => {
   try {

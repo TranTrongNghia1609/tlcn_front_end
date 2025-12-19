@@ -619,7 +619,7 @@ body.modal-open {
 }
 
 .flare-bg-blue {
-  background: radial-gradient(40% 40% at 50% 50%, rgba(37,99,235,0.4) 0%, rgba(29,78,216,0.3) 40%, transparent 80%);
+  background: radial-gradient(50% 50% at 60% 60%, rgba(37,99,235,0.4) 0%, rgba(29,78,216,0.3) 40%, transparent 80%);
   filter: blur(100px);
 }
 
@@ -630,3 +630,4 @@ body.modal-open {
 .gradient-button-blue:hover {
   background: linear-gradient(to right, #1d4ed8, #1e3a8a);
 }
+

@@ -8,24 +8,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  CheckCircle2, 
-  Lock, 
-  Megaphone, 
-  Clock, 
-  Trophy, 
-  ArrowRight 
+import {
+  CheckCircle2,
+  Lock,
+  Megaphone,
+  Clock,
+  Trophy,
+  ArrowRight
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { contestStore } from "@/zustand/contestStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils"; // Đảm bảo bạn có hàm cn để merge class2
 
 function ProblemContestList({ isStarted = false, onProblemClick, problems = null, announcements, currentProblemId = null }) {
-  
+
   const ProblemListSkeleton = () => (
     <div className="w-full space-y-4">
-       {/* Skeleton Header */}
+      {/* Skeleton Header */}
       <div className="flex items-center justify-between px-1">
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-6 w-24" />
@@ -59,16 +59,34 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
 
   const { code } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const contest = contestStore((state) => state.contest);
+  const isClassroomContest = contest?.isClassroomContest || !!location.state?.classroomId || !!location.state?.classCode;
+  const classCode = contest?.classCode || location.state?.classCode;
+  const classroomId = contest?.classroomId || location.state?.classroomId;
 
   const handleRowClick = (problemShortId) => {
     if (!isStarted) return;
-    
-    if (contest.userParticipation?.isStarted) {
-      navigate(`/contest/${code}/problem/${problemShortId}`);
+    let targetUrl;
+    const stateToPass = {
+      classroomId,
+      classCode,
+      fromClassroom: isClassroomContest,
+      contestId: contest?._id
+    };
+   if (isClassroomContest && classCode) {
+      // Classroom contest
+      targetUrl = `/classrooms/${classCode}/contests/${code}/problem/${problemShortId}`;
+    } else if (contest.userParticipation?.isStarted) {
+      // Public contest (user joined)
+      targetUrl = `/contest/${code}/problem/${problemShortId}`;
     } else {
-      navigate(`/problemset/problem/${problemShortId}`);
+      // Public problemset (user not joined)
+      targetUrl = `/problemset/problem/${problemShortId}`;
     }
+    navigate(targetUrl, {
+      state: stateToPass
+    });
 
     if (onProblemClick) onProblemClick();
   };
@@ -98,96 +116,96 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
             <TableBody>
               {problems.map((problem, index) => {
                 const isHighlighted = !isLocked && currentProblemId && problem.shortId === currentProblemId;
-                
+
                 return (
                   <TableRow
-                  key={problem.shortId || index}
-                  className={cn(
-                  "group transition-all duration-200 border-border",
-                  !isLocked && "cursor-pointer hover:bg-accent/50",
-                  isLocked && "opacity-60 bg-muted/10 cursor-not-allowed",
-                  isHighlighted && "bg-primary/10 border-l-4 border-l-primary"
-                  )}
-                  onClick={() => handleRowClick(problem.shortId)}
-                  >
-                  {/* Column: ID */}
-                  <TableCell className="font-mono font-medium py-4">
-                  <div className="flex items-center gap-2">
-                  {isLocked ? (
-                    <Lock className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Badge 
-                    variant="outline" 
+                    key={problem.shortId || index}
                     className={cn(
-                    "font-mono font-bold bg-background text-foreground/80 h-7 min-w-[2.5rem] justify-center",
-                    isHighlighted && "bg-primary text-primary-foreground border-primary"
+                      "group transition-all duration-200 border-border",
+                      !isLocked && "cursor-pointer hover:bg-accent/50",
+                      isLocked && "opacity-60 bg-muted/10 cursor-not-allowed",
+                      isHighlighted && "bg-primary/10 border-l-4 border-l-primary"
                     )}
-                    >
-                    {problem.shortId || String.fromCharCode(65 + index)}
-                    </Badge>
-                  )}
-                  </div>
-                  </TableCell>
-
-                  {/* Column: Name */}
-                  <TableCell className="py-4">
-                  <div className="flex items-center justify-between">
-                  <div className="flex flex-col gap-0.5">
-                    <span className={cn(
-                    "font-semibold text-base", 
-                    isLocked && "blur-[3px] select-none",
-                    isHighlighted && "text-primary"
-                    )}>
-                    {isLocked ? "Hidden Problem Name" : problem.name}
-                    </span>
-                    {isLocked && (
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Lock className="h-3 w-3" /> Content locked
-                    </span>
-                    )}
-                  </div>
-                  
-                  {/* Action Icon on Hover */}
-                  {!isLocked && (
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 mr-2" />
-                  )}
-                  </div>
-                  </TableCell>
-
-                  {/* Column: Points */}
-                  <TableCell className="font-mono py-4">
-                  {isLocked ? (
-                  "---"
-                  ) : (
-                  <div className={cn(
-                    "flex items-center gap-1.5 text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors",
-                    isHighlighted && "text-primary"
-                  )}>
-                    <Trophy className="h-3.5 w-3.5" />
-                    {problem.point}
-                  </div>
-                  )}
-                  </TableCell>
-
-                  {/* Column: Solved Count */}
-                  <TableCell className="text-right font-mono py-4">
-                  {isLocked ? (
-                    "---"
-                    ) : (
-                    <div className="inline-flex flex-col items-end">
-                      <span className={cn(
-                        "font-medium text-foreground/80",
-                        isHighlighted && "text-primary font-bold"
-                        )}>
-                        {problem.noOfSolved?.toLocaleString() || 0}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      Users
-                      </span>
-                    </div>
-                    )}
+                    onClick={() => handleRowClick(problem.shortId)}
+                  >
+                    {/* Column: ID */}
+                    <TableCell className="font-mono font-medium py-4">
+                      <div className="flex items-center gap-2">
+                        {isLocked ? (
+                          <Lock className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "font-mono font-bold bg-background text-foreground/80 h-7 min-w-[2.5rem] justify-center",
+                              isHighlighted && "bg-primary text-primary-foreground border-primary"
+                            )}
+                          >
+                            {problem.shortId || String.fromCharCode(65 + index)}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
-                    </TableRow>
+
+                    {/* Column: Name */}
+                    <TableCell className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-0.5">
+                          <span className={cn(
+                            "font-semibold text-base",
+                            isLocked && "blur-[3px] select-none",
+                            isHighlighted && "text-primary"
+                          )}>
+                            {isLocked ? "Hidden Problem Name" : problem.name}
+                          </span>
+                          {isLocked && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Lock className="h-3 w-3" /> Content locked
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Action Icon on Hover */}
+                        {!isLocked && (
+                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 mr-2" />
+                        )}
+                      </div>
+                    </TableCell>
+
+                    {/* Column: Points */}
+                    <TableCell className="font-mono py-4">
+                      {isLocked ? (
+                        "---"
+                      ) : (
+                        <div className={cn(
+                          "flex items-center gap-1.5 text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors",
+                          isHighlighted && "text-primary"
+                        )}>
+                          <Trophy className="h-3.5 w-3.5" />
+                          {problem.point}
+                        </div>
+                      )}
+                    </TableCell>
+
+                    {/* Column: Solved Count */}
+                    <TableCell className="text-right font-mono py-4">
+                      {isLocked ? (
+                        "---"
+                      ) : (
+                        <div className="inline-flex flex-col items-end">
+                          <span className={cn(
+                            "font-medium text-foreground/80",
+                            isHighlighted && "text-primary font-bold"
+                          )}>
+                            {problem.noOfSolved?.toLocaleString() || 0}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                            Users
+                          </span>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>
@@ -211,7 +229,7 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
                 <div key={index} className="group relative pl-6 border-l border-border/60 pb-1 last:pb-0">
                   {/* Timeline dot */}
                   <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background" />
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-muted-foreground mb-1">
                     <span className="flex items-center gap-1 font-mono bg-background px-1.5 py-0.5 rounded border">
                       <Clock className="h-3 w-3" />
