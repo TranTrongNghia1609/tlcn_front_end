@@ -52,8 +52,8 @@ const UpcomingContests = () => {
     let second = milliseconds /1000;
     const day = Math.floor(second / (3600 * 24));
     second = second % (3600 * 24);
-    const hours = Math.floor(second / 60);
-    const mins = second % 60;
+    const hours = Math.floor(second / 3600);
+    const mins = (second % 3600) / 60;
     if (day > 0){
       return `${day}d ${hours}h ${mins}m`;
     }
@@ -100,7 +100,9 @@ const UpcomingContests = () => {
       ) : upcomingContests.length > 0 ? (
         <div className="space-y-3">
           {upcomingContests.slice(0, 3).map(contest => (
-            <div key={contest._id} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group">
+            <div key={contest._id} 
+              onClick={() => navigate(`/contest/${contest.code}`)}
+              className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group">
               <div className="mb-3">
                 <h4 className="font-medium text-gray-900 text-sm mb-2 group-hover:text-blue-600 transition-colors">
                   {contest.title}
@@ -155,7 +157,7 @@ const UpcomingContests = () => {
       )}
 
       <div className="mt-4 pt-4 border-t border-gray-100">
-        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium" 
+        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"  
           onClick={() => navigate('/contests')}>
           Xem tất cả
         </button>
