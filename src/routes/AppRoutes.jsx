@@ -243,9 +243,6 @@ const AppRoutes = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/profile/:username" element={<Profile />} />
       {/* 404 */}
-      <Route path="*" element={<NotFound />} />
-      <Route path="/problemset/problem/:id" element={<WorkSpace/>}/>
-      <Route path="/problemset" element={<Problems/>}/>
       <Route path="/contests" element={<Contests/>}/>
       <Route path="/contest/:code" element={<ContestDetail/>}/>
       <Route path="/leaderboard" element={<LeaderBoard/>}/>
@@ -254,6 +251,7 @@ const AppRoutes = () => {
       <Route path="/contest/:code/problem/:id/rankings" element={<Contest />} />
       <Route path="/contest/:code/problem/:id/contest-problems" element={<Contest />} />
       <Route path="/contest/:code/rankings" element={<Contest />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

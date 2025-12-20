@@ -13,7 +13,7 @@ export const languages = [
     label: "All Languages"
   },
   {
-    value: "py",
+    value: "python",
     label: "Python"
   },
   {
@@ -34,6 +34,6 @@ export const mapLanguage = () => {
   const map = []
   map['cpp'] = {code: CPP_VALUE, extensions: cpp};
   map['js'] = {code: JS_VALUE, extensions: javascript};
-  map['py'] = {code: PYTHON_VALUE, extensions: python};
+  map['python'] = {code: PYTHON_VALUE, extensions: python};
   return map;
 }

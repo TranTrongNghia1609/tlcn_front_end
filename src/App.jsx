@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { BrowserRouter, BrowserRouter as Router, useLocation } from 'react-router-dom';
 
 import { AuthModalProvider } from '@/context/AuthModalContext';
 import { UserProvider } from '@/context/UserContext';
@@ -91,11 +91,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <AuthProvider>
         <AppContent /> 
       </AuthProvider>
-    </Router>
+    </BrowserRouter>
   );
 }
 
