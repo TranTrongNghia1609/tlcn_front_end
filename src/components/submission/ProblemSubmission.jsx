@@ -46,17 +46,10 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
   const { socket, isConnected, emit, on, off } = useSocket();
 
-  console.log('📋 ProblemSubmission - Props:', {
-    contestParticipant,
-    classroomId
-  });
+  
   useEffect(()=>{
     const fetchProblemSubmission = async () => {
-      console.log('Fetching submissions for user:', user);
-      console.log('Fetching page: ', pageActive);
-      console.log('📥 problemId:', currentProblem._id);
-      console.log('📥 contestParticipant:', contestParticipant);
-      console.log('📥 classroomId:', classroomId); // ✅ Log classroomId
+  
       if (isAuthenticated && !loading){
         let shouldExcludeClassroom = false;
         
@@ -130,12 +123,9 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   }, [submissions]);
 
   useEffect(()=>{ 
-    console.log("Testing socket");
     const handleSubmissionUpdate = (data) => {
-      console.log('Received submission update via socket:', data);
       const updatedSubmissionId = data._id;
       const status = data.status;
-      console.log('Submission ID:', updatedSubmissionId, 'Status:', status);
       updateSubmission(updatedSubmissionId, data);
     }
     on('submission-update', handleSubmissionUpdate);
@@ -153,7 +143,6 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
     submission.isNew = true;
     setCurrentSubmission(submission);
   }
-  console.log('Submssion: ', submissions);
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className='text-2xl font-bold'>My Submission</div>

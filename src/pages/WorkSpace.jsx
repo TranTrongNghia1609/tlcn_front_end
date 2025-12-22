@@ -30,9 +30,7 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const classroomId = location.state?.classroomId;
   const fromClassroom = location.state?.fromClassroom;
   const isClassroomContest = !!classCode && isContest;
-  console.log('🏫 WorkSpace - classroomId:', classroomId);
-  console.log('🏫 WorkSpace - fromClassroom:', fromClassroom);
-  console.log('🏫 WorkSpace - location.state:', location.state);
+
   if (isContest) {
     contestId = contest?._id || null;
     contestParticipantId = contest?.userParticipation?.id || null;

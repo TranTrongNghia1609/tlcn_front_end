@@ -20,18 +20,14 @@ const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) =
   const addSubmission = submissionsStore((state) => state.addSubmission);
   const effectiveClassroomId = classroomId || location.state?.classroomId;
   const fromClassroom = location.state?.fromClassroom;
+
+
   const changeLanguage = (lang) => {
     setLanguage(lang);
   }
 
   const handleSumit = async () => {
     const problemId = currentProblem._id;
-    console.log('📤 Submitting with:', { 
-      problemId, 
-      language, 
-      contestId, 
-      effectiveClassroomId 
-    });
     const response = await submitCode(problemId, code, language, contestId, classroomId );
     const submissionResult = response.data;
     submissionResult.isNew = true;
