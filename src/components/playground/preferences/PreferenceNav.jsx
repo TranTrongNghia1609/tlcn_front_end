@@ -2,12 +2,24 @@ import React, { useState } from "react"
 import { ComboBox } from "@/components/common/Combobox"
 import { Play, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { languages } from "@/lib/utils";
 import { useProblem } from "@/context/ProblemContext";
 import { submitCode } from "@/services/submissionService";
 export function PreferenceNav({changLanguage, onSubmit}) {
   const { currentProblem } = useProblem();
-
+  const languages = [
+    {
+      value: "python",
+      label: "Python"
+    },
+    {
+      value: "cpp",
+      label: "C++"
+    },
+    {
+      value: "js",
+      label: "Javascript"
+    },
+  ]
   return (
     <div className="flex justify-between">
       <ComboBox

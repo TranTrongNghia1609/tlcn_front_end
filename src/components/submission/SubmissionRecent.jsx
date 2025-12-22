@@ -12,64 +12,52 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { getSubmissionByUserId } from '@/services/submissionService';
+import TablePagination from '../common/TablePagination';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+const SubmissionRowSkeleton = () => (
+  <TableRow>
+    <TableCell>
+      <Skeleton className="h-4 w-16" />
+    </TableCell>
+    <TableCell>
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-3 w-16" />
+      </div>
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-20" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-32" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-6 w-24 rounded-full" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-12" />
+    </TableCell>
+    <TableCell>
+      <Skeleton className="h-4 w-16" />
+    </TableCell>
+  </TableRow>
+);
+
+
 function SubmissionRecent({userId}) {
-  const mockSubmissions = [
-    {
-      id: 1,
-      when: "2 mins ago",
-      who: "john_doe",
-      problem: "Two Sum",
-      status: "Accepted",
-      time: "45ms",
-      memory: "42.1MB"
-    },
-    {
-      id: 2,
-      when: "5 mins ago",
-      who: "jane_smith",
-      problem: "Reverse String",
-      status: "Wrong Answer",
-      time: "32ms",
-      memory: "38.5MB"
-    },
-    {
-      id: 3,
-      when: "10 mins ago",
-      who: "alex_wong",
-      problem: "Binary Search",
-      status: "Accepted",
-      time: "28ms",
-      memory: "40.2MB"
-    },
-    {
-      id: 4,
-      when: "15 mins ago",
-      who: "sarah_lee",
-      problem: "Merge Sort",
-      status: "Time Limit Exceeded",
-      time: "N/A",
-      memory: "45.8MB"
-    },
-    {
-      id: 5,
-      when: "20 mins ago",
-      who: "mike_johnson",
-      problem: "Valid Parentheses",
-      status: "Accepted",
-      time: "18ms",
-      memory: "35.9MB"
-    }
-  ];
   const [ submissions, setSubmissions ] = useState([]);
   const [ pageActive, setPageActive ] = useState(1);
   const [ pagination, setPagination ] = useState({});
   const [ isLoading, setIsLoading ] = useState(false);
   useEffect(() => {
     const fetchSubmssion = async () => {
-      setIsLoading(false);
+      setIsLoading(true);
       try {
         const response = await getSubmissionByUserId(userId, null, pageActive); 
-        setPagination({page: response.page, totalPages: response.totalPages, last: response.last});
+        console.log('Fetched submissions:', {page: response.page, totalPages: response.totalPages, last: response.last});
+        setPagination({page: response.data.page, totalPages: response.data.totalPages, last: response.data.last});
         setSubmissions(response.data.content);
       }
       catch (error){
@@ -90,6 +78,9 @@ function SubmissionRecent({userId}) {
       month: 'short',
       day: 'numeric',
     });
+  }
+  const handlePageChange = (newPage) => {
+    setPageActive(newPage);
   }
 
   // --- Helper format riêng cho Giờ ---
@@ -122,45 +113,66 @@ function SubmissionRecent({userId}) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {submissions.map((submission) => (
-                <TableRow key={submission.shortId}>
-                  <TableCell className="font-mono text-muted-foreground">
-                    {submission.shortId}
+              {isLoading ? (
+                // Hiển thị 5 skeleton rows khi đang loading
+                Array.from({ length: 5 }).map((_, index) => (
+                  <SubmissionRowSkeleton key={index} />
+                ))
+              ) : submissions.length === 0 ? (
+                // Hiển thị message khi không có data
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    Không có bài nộp nào
                   </TableCell>
-
-                  {/* --- UPDATE: Tách Ngày/Giờ thành 2 dòng --- */}
-                  <TableCell>
-                    <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
-                            {formatDate(submission.createdAt)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                            {formatTime(submission.createdAt)}
-                        </span>
-                    </div>
-                  </TableCell>
-
-                  {/* --- UPDATE: Nhấn mạnh người nộp --- */}
-                  <TableCell className="font-semibold text-primary">
-                    {submission.user?.userName || "Unknown"}
-                  </TableCell>
-
-                  {/* --- UPDATE: Nhấn mạnh tên bài tập --- */}
-                  <TableCell className="font-medium">
-                    {submission.problem?.name || "Unknown"}
-                  </TableCell>
-
-                  <TableCell>
-                    {getStatusBadge(submission.status)}
-                  </TableCell>
-                  <TableCell>{submission.time}</TableCell>
-                  <TableCell>{submission.memory}</TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                // Hiển thị data thực tế
+                submissions.map((submission) => (
+                  <TableRow key={submission.shortId}>
+                    <TableCell className="font-mono text-muted-foreground">
+                      {submission.shortId}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                              {formatDate(submission.createdAt)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                              {formatTime(submission.createdAt)}
+                          </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="font-semibold text-primary">
+                      {submission.user?.userName || "Unknown"}
+                    </TableCell>
+
+                    <TableCell className="font-medium">
+                      {submission.problem?.name || "Unknown"}
+                    </TableCell>
+
+                    <TableCell>
+                      {getStatusBadge(submission.status)}
+                    </TableCell>
+                    <TableCell>{submission.time}</TableCell>
+                    <TableCell>{submission.memory}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
+          {!isLoading && submissions.length > 0 && (
+            <TablePagination
+              currentPage={pageActive}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+              maxVisiblePages={10}
+              showFirstLast={true}
+            />
+          )}
         </div>
-
+        
       </Card>
     </div>
   )

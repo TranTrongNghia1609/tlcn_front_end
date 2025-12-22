@@ -20,11 +20,6 @@ const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) =
   const addSubmission = submissionsStore((state) => state.addSubmission);
   const effectiveClassroomId = classroomId || location.state?.classroomId;
   const fromClassroom = location.state?.fromClassroom;
-
-  console.log('🎮 PlayGround - classroomId (prop):', classroomId);
-  console.log('🎮 PlayGround - classroomId (location):', location.state?.classroomId);
-  console.log('🎮 PlayGround - effectiveClassroomId:', effectiveClassroomId);
-  console.log('🎮 PlayGround - fromClassroom:', fromClassroom);
   const changeLanguage = (lang) => {
     setLanguage(lang);
   }
