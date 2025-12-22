@@ -239,6 +239,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         onEdit={handleEdit}
         onDelete={onDelete}
         isLiking={isLiking}
+        realTimeCommentsCount={localPost.commentsCount}
         onCreateComment={handleCreateComment}
         submitting={submitting}
       />

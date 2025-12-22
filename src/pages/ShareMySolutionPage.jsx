@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,10 @@ import {
   Link as LinkIcon,
   Image as ImageIcon,
   ArrowLeft,
-  Code2
+  Code2,
+  Upload,
+  FileText,
+  Download
 } from 'lucide-react';
 
 import ReactMarkdown from 'react-markdown';
@@ -57,6 +60,9 @@ const ShareMySolutionPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submission, setSubmission] = useState(null);
+  
+  // ✅ NEW: Ref for file input
+  const fileInputRef = useRef(null);
 
   const approaches = [
     { value: 'brute-force', label: 'Brute Force' },
@@ -145,6 +151,90 @@ public:
     }
   };
 
+  // ✅ NEW: Handle file import
+  const handleFileImport = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file extension
+    if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
+      toast.error('Vui lòng chọn file Markdown (.md hoặc .markdown)');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File quá lớn. Vui lòng chọn file nhỏ hơn 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result;
+        if (typeof content === 'string') {
+          setFormData(prev => ({ ...prev, content }));
+          
+          // Auto-generate title from filename if title is empty
+          if (!formData.title.trim()) {
+            const fileName = file.name.replace(/\.(md|markdown)$/i, '');
+            setFormData(prev => ({ ...prev, title: fileName }));
+          }
+          
+          toast.success('Đã import file Markdown thành công');
+        }
+      } catch (error) {
+        console.error('Error reading file:', error);
+        toast.error('Không thể đọc file. Vui lòng thử lại');
+      }
+    };
+
+    reader.onerror = () => {
+      toast.error('Lỗi khi đọc file');
+    };
+
+    reader.readAsText(file);
+    
+    // Reset input to allow importing the same file again
+    event.target.value = '';
+  };
+
+  // ✅ NEW: Trigger file input
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // ✅ NEW: Export to MD file
+  const handleExportToMD = () => {
+    if (!formData.content.trim()) {
+      toast.error('Không có nội dung để export');
+      return;
+    }
+
+    try {
+      const blob = new Blob([formData.content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      
+      const fileName = formData.title.trim() 
+        ? `${formData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`
+        : 'solution.md';
+      
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Đã export file Markdown');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Không thể export file');
+    }
+  };
+
   const insertMarkdown = (syntax, placeholder = '') => {
     const textarea = document.getElementById('solution-content');
     if (!textarea) return;
@@ -190,7 +280,6 @@ public:
       const val = textarea.value;
       const pos = textarea.selectionStart;
 
-      const lines = val.split('\n');
       for (let i = pos; i >= 0; i--) {
         if (val.substring(i, i + 3) === '```') {
           const newVal = val.slice(0, i + 3) + language.toLowerCase() + val.slice(i + 3);
@@ -249,6 +338,15 @@ public:
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* ✅ NEW: Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".md,.markdown"
+        onChange={handleFileImport}
+        className="hidden"
+      />
+
       {/* Header */}
       <div className="bg-white border-t py-1 sticky top-0 z-10">
         <div className="max-w-full px-6 py-4 flex justify-between items-center">
@@ -263,6 +361,7 @@ public:
             </div>
           </div>
           <div className="flex gap-3">
+            
             <Button className="cursor-pointer hover:bg-gray-100" variant="outline" onClick={() => navigate(`/problemset/problem/${id}`)} disabled={submitting}>
               Cancel
             </Button>
@@ -340,7 +439,21 @@ public:
             </div>
 
             <div className="space-y-2">
-              <Label>Content <span className="text-red-500">*</span></Label>
+              <div className="flex items-center justify-between">
+                <Label>Content <span className="text-red-500">*</span></Label>
+                {/* ✅ NEW: Import button in content label */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleImportClick}
+                  disabled={submitting}
+                  className="text-xs gap-1 h-7 hover:bg-gray-100 cursor-pointer"
+                >
+                  <Upload className="w-3 h-3" />
+                  Import file MD
+                </Button>
+              </div>
               <div className="border rounded-lg overflow-hidden">
                 <div className="bg-gray-50 border-b p-2 flex flex-wrap gap-1 items-center">
                   <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => insertMarkdown('bold')} title="Bold"><Bold className="w-4 h-4" /></Button>
@@ -367,7 +480,7 @@ public:
                   className="min-h-96 font-mono text-sm resize-none border-0 focus:ring-0"
                   value={formData.content}
                   onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
-                  placeholder="Viết solution bằng Markdown..."
+                  placeholder="Viết solution bằng Markdown hoặc import file .md..."
                 />
               </div>
             </div>
@@ -377,8 +490,6 @@ public:
         {/* RIGHT - Preview */}
         <div className="w-1/2 overflow-y-auto bg-white">
           <div className="px-8 py-6">
-            
-
             <div className="markdown-preview">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}

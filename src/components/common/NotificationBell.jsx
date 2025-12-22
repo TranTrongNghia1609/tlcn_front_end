@@ -93,36 +93,43 @@ const NotificationBell = () => {
   };
 
   const fetchBroadcasts = async (page = 1, append = false) => {
-    try {
-      if (append) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
-
-      const response = await broadcastService.getBroadcasts({
-        page,
-        limit: LIMIT_PER_PAGE
-      });
-
-      const newBroadcasts = response.data.broadcasts || [];
-
-      if (append) {
-        setBroadcasts(prev => [...prev, ...newBroadcasts]);
-      } else {
-        setBroadcasts(newBroadcasts);
-      }
-
-      setHasMore(newBroadcasts.length === LIMIT_PER_PAGE);
-      setCurrentPage(page);
-
-    } catch (error) {
-      console.error('Error fetching broadcasts:', error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
+  try {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
     }
-  };
+
+    const response = await broadcastService.getBroadcasts({
+      page,
+      limit: LIMIT_PER_PAGE
+    });
+
+    const newBroadcasts = response.data.broadcasts || [];
+
+    if (append) {
+      // Lọc bỏ các broadcast trùng lặp dựa trên _id
+      setBroadcasts(prev => {
+        const existingIds = new Set(prev.map(b => b._id));
+        const uniqueNewBroadcasts = newBroadcasts.filter(b => !existingIds.has(b._id));
+        return [...prev, ...uniqueNewBroadcasts];
+      });
+    } else {
+      setBroadcasts(newBroadcasts);
+    }
+
+    // Kiểm tra hasMore: nếu số lượng trả về < LIMIT thì hết data
+    setHasMore(newBroadcasts.length >= LIMIT_PER_PAGE);
+    setCurrentPage(page);
+
+  } catch (error) {
+    console.error('Error fetching broadcasts:', error);
+    setHasMore(false); // Nếu lỗi thì không cho xem thêm
+  } finally {
+    setLoading(false);
+    setLoadingMore(false);
+  }
+};
 
   const handleBellClick = () => {
     setIsOpen(!isOpen);
@@ -580,12 +587,12 @@ const NotificationBell = () => {
             )}
 
             {/* Load More */}
-            {hasMore && (activeTab === 'personal' ? personalNotifications : broadcasts).length > 0 && (
+            {hasMore && !loading && (activeTab === 'personal' ? personalNotifications : broadcasts).length > 0 && (
               <div className="p-3 border-t border-gray-100">
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 font-medium hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                  className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 font-medium hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loadingMore ? (
                     <span className="flex items-center justify-center gap-2">
@@ -596,6 +603,13 @@ const NotificationBell = () => {
                     'Xem thêm'
                   )}
                 </button>
+              </div>
+            )}
+            
+            {/* Thông báo đã hết data */}
+            {!hasMore && !loading && (activeTab === 'personal' ? personalNotifications : broadcasts).length > 0 && (
+              <div className="p-3 text-center">
+                <p className="text-xs text-gray-400">Đã hiển thị tất cả thông báo</p>
               </div>
             )}
           </div>
