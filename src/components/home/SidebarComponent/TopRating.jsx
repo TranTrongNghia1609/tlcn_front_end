@@ -60,7 +60,9 @@ const TopRating = () => {
           {topUsers.slice(0, 5).map((user, index) => {
             const badge = getRatingBadge(user.rating);
             return (
-              <div key={user._id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={user._id} 
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => navigate(`/profile/${user.userName}`)}>
                 <div className="relative flex-shrink-0">
                   <img
                     src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.userName)}&size=40&background=2563eb&color=fff`}

@@ -4,6 +4,7 @@ import { useAuthModal } from '../../context/AuthModalContext';
 import UserMenu from './UserMenu';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from '@/components/common/NotificationBell';
+import logo from '@/assets/logo.png';
 const Navbar = () => {
   const { openLogin, openRegister } = useAuthModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,8 +40,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="relative">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-lg lg:text-xl">BN</span>
+              <div className="w-12 h-12 lg:w-13 lg:h-13 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
+                <img src={logo}/>
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
