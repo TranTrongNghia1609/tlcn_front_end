@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLocation } from 'react-router-dom';
 
 import { 
@@ -14,7 +15,35 @@ import {
   Clock,
   RefreshCw
 } from 'lucide-react';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+
+// Skeleton Component
+const ProblemCardSkeleton = () => (
+  <Card className="p-5">
+    <div className="flex items-start gap-4">
+      {/* Status Icon Skeleton */}
+      <Skeleton className="w-6 h-6 rounded-full flex-shrink-0 mt-1" />
+
+      {/* Problem Info Skeleton */}
+      <div className="flex-1 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+
+        {/* Meta Info Skeleton */}
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-5 w-16" />
+          <Skeleton className="h-5 w-16" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+      </div>
+    </div>
+  </Card>
+);
 
 const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, onRefresh }) => {
   const navigate = useNavigate();
@@ -29,8 +58,6 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
     const matchesDifficulty = difficultyFilter === 'all' || problem.difficulty === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
-
-  console.log('📚 ProblemList - Filtered problems:', filteredProblems.length);
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
@@ -68,7 +95,6 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
     return <Circle size={24} className="text-gray-300" />;
   };
 
-  // Handle navigate with classCode
   const handleProblemClick = (problem) => {
     const problemId = problem.shortId || problem._id;
     navigate(`/classrooms/${classCode}/problems/${problemId}`, {
@@ -80,14 +106,6 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -97,9 +115,13 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
             <BookOpen size={28} className="text-purple-600" />
             Bài tập
           </h2>
-          <p className="text-gray-600 mt-1">
-            {filteredProblems.length} bài tập trong lớp học
-          </p>
+          {loading ? (
+            <Skeleton className="h-4 w-40 mt-1" />
+          ) : (
+            <p className="text-gray-600 mt-1">
+              {filteredProblems.length} bài tập trong lớp học
+            </p>
+          )}
         </div>
         
         {onRefresh && (
@@ -125,13 +147,15 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              disabled={loading}
             />
           </div>
 
           <select
             value={difficultyFilter}
             onChange={(e) => setDifficultyFilter(e.target.value)}
-            className="px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
           >
             <option value="all">Tất cả độ khó</option>
             <option value="easy">Dễ</option>
@@ -142,7 +166,13 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
       </Card>
 
       {/* Problem List */}
-      {filteredProblems.length === 0 ? (
+      {loading ? (
+        <div className="space-y-3">
+          {[...Array(5)].map((_, index) => (
+            <ProblemCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : filteredProblems.length === 0 ? (
         <Card className="p-12 text-center">
           <BookOpen size={64} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">

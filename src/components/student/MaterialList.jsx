@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   FileText, 
   Search, 
@@ -16,51 +17,70 @@ import {
   FileCode
 } from 'lucide-react';
 import { formatDate } from '@/utils/dateHelpers';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+
+// Skeleton Component
+const MaterialCardSkeleton = () => (
+  <Card className="p-5">
+    <div className="flex items-start gap-4">
+      {/* File Icon Skeleton */}
+      <Skeleton className="w-12 h-12 rounded-lg flex-shrink-0" />
+
+      {/* Material Info Skeleton */}
+      <div className="flex-1 space-y-3">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-1/2" />
+        
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-5 w-16 rounded" />
+        </div>
+      </div>
+
+      {/* Actions Skeleton */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-9 w-28" />
+      </div>
+    </div>
+  </Card>
+);
 
 const MaterialList = ({ classCode, materials = [], loading = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const safeMaterials = Array.isArray(materials) ? materials : [];
-  console.log('📄 MaterialList - Safe materials:', safeMaterials.length);
 
   const filteredMaterials = safeMaterials.filter(material =>
     material.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     material.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  console.log('📄 MaterialList - Filtered materials:', filteredMaterials.length);
-
   const getFileIcon = (fileType, fileName) => {
     const type = fileType?.toLowerCase() || '';
     const ext = fileName?.split('.').pop()?.toLowerCase() || '';
     
-    // Images
     if (type.includes('image') || ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
       return FileImage;
     }
     
-    // Videos
     if (type.includes('video') || ['mp4', 'avi', 'mkv', 'mov', 'wmv'].includes(ext)) {
       return FileVideo;
     }
     
-    // Archives
     if (type.includes('zip') || type.includes('rar') || ['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
       return FileArchive;
     }
     
-    // PDF
     if (type.includes('pdf') || ext === 'pdf') {
       return FileType;
     }
     
-    // Spreadsheets
     if (type.includes('sheet') || ['xls', 'xlsx', 'csv'].includes(ext)) {
       return FileSpreadsheet;
     }
     
-    // Code files
     if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'cpp', 'c', 'html', 'css'].includes(ext)) {
       return FileCode;
     }
@@ -78,14 +98,6 @@ const MaterialList = ({ classCode, materials = [], loading = false }) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -95,9 +107,13 @@ const MaterialList = ({ classCode, materials = [], loading = false }) => {
             <FileText size={28} className="text-blue-600" />
             Tài liệu
           </h2>
-          <p className="text-gray-600 mt-1">
-            {filteredMaterials.length} tài liệu trong lớp học
-          </p>
+          {loading ? (
+            <Skeleton className="h-4 w-40 mt-1" />
+          ) : (
+            <p className="text-gray-600 mt-1">
+              {filteredMaterials.length} tài liệu trong lớp học
+            </p>
+          )}
         </div>
       </div>
 
@@ -110,12 +126,19 @@ const MaterialList = ({ classCode, materials = [], loading = false }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
+            disabled={loading}
           />
         </div>
       </Card>
 
       {/* Material List */}
-      {filteredMaterials.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4">
+          {[...Array(4)].map((_, index) => (
+            <MaterialCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : filteredMaterials.length === 0 ? (
         <Card className="p-12 text-center">
           <FileText size={64} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Trophy, 
   Calendar, 
@@ -14,12 +15,42 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import classroomService from '@/services/classroomService';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatDateTime, formatDuration, getExamStatus } from '@/utils/dateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-// ✅ Add classroomId prop
+// Skeleton Component
+const ExamCardSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-start justify-between">
+      {/* Left: Exam Info Skeleton */}
+      <div className="flex-1">
+        <div className="flex items-start gap-3 mb-3">
+          <Skeleton className="w-12 h-12 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-7 w-64" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-full max-w-lg" />
+            <Skeleton className="h-4 w-3/4 max-w-md" />
+          </div>
+        </div>
+
+        {/* Meta Info Skeleton */}
+        <div className="flex flex-wrap gap-4 ml-14">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+
+      {/* Right: Action Button Skeleton */}
+      <Skeleton className="h-9 w-28 ml-4" />
+    </div>
+  </Card>
+);
+
 const StudentExamList = ({ classCode, classroomId }) => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +73,6 @@ const StudentExamList = ({ classCode, classroomId }) => {
       };
 
       const response = await classroomService.getExams(classCode, params);
-      console.log('📝 Exams response:', response.data);
       setExams(response.data.exams || []);
     } catch (error) {
       console.error('❌ Error fetching exams:', error);
@@ -60,24 +90,15 @@ const StudentExamList = ({ classCode, classroomId }) => {
       return;
     }
 
-    // ✅ Navigate with classroom context
-    console.log('🎯 Navigating to exam:', {
-      classCode,
-      classroomId,
-      examCode: exam.code,
-      examClassRoomId: exam.classRoom?._id
-    });
-
     navigate(`/classrooms/${classCode}/contests/${exam.code}`, {
       state: {
-        classroomId: classroomId || exam.classRoom?._id, // ✅ Use prop or exam data
+        classroomId: classroomId || exam.classRoom?._id,
         classCode: classCode,
         fromClassroom: true
       }
     });
   };
 
-  // ...rest of the component remains the same...
   const getStatusBadge = (exam) => {
     const status = getExamStatus(exam.startTime, exam.endTime);
     
@@ -159,14 +180,6 @@ const StudentExamList = ({ classCode, classroomId }) => {
     { key: 'ended', label: 'Đã kết thúc', count: exams.filter(e => getExamStatus(e.startTime, e.endTime) === 'ended').length }
   ];
 
-  if (loading) {
-    return (
-      <Card className="p-8">
-        <LoadingSpinner />
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -176,39 +189,58 @@ const StudentExamList = ({ classCode, classroomId }) => {
             <Trophy className="text-yellow-500" size={28} />
             Kỳ thi
           </h2>
-          <p className="text-gray-600 mt-1">Danh sách các kỳ thi trong lớp học</p>
+          {loading ? (
+            <Skeleton className="h-4 w-52 mt-1" />
+          ) : (
+            <p className="text-gray-600 mt-1">Danh sách các kỳ thi trong lớp học</p>
+          )}
         </div>
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex gap-2 flex-wrap">
-        {filterButtons.map((btn) => (
-          <Button
-            key={btn.key}
-            variant={filter === btn.key ? 'default' : 'outline'}
-            onClick={() => setFilter(btn.key)}
-            className={cn(
-              'transition-all',
-              filter === btn.key
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600'
-            )}
-          >
-            {btn.label}
-            <span className={cn(
-              'ml-2 px-2 py-0.5 rounded-full text-xs font-bold',
-              filter === btn.key
-                ? 'bg-white/20 text-white'
-                : 'bg-gray-100 text-gray-600'
-            )}>
-              {btn.count}
-            </span>
-          </Button>
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex gap-2">
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={index} className="h-10 w-32" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {filterButtons.map((btn) => (
+            <Button
+              key={btn.key}
+              variant={filter === btn.key ? 'default' : 'outline'}
+              onClick={() => setFilter(btn.key)}
+              disabled={loading}
+              className={cn(
+                'transition-all',
+                filter === btn.key
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600'
+              )}
+            >
+              {btn.label}
+              <span className={cn(
+                'ml-2 px-2 py-0.5 rounded-full text-xs font-bold',
+                filter === btn.key
+                  ? 'bg-white/20 text-white'
+                  : 'bg-gray-100 text-gray-600'
+              )}>
+                {btn.count}
+              </span>
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Exams List */}
-      {filteredExams.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4">
+          {[...Array(3)].map((_, index) => (
+            <ExamCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : filteredExams.length === 0 ? (
         <Card className="p-12 text-center">
           <Trophy size={64} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -238,7 +270,6 @@ const StudentExamList = ({ classCode, classroomId }) => {
                 <div className="flex items-start justify-between">
                   {/* Left: Exam Info */}
                   <div className="flex-1">
-                    {/* Title & Status */}
                     <div className="flex items-start gap-3 mb-3">
                       <div className={cn(
                         'p-2 rounded-lg',
