@@ -1,10 +1,60 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CheckCircle, Clock, XCircle, BookOpen, TrendingUp, Award } from 'lucide-react';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+
+// Skeleton Components
+const StatCardSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex-1">
+        <Skeleton className="h-4 w-24 mb-2" />
+        <Skeleton className="h-9 w-16 mb-2" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+      <Skeleton className="w-14 h-14 rounded-full" />
+    </div>
+  </Card>
+);
+
+const ProgressBarSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="w-5 h-5 rounded" />
+        <Skeleton className="h-6 w-32" />
+      </div>
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="h-8 w-28 rounded-lg" />
+      </div>
+    </div>
+    
+    <Skeleton className="h-4 w-full rounded-full mb-4" />
+    
+    <div className="flex items-center justify-center gap-6">
+      {[...Array(3)].map((_, index) => (
+        <Skeleton key={index} className="h-4 w-32" />
+      ))}
+    </div>
+  </Card>
+);
+
+const RecentCompletionsSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Skeleton className="w-5 h-5 rounded" />
+      <Skeleton className="h-6 w-48" />
+    </div>
+    <div className="space-y-2">
+      {[...Array(3)].map((_, index) => (
+        <Skeleton key={index} className="h-14 w-full rounded-lg" />
+      ))}
+    </div>
+  </Card>
+);
 
 const ClassroomStats = ({ classCode, stats, problems = [], materials = [], loading = false }) => {
-  // ✅ Calculate stats from props
   const safeProblems = Array.isArray(problems) ? problems : [];
   const safeMaterials = Array.isArray(materials) ? materials : [];
 
@@ -30,8 +80,19 @@ const ClassroomStats = ({ classCode, stats, problems = [], materials = [], loadi
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner />
+      <div className="space-y-6">
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, index) => (
+            <StatCardSkeleton key={index} />
+          ))}
+        </div>
+
+        {/* Progress Bar Skeleton */}
+        <ProgressBarSkeleton />
+
+        {/* Recent Completions Skeleton */}
+        <RecentCompletionsSkeleton />
       </div>
     );
   }

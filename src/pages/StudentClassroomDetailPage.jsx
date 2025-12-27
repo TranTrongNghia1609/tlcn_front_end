@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BookOpen,
   FileText,
@@ -29,6 +30,72 @@ import { formatDate } from '@/utils/dateHelpers';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useStudentClassroomData } from '@/hooks/useStudentClassroomData';
+
+// Skeleton Components
+const ClassroomHeaderSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-start gap-6">
+      <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+      <div className="flex-1 space-y-3">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+        </div>
+        <Skeleton className="h-4 w-full max-w-3xl" />
+        <Skeleton className="h-4 w-2/3 max-w-2xl" />
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-28" />
+        </div>
+      </div>
+    </div>
+  </Card>
+);
+
+const SidebarSkeleton = () => (
+  <div className="w-64 flex-shrink-0 space-y-4">
+    {/* Teacher Card Skeleton */}
+    <Card className="p-4">
+      <div className="text-center">
+        <Skeleton className="w-16 h-16 rounded-full mx-auto mb-3" />
+        <Skeleton className="h-3 w-16 mx-auto mb-2" />
+        <Skeleton className="h-4 w-32 mx-auto mb-1" />
+        <Skeleton className="h-3 w-40 mx-auto" />
+      </div>
+    </Card>
+
+    {/* Menu Items Skeleton */}
+    <Card className="p-3">
+      <div className="space-y-1">
+        {[...Array(5)].map((_, index) => (
+          <Skeleton key={index} className="h-10 w-full rounded-lg" />
+        ))}
+      </div>
+    </Card>
+
+    {/* Leave Button Skeleton */}
+    <Skeleton className="h-10 w-full rounded-lg" />
+  </div>
+);
+
+const OverviewCardSkeleton = () => (
+  <Card className="p-6">
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <Skeleton className="w-5 h-5 rounded" />
+        <Skeleton className="h-6 w-32" />
+      </div>
+      <Skeleton className="h-8 w-24 rounded" />
+    </div>
+    <div className="space-y-2">
+      {[...Array(3)].map((_, index) => (
+        <Skeleton key={index} className="h-16 w-full rounded-lg" />
+      ))}
+    </div>
+  </Card>
+);
 
 const StudentClassroomDetailPage = () => {
   const { classCode } = useParams();
@@ -150,18 +217,55 @@ const StudentClassroomDetailPage = () => {
       icon: FileText,
       path: 'materials'
     },
-    {
-      id: 'leaderboard',
-      label: 'Bảng điểm',
-      icon: BarChart3,
-      path: 'leaderboard'
-    },
+    // {
+    //   id: 'leaderboard',
+    //   label: 'Bảng điểm',
+    //   icon: BarChart3,
+    //   path: 'leaderboard'
+    // },
   ];
 
+  // Loading State - Show Skeleton
   if (loading && !classroom) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Skeleton */}
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <ClassroomHeaderSkeleton />
+        </div>
+
+        {/* Main Content Skeleton */}
+        <div className="max-w-7xl mx-auto px-4 pb-6">
+          <div className="flex gap-6">
+            <SidebarSkeleton />
+            
+            {/* Main Content Area Skeleton */}
+            <div className="flex-1 min-w-0">
+              <div className="space-y-6">
+                {/* Stats Cards Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-10 h-10 rounded-lg" />
+                        <div className="flex-1">
+                          <Skeleton className="h-3 w-16 mb-2" />
+                          <Skeleton className="h-6 w-12" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Overview Cards Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <OverviewCardSkeleton />
+                  <OverviewCardSkeleton />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -302,11 +406,13 @@ const StudentClassroomDetailPage = () => {
                     <button
                       key={item.id}
                       onClick={() => handleTabChange(item.id)}
+                      disabled={loading}
                       className={cn(
                         'w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all text-sm',
                         isActive
                           ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600',
+                        loading && 'opacity-50 cursor-not-allowed'
                       )}
                     >
                       <div className="flex items-center gap-2.5">
@@ -322,11 +428,11 @@ const StudentClassroomDetailPage = () => {
             <Button
               variant="outline"
               onClick={handleLeaveClassroomClick}
-              disabled={isLeaving}
+              disabled={isLeaving || loading}
               className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
             >
               <LogOut size={16} className="mr-2" />
-              Rời lớp
+              {isLeaving ? 'Đang rời...' : 'Rời lớp'}
             </Button>
           </div>
 
@@ -354,12 +460,19 @@ const StudentClassroomDetailPage = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleTabChange('problems')}
+                        disabled={loading}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
                       </Button>
                     </div>
-                    {safeProblems.length === 0 ? (
+                    {loading ? (
+                      <div className="space-y-2">
+                        {[...Array(3)].map((_, index) => (
+                          <Skeleton key={index} className="h-14 w-full rounded-lg" />
+                        ))}
+                      </div>
+                    ) : safeProblems.length === 0 ? (
                       <p className="text-center text-gray-500 py-8">Chưa có bài tập nào</p>
                     ) : (
                       <div className="space-y-2">
@@ -394,12 +507,19 @@ const StudentClassroomDetailPage = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleTabChange('materials')}
+                        disabled={loading}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         Xem tất cả
                       </Button>
                     </div>
-                    {safeMaterials.length === 0 ? (
+                    {loading ? (
+                      <div className="space-y-2">
+                        {[...Array(3)].map((_, index) => (
+                          <Skeleton key={index} className="h-14 w-full rounded-lg" />
+                        ))}
+                      </div>
+                    ) : safeMaterials.length === 0 ? (
                       <p className="text-center text-gray-500 py-8">Chưa có tài liệu nào</p>
                     ) : (
                       <div className="space-y-2">

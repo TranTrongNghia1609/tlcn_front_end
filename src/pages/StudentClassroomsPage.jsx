@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   GraduationCap,
   Plus,
@@ -16,9 +17,68 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import classroomService from '@/services/classroomService';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatDate } from '@/utils/dateHelpers';
 import JoinClassroomModal from '@/components/student/JoinClassroomModal';
+
+// Skeleton Components
+const StatCardSkeleton = () => (
+  <Card className="border border-gray-200 bg-gray-50/50">
+    <div className="flex items-center gap-3 p-4">
+      <Skeleton className="w-12 h-12 rounded-lg" />
+      <div className="flex-1">
+        <Skeleton className="h-4 w-20 mb-2" />
+        <Skeleton className="h-8 w-12" />
+      </div>
+    </div>
+  </Card>
+);
+
+const ClassroomCardSkeleton = () => (
+  <Card className="overflow-hidden">
+    <div className="p-3">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <Skeleton className="h-7 w-3/4" />
+        <Skeleton className="h-6 w-16 rounded-full" />
+      </div>
+
+      {/* Description */}
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-2/3 mb-4" />
+
+      {/* Teacher Info */}
+      <div className="flex items-center gap-2 mb-4 pb-4 border-b">
+        <Skeleton className="w-8 h-8 rounded-full" />
+        <div className="flex-1">
+          <Skeleton className="h-4 w-24 mb-1" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-8" />
+        </div>
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-8" />
+        </div>
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-24 rounded-full" />
+        <Skeleton className="h-5 w-5 rounded" />
+      </div>
+    </div>
+  </Card>
+);
 
 const StudentClassroomsPage = () => {
   const navigate = useNavigate();
@@ -54,14 +114,6 @@ const StudentClassroomsPage = () => {
     classroom.classCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -79,54 +131,63 @@ const StudentClassroomsPage = () => {
               onClick={() => setShowJoinModal(true)}
               className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
               size="lg"
+              disabled={loading}
             >
               <Plus size={20} className="mr-2" />
               Tham gia lớp học
             </Button>
           </div>
 
-          {/* Stats - Subtle Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 p-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <GraduationCap size={24} className="text-blue-600" />
+          {/* Stats */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <GraduationCap size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm">Tổng lớp học</p>
+                    <p className="text-2xl font-bold text-gray-900">{classrooms.length}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Tổng lớp học</p>
-                  <p className="text-2xl font-bold text-gray-900">{classrooms.length}</p>
-                </div>
-              </div>
-            </Card>
+              </Card>
 
-            <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 p-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <BookOpen size={24} className="text-blue-600" />
+              <Card className="border border-blue-200 bg-blue-50/50 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <BookOpen size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm">Bài tập</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {classrooms.reduce((sum, c) => sum + (c.stats?.totalProblems || 0), 0)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Bài tập</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {classrooms.reduce((sum, c) => sum + (c.stats?.totalProblems || 0), 0)}
-                  </p>
-                </div>
-              </div>
-            </Card>
+              </Card>
 
-            <Card className="border border-green-200 bg-green-50/50 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 p-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Users size={24} className="text-green-600" />
+              <Card className="border border-green-200 bg-green-50/50 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 p-4">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <Users size={24} className="text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm">Đang hoạt động</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {classrooms.filter(c => c.status === 'active').length}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Đang hoạt động</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {classrooms.filter(c => c.status === 'active').length}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 
@@ -141,12 +202,19 @@ const StudentClassroomsPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              disabled={loading}
             />
           </div>
         </Card>
 
         {/* Classroom List */}
-        {filteredClassrooms.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <ClassroomCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : filteredClassrooms.length === 0 ? (
           <Card className="p-12 text-center">
             <GraduationCap size={64} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">

@@ -8,7 +8,6 @@ import { getPublicStatistics } from '@/services/statisticsService';
 import anh1 from '../assets/anh1.jpg';
 import anh2 from '../assets/anh2.jpg';
 import anh3 from '../assets/anh3.jpg';
-import Footer from '@/components/layout/Footer';
 const LandingPage = () => {
   const navigate = useNavigate();
   const { openLogin, openRegister } = useAuthModal();
