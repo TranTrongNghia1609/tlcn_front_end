@@ -23,7 +23,15 @@ export const ProblemProvider = ({ children, problemId }) => {
         setCurrentProblem(data.data);
       } catch (err) {
         console.error('Error fetching problem:', err);
-        setError(err.message || 'Failed to fetch problem');
+        
+        // Set error with message and status
+        setError({
+          message: err.message || 'Failed to fetch problem',
+          status: err.status,
+          isNotFound: err.status === 404,
+          isForbidden: err.status === 403,
+          isUnauthorized: err.status === 401
+        });
       } finally {
         setLoading(false);
       }
