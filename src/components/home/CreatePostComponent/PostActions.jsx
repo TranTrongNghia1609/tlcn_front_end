@@ -1,26 +1,28 @@
 import React from 'react';
 import { CodeBracketIcon } from '@heroicons/react/24/outline';
 
-const PostActions = ({ 
-  showCodeEditor, 
-  onToggleCodeEditor, 
-  onCancel, 
-  onSubmit, 
-  isSubmitting, 
-  canSubmit 
+const PostActions = ({
+  showCodeEditor,
+  onToggleCodeEditor,
+  onCancel,
+  onSubmit,
+  isSubmitting,
+  canSubmit,
+  submitText = 'Post',
+  isEditMode = false // ✅ Add this prop
 }) => {
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-      <div className="flex items-center space-x-4">
-        {/* Code Toggle */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-2">
         <button
           type="button"
           onClick={onToggleCodeEditor}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+          className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors ${
             showCodeEditor
-              ? 'text-blue-600 bg-blue-50'
-              : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+              ? 'bg-blue-100 text-blue-600'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
+          disabled={isSubmitting}
         >
           <CodeBracketIcon className="w-5 h-5" />
           <span className="text-sm font-medium">Code</span>
@@ -31,17 +33,18 @@ const PostActions = ({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
-          Cancel
+          {isEditMode ? 'Hủy' : 'Cancel'}
         </button>
+        
         <button
           type="submit"
-          onClick={onSubmit}
-          disabled={!canSubmit || isSubmitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          disabled={!canSubmit}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
         >
-          {isSubmitting ? 'Posting...' : 'Post'}
+          {submitText}
         </button>
       </div>
     </div>

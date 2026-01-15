@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { EllipsisHorizontalIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { EllipsisHorizontalIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useUser } from '../../../context/UserContext';
 
 const PostHeader = ({ post, onEdit, onDelete }) => {
   const { user } = useUser();
   const [showMenu, setShowMenu] = useState(false);
 
-  const isOwner = user?._id === post.author._id;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="p-6 pb-4">
@@ -24,6 +24,11 @@ const PostHeader = ({ post, onEdit, onDelete }) => {
                 {post.author.fullName || post.author.userName}
               </h3>
               <span className="text-gray-500 text-sm">@{post.author.userName}</span>
+              {post.author.role === 'admin' && (
+                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                  ADMIN
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <time>{formatDistanceToNow(new Date(post.createdAt))} ago</time>
@@ -55,51 +60,42 @@ const PostHeader = ({ post, onEdit, onDelete }) => {
           </div>
         </div>
 
-        {/* Post Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
-          >
-            <EllipsisHorizontalIcon className="w-5 h-5" />
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-              {isOwner ? (
-                <>
-                  <button
-                    onClick={() => {
-                      onEdit();
-                      setShowMenu(false);
-                    }}
-                    className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                    <span>Edit Post</span>
-                  </button>
-                  <button
-                    onClick={() => {
+        {isAdmin && (
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            >
+              <EllipsisHorizontalIcon className="w-5 h-5" />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                <button
+                  onClick={() => {
+                    onEdit();
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  <span>Edit Post</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this post?')) {
                       onDelete(post._id);
                       setShowMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  >
-                    Delete Post
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Report Post
-                  </button>
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Hide Post
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                    }
+                  }}
+                  className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  <span>Delete Post</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -152,7 +152,6 @@ const CreatePost = ({ onPostCreated }) => {
     }));
   };
 
-  //  Enhanced modal-aware image edit
   const handleEditImageSave = (index, updatedImageData) => {
     setFormData(prev => ({
       ...prev,
@@ -174,7 +173,7 @@ const CreatePost = ({ onPostCreated }) => {
       const cloudinaryImages = uploadResult.images || uploadResult.data?.images || [];
       return cloudinaryImages;
     } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
+      console.error('❌ Error uploading to Cloudinary:', error);
       throw new Error('Failed to upload images: ' + error.message);
     } finally {
       setIsUploadingImages(false);
@@ -193,6 +192,7 @@ const CreatePost = ({ onPostCreated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!formData.title.trim() || !formData.content.trim() || isSubmitting) return;
 
     try {
@@ -210,7 +210,8 @@ const CreatePost = ({ onPostCreated }) => {
         images: uploadedImages
       };
 
-      const response = await createPost(submitData);      
+      const response = await createPost(submitData);
+      
       handleCancel();
       
       if (onPostCreated) {
@@ -220,7 +221,7 @@ const CreatePost = ({ onPostCreated }) => {
       alert('Bài viết đã được tạo thành công!');
       
     } catch (error) {
-      console.error(' Error:', error);
+      console.error('❌ Error:', error);
       alert('Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsSubmitting(false);
@@ -228,7 +229,6 @@ const CreatePost = ({ onPostCreated }) => {
   };
 
   const handleCancel = () => {
-    // Cleanup preview URLs
     formData.images.forEach(image => {
       if (image.preview) {
         URL.revokeObjectURL(image.preview);
@@ -251,7 +251,6 @@ const CreatePost = ({ onPostCreated }) => {
     modalManager.openModal('create');
   };
 
-  // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       formData.images.forEach(image => {
@@ -264,15 +263,9 @@ const CreatePost = ({ onPostCreated }) => {
 
   const canSubmit = formData.title.trim() && formData.content.trim() && !isSubmitting && !isUploadingImages;
 
-  if (!user) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6 text-center">
-        <p className="text-gray-600 mb-4">Join our community to share your thoughts!</p>
-        <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Sign In
-        </button>
-      </div>
-    );
+  //  Chỉ hiển thị nếu user đăng nhập và là admin
+  if (!user || user.role !== 'admin') {
+    return null;
   }
 
   return (
@@ -290,13 +283,13 @@ const CreatePost = ({ onPostCreated }) => {
               onClick={handleOpenModal}
               className="flex-1 text-left px-4 py-3 bg-gray-50 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
             >
-              Bạn có suy nghĩ gì, {user.fullName || user.userName}?
+              Chia sẻ bài viết mới, {user.fullName || user.userName}?
             </button>
           </div>
         </div>
       </div>
 
-      {/* ✅ Single Modal với dynamic content */}
+      {/* Modal */}
       <Modal
         isOpen={modalManager.isModalOpen}
         onClose={modalManager.modalContent === 'create' ? handleCancel : modalManager.handleBackToCreate}
@@ -312,7 +305,6 @@ const CreatePost = ({ onPostCreated }) => {
           showCodeEditor={showCodeEditor}
           canSubmit={canSubmit}
           
-          // Form handlers
           setFormData={setFormData}
           handleContentChange={handleContentChange}
           handleEditorImageUpload={handleEditorImageUpload}
@@ -326,7 +318,6 @@ const CreatePost = ({ onPostCreated }) => {
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
           
-          // Modal navigation
           showImagePreview={modalManager.showImagePreview}
           showImageCustomizer={modalManager.showImageCustomizer}
           handleBackToCreate={modalManager.handleBackToCreate}

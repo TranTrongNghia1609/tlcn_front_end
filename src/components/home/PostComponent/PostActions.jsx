@@ -95,31 +95,6 @@ const PostActions = ({
             </div>
           )}
         </div>
-
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleBookmarkClick}
-            disabled={!user}
-            className={`transition-colors ${
-              post.isBookmarked
-                ? 'text-blue-500 hover:text-blue-600'
-                : 'text-gray-500 hover:text-blue-500'
-            } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {post.isBookmarked ? (
-              <BookmarkSolid className="w-5 h-5" />
-            ) : (
-              <BookmarkOutline className="w-5 h-5" />
-            )}
-          </button>
-
-          <button
-            onClick={handleShareClick}
-            className="text-gray-500 hover:text-blue-500 transition-colors"
-          >
-            <ShareIcon className="w-5 h-5" />
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -16,8 +16,8 @@ const ModalContentRenderer = ({
   isUploadingImages,
   showCodeEditor,
   canSubmit,
+  isEditMode = false, // ✅ Add this prop
   
-  // Form handlers
   setFormData,
   handleContentChange,
   handleEditorImageUpload,
@@ -31,12 +31,12 @@ const ModalContentRenderer = ({
   handleSubmit,
   handleCancel,
   
-  // Modal navigation
   showImagePreview,
   showImageCustomizer,
   handleBackToCreate,
   handleEditImageSave
 }) => {
+
   
   const renderCreatePostContent = () => (
     <div className="max-h-[calc(95vh-80px)] overflow-y-auto">
@@ -55,7 +55,7 @@ const ModalContentRenderer = ({
             <input
               type="text"
               placeholder="Tiêu đề..."
-              value={formData.title}
+              value={formData.title} // ✅ This should show existing title
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               className="w-full text-xl font-semibold border-none outline-none placeholder-gray-400 focus:ring-0"
               maxLength={200}
@@ -67,15 +67,15 @@ const ModalContentRenderer = ({
         {/* Content Editor Section */}
         <div className="w-full">
           <PostEditor
-            value=""
+            value={formData.content} // ✅ FIX: Truyền content vào, không để empty
             onChange={handleContentChange}
             onImageUpload={handleEditorImageUpload}
-            placeholder="Chia sẻ suy nghĩ của bạn..."
+            placeholder={isEditMode ? "Chỉnh sửa nội dung..." : "Chia sẻ suy nghĩ của bạn..."}
           />
 
           <div className="flex justify-between items-center text-sm text-gray-500 mt-3 px-2">
-            <span>Characters: {formData.content.length}</span>
-            <span>Words: {formData.content.split(/\s+/).filter(word => word.length > 0).length}</span>
+            <span>Characters: {formData.content?.length || 0}</span>
+            <span>Words: {formData.content ? formData.content.split(/\s+/).filter(word => word.length > 0).length : 0}</span>
           </div>
         </div>
 
@@ -119,6 +119,7 @@ const ModalContentRenderer = ({
 
         {/* Actions Section */}
         <div className="w-full border-t border-gray-200 pt-4">
+          <div className="w-full border-t border-gray-200 pt-4">
           <PostActions
             showCodeEditor={showCodeEditor}
             onToggleCodeEditor={() => setShowCodeEditor(!showCodeEditor)}
@@ -126,12 +127,14 @@ const ModalContentRenderer = ({
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting || isUploadingImages}
             canSubmit={canSubmit}
+            isEditMode={isEditMode} 
             submitText={
-              isUploadingImages ? 'Uploading images...' : 
-              isSubmitting ? 'Publishing...' : 
-              'Post'
+              isUploadingImages ? (isEditMode ? 'Đang tải ảnh...' : 'Uploading images...') : 
+              isSubmitting ? (isEditMode ? 'Đang cập nhật...' : 'Publishing...') : 
+              (isEditMode ? 'Cập nhật' : 'Đăng bài')
             }
           />
+        </div>
         </div>
       </form>
     </div>
@@ -155,13 +158,12 @@ const ModalContentRenderer = ({
     />
   );
 
-  // Main render logic
   switch (modalContent) {
     case 'preview':
       return renderImagePreview();
     case 'customize':
       return renderImageCustomizer();
-    default: // create
+    default:
       return renderCreatePostContent();
   }
 };
