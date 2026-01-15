@@ -88,7 +88,7 @@ const ProblemListSkeleton = () => {
   );
 };
 
-const ProblemList = () => {
+const ProblemList = ({filters}) => {
   const navigate = useNavigate();
 
   const [problems, setProblems] = useState([]);
@@ -100,6 +100,11 @@ const ProblemList = () => {
     const fetchProblems = async () => {
       try {
         const params = {page: pageActive}
+        // Thêm filters vào params nếu có giá trị
+        if (filters?.name) params.name = filters.name;
+        if (filters?.tags) params.tags = filters.tags;
+        if (filters?.difficulty) params.difficulty = filters.difficulty;
+        console.log('Filters applied:', params);
         const response = await getProblems(params);
         setProblems(response.data.content);
         setProblemPagination(response.data);
@@ -110,7 +115,7 @@ const ProblemList = () => {
       }
     }
     fetchProblems();
-  }, [pageActive]);
+  }, [pageActive, filters]);
   if (isLoading){
     return <ProblemListSkeleton />
   }
