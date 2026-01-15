@@ -44,12 +44,11 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const submissions = submissionsStore((state) => state.submissions);
   const setCurrentSubmission = submissionsStore((state) => state.setCurrentSubmission);
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
-  const { socket, isConnected, emit, on, off } = useSocket();
+  const { on, off } = useSocket();
 
   
   useEffect(()=>{
     const fetchProblemSubmission = async () => {
-  
       if (isAuthenticated && !loading){
         let shouldExcludeClassroom = false;
         
@@ -228,7 +227,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                           submission.passed === submission.total 
                             ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {submission.passed || 0}/{submission.total || 10}
+                          {submission.status === 'Pending' ? '...' : `${submission.passed || 0} / ${submission.total || 10}`}
                         </span>
                       </td>
                     </tr>
