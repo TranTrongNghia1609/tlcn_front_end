@@ -3,6 +3,7 @@ import PostHeader from './PostComponent/PostHeader';
 import PostContent from './PostComponent/PostContent';
 import PostActions from './PostComponent/PostActions';
 import PostDetailModal from './PostDetailModal';
+import PostEdit from './PostComponent/PostEdit';
 import { useUser } from '../../context/UserContext';
 import { usePost } from '../../context/PostContext';
 import { useComment } from '../../context/CommentContext';
@@ -10,7 +11,7 @@ import { toast } from 'react-toastify';
 
 const PostCard = ({ post, onUpdate, onDelete }) => {
   const { user } = useUser();
-  const { toggleLike, bookmarkPost, updatePost } = usePost();
+  const { toggleLike, bookmarkPost, updatePost, deletePost } = usePost(); // ✅ Add deletePost
   const { createComment } = useComment();
   
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +52,6 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     try {
       setIsLiking(true);
 
-      // Optimistic update
       setLocalPost(prev => ({
         ...prev,
         isLiked: newLikeState,
@@ -73,7 +73,6 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     } catch (error) {
       console.error('PostCard toggleLike error:', error);
 
-      // Rollback on error
       setLocalPost(prev => ({
         ...prev,
         isLiked: currentLikeState,
@@ -141,6 +140,22 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     }
   };
 
+  // ✅ Add handleDelete function
+  const handleDelete = async (postId) => {
+    try {
+      await deletePost(postId);
+      toast.success('Đã xóa bài viết thành công!');
+      
+      // Call parent onDelete callback if provided
+      if (onDelete) {
+        onDelete(postId);
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Không thể xóa bài viết. Vui lòng thử lại.');
+    }
+  };
+
   const handleToggleComments = () => {
     setShowModal(true);
   };
@@ -169,13 +184,11 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         parentCommentId: null
       });
       
-      // Update local comments count
       setLocalPost(prev => ({
         ...prev,
         commentsCount: (prev.commentsCount || 0) + 1
       }));
 
-      // Notify parent to update the main post list if needed
       if (onUpdate) {
         onUpdate({
           ...localPost,
@@ -191,42 +204,39 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     }
   };
 
+  if (isEditing) {
+    return (
+      <PostEdit
+        post={localPost}
+        onSave={handleSaveEdit}
+        onCancel={handleCancelEdit}
+        isUpdating={isUpdating}
+      />
+    );
+  }
+
   return (
     <>
       <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-        {false && isEditing ? (
-          <div className="p-6 text-center">
-            <p className="text-gray-500">Edit feature is temporarily disabled</p>
-            <button
-              onClick={handleCancelEdit}
-              className="mt-2 px-4 py-2 bg-gray-500 text-white rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <>
-            <PostHeader
-              post={localPost}
-              onEdit={handleEdit}
-              onDelete={onDelete}
-            />
-            <PostContent
-              post={localPost}
-              isExpanded={isExpanded}
-              onToggleExpanded={handleToggleExpanded}
-            />
-            <PostActions
-              post={localPost}
-              onLike={handleLike}
-              onToggleComments={handleToggleComments}
-              onBookmark={handleBookmark}
-              onShare={handleShare}
-              showComments={false}
-              isLiking={isLiking}
-            />
-          </>
-        )}
+        <PostHeader
+          post={localPost}
+          onEdit={handleEdit}
+          onDelete={handleDelete} // ✅ Pass handleDelete
+        />
+        <PostContent
+          post={localPost}
+          isExpanded={isExpanded}
+          onToggleExpanded={handleToggleExpanded}
+        />
+        <PostActions
+          post={localPost}
+          onLike={handleLike}
+          onToggleComments={handleToggleComments}
+          onBookmark={handleBookmark}
+          onShare={handleShare}
+          showComments={false}
+          isLiking={isLiking}
+        />
       </article>
 
       <PostDetailModal
@@ -237,7 +247,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         onBookmark={handleBookmark}
         onShare={handleShare}
         onEdit={handleEdit}
-        onDelete={onDelete}
+        onDelete={handleDelete}
         isLiking={isLiking}
         realTimeCommentsCount={localPost.commentsCount}
         onCreateComment={handleCreateComment}

@@ -194,6 +194,9 @@ const Home = ({isShowOnboarding = false}) => {
               open={onboarding}
               onClose={() => setOnboarding(false)}
             />
+            {user && (
+              <CreatePost onPostCreated={handleNewPost} />
+            )}
 
             {/* Filter Tabs */}
             <div className="bg-white rounded-lg shadow-sm mb-6">
