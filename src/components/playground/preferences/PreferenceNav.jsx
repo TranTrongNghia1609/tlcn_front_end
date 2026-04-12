@@ -8,7 +8,7 @@ export function PreferenceNav({changLanguage, onSubmit}) {
   const { currentProblem } = useProblem();
   const languages = [
     {
-      value: "python",
+      value: "py",
       label: "Python"
     },
     {
