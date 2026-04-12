@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 
-const ImageUpload = ({ 
-  onUploadSuccess, 
+const ImageUpload = ({
+  onUpload,
   onUploadError,
-  folder = 'user_avatars',
   maxSize = 5 * 1024 * 1024, // 5MB
   allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
   className = '',
@@ -11,55 +10,8 @@ const ImageUpload = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(null); 
   const fileInputRef = useRef(null);
-
-  const uploadToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', folder);
-
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      
-      // Track upload progress
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = (event.loaded / event.total) * 100;
-          setProgress(percentComplete);
-        }
-      });
-      
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
-          const result = JSON.parse(xhr.responseText);
-          resolve({
-            success: true,
-            url: result.secure_url,
-            public_id: result.public_id,
-            width: result.width,
-            height: result.height,
-            format: result.format,
-            bytes: result.bytes,
-            cloudinary_result: result
-          });
-        } else {
-          const error = JSON.parse(xhr.responseText);
-          reject(new Error(error.error?.message || 'Upload failed'));
-        }
-      });
-      
-      xhr.addEventListener('error', () => {
-        reject(new Error('Upload error'));
-      });
-      
-      xhr.open('POST', cloudinaryUrl);
-      xhr.send(formData);
-    });
-  };
 
   const validateFile = (file) => {
     // Check file type
@@ -78,25 +30,15 @@ const ImageUpload = ({
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
+    console.log(file);
     try {
       validateFile(file);
-      
-      // Create preview
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
       
       // Start upload
       setUploading(true);
       setProgress(0);
-      
-      console.log('📤 Uploading image to Cloudinary...');
-      const result = await uploadToCloudinary(file);
-      
-      console.log('✅ Upload successful:', result);      
-      if (onUploadSuccess) {
-        onUploadSuccess(result);
-      }
+
+      const result = await onUpload(file);
       
     } catch (error) {
       console.error('❌ Upload failed:', error);

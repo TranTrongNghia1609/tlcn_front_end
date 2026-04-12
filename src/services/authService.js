@@ -3,12 +3,7 @@ import API from '../utils/api';
 import { AUTH_ENDPOINTS } from '../config/endpoints';
 export const authService = {
   login: async (credentials) => {
-    try {
-      console.log('📤 AuthService: Logging in...', {
-        userName: credentials.userName,
-        hasPassword: !!credentials.password
-      });
-      
+    try {  
       if (!credentials.userName || !credentials.password) {
         throw new Error('Username và password là bắt buộc');
       }
@@ -18,14 +13,11 @@ export const authService = {
         password: credentials.password
       });
       
-      console.log('✅ Login API Response:', response.data);
       
       // Lưu access token
       const  accessToken  = response.data.data.accessToken;
-      console.log(`AcessToken: ${accessToken}`)
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        console.log('✅ Access token saved');
       }
       
       return response.data;
@@ -62,7 +54,6 @@ export const authService = {
   },
   refreshToken: async () => {
     try {
-      console.log('🔄 AuthService: Refreshing token...');
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
@@ -71,15 +62,12 @@ export const authService = {
       );
       
       const { accessToken } = response.data.data.accessToken;
-      console.log(`Ma accesstoken: ${accessToken} `)
       
       // Update access token mới
       if (accessToken) {
         localStorage.setItem('access_token', accessToken);
-        console.log('✅ New access token saved');
       }
       
-      console.log('✅ AuthService: Token refreshed successfully');
       return response.data;
       
     } catch (error) {
@@ -124,12 +112,10 @@ export const authService = {
   // Logout - không cần tham số
   logout: async () => {
     try {
-      console.log('🔄 AuthService: Logging out...');
       
       // Gọi API logout để clear refresh token cookie
       await API.post(AUTH_ENDPOINTS.LOGOUT);
       
-      console.log('✅ Logout API called successfully');
       
     } catch (error) {
       console.error('❌ Logout API error:', error);
@@ -137,23 +123,20 @@ export const authService = {
     } finally {
       // Clear access token
       localStorage.removeItem('access_token');
-      console.log('✅ AuthService: Access token cleared');
     }
   },
 
   // Get current user - không cần tham số
   getCurrentUser: async () => {
     try {
-      console.log('🔍 AuthService: Getting current user...');
       
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        throw new Error('No access token available');
-      }
+      // const token = localStorage.getItem('access_token');
+      // if (!token) {
+      //   throw new Error('No access token available');
+      // }
       
       const response = await API.get(AUTH_ENDPOINTS.ME);
       
-      console.log('✅ AuthService: Current user fetched:', response.data);
       return response.data;
       
     } catch (error) {
@@ -164,7 +147,7 @@ export const authService = {
         message: error.message
       });
       
-      // ✅ Throw error để AuthContext có thể handle
+      // Throw error để AuthContext có thể handle
       throw error.response?.data || { message: 'Failed to get current user' };
     }
   },
@@ -181,5 +164,62 @@ export const authService = {
 
   removeToken: () => {
     localStorage.removeItem('access_token');
-  }
+  },
+
+  onBoarding: async (userName) =>{
+    try{
+      const response = await API.post(AUTH_ENDPOINTS.ONBOARDING, {}, {
+        params: {username: userName}
+      });
+      // Lưu access token
+      const  accessToken  = response.data.data.accessToken;
+      if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+      }
+      
+      return response.data;
+    }
+    catch (e){
+      throw e;
+    }
+  },
+  // Forgot Password - Send OTP
+  sendForgotPasswordOTP: async (userName) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_SEND_OTP, { userName });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Gửi OTP thất bại' };
+    }
+  },
+
+  // Forgot Password - Verify OTP
+  verifyForgotPasswordOTP: async (otpData) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_VERIFY_OTP, otpData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Xác thực OTP thất bại' };
+    }
+  },
+
+  // Forgot Password - Reset Password
+  resetPassword: async (resetData) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_RESET, resetData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Đặt lại mật khẩu thất bại' };
+    }
+  },
+
+  // Forgot Password - Resend OTP
+  resendForgotPasswordOTP: async (userName) => {
+    try {
+      const response = await API.post(AUTH_ENDPOINTS.FORGOT_PASSWORD_RESEND_OTP, { userName });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Gửi lại OTP thất bại' };
+    }
+  },
 }

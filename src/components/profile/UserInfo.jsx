@@ -1,79 +1,115 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { User, MapPinHouse, Mail, Calendar, School, Edit } from 'lucide-react';
 
-const UserInfo = () => {
-  const { user } = useAuth();
+const UserInfo = ({ profileData, onEditProfile }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Chưa cập nhật';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Profile Information */}
-      <div className="border-t pt-8">
-        <h3 className="text-xl font-semibold mb-6">Profile Information</h3>
+    <div className='p-6'>
+      <div className='space-y-6'>
+        {/* Profile Header */}
+        <div className='flex flex-col items-center text-center'>
+          {/* Avatar */}
+          <div className='mb-4'>
+            <img 
+              src={profileData.avatar} 
+              alt={profileData.userName}
+              className='h-32 w-32 object-cover rounded-full border-4 border-blue-100 shadow-lg'
+            />
+          </div>
+
+          {/* Username */}
+          <div className='mb-2'>
+            <p className='font-bold text-gray-900 text-2xl'>{profileData.userName}</p>
+          </div>
+
+          {/* Full Name */}
+          <div className='mb-4'>
+            <p className='text-gray-600 text-lg'>{profileData.fullName || 'Chưa cập nhật'}</p>
+          </div>
+        </div>
+
+        {/* Info List */}
+        <div className='space-y-4 pt-4 border-t'>
+          {/* Email */}
+          <div className='flex items-start gap-3'>
+            <Mail size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Email</p>
+              <p className='text-gray-900 break-all'>{profileData.email}</p>
+            </div>
+          </div>
+
+          {/* Date of Birth */}
+          <div className='flex items-start gap-3'>
+            <Calendar size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Ngày sinh</p>
+              <p className='text-gray-900'>{formatDate(profileData.dob)}</p>
+            </div>
+          </div>
+
+          {/* School */}
+          <div className='flex items-start gap-3'>
+            <School size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Trường học</p>
+              <p className='text-gray-900'>{profileData.School || 'Chưa cập nhật'}</p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className='flex items-start gap-3'>
+            <MapPinHouse size={20} className="text-blue-600 flex-shrink-0 mt-1" />
+            <div className='flex-1'>
+              <p className='text-xs text-gray-500 mb-1'>Quốc gia</p>
+              <p className='text-gray-900'>Vietnam</p>
+            </div>
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
-            <input
-              type="text"
-              value={user?.userName || ''}
-              readOnly
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-            />
-            <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              readOnly
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-            />
-            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text"
-              value={user?.fullName || ''}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-500 mt-1">You can update your full name</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Account Status */}
-      <div className="border-t pt-8">
-        <h3 className="text-xl font-semibold mb-4">Account Status</h3>
-        <div className="flex items-center space-x-3">
-          <div className={`w-3 h-3 rounded-full ${user?.active ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className={`font-medium ${user?.active ? 'text-green-600' : 'text-red-600'}`}>
-            {user?.active ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-      </div>
-
-      {/* Avatar URL Debug */}
-      {user?.avatar && (
-        <div className="border-t pt-8">
-          <h3 className="text-lg font-semibold mb-3">Current Avatar URL</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 break-all">{user.avatar}</p>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(user.avatar);
-                alert('URL copied to clipboard!');
-              }}
-              className="mt-2 px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+        {/* Edit Button */}
+        {profileData.isOwner && (
+          <div className='pt-4 border-t'>
+            <Button 
+              onClick={onEditProfile}
+              className='w-full bg-blue-600 hover:bg-blue-700 text-white'
+              type="button"
             >
-              Copy URL
-            </button>
+              <Edit size={18} className="mr-2" />
+              Chỉnh sửa thông tin
+            </Button>
+          </div>
+        )}
+
+        {/* Languages Section */}
+        <div className='pt-6 border-t'>
+          <h3 className="text-base font-semibold mb-3 text-gray-900">Ngôn ngữ lập trình</h3>
+          <div className="flex flex-wrap gap-2">
+            {profileData.languages?.length > 0 ? (
+              profileData.languages.map((lang, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                >
+                  {lang}
+                </span>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">Chưa có ngôn ngữ nào</p>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

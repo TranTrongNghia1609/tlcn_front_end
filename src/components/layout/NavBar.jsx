@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthModal } from '../../context/AuthModalContext';
 import UserMenu from './UserMenu';
 import { useAuth } from '../../context/AuthContext';
-
+import NotificationBell from '@/components/common/NotificationBell';
+import logo from '@/assets/logo.png';
 const Navbar = () => {
   const { openLogin, openRegister } = useAuthModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,11 +22,11 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Problems', path: '/problems' },
-    { name: 'Contests', path: '/contests' },
-    { name: 'Leaderboard', path: '/leaderboard' },
-    { name: 'Tutorials', path: '/tutorials' },
+    { name: 'Trang chủ', path: '/home' },
+    { name: 'Bài tập', path: '/problemset' },
+    { name: 'Kì thi', path: '/contests' },
+    { name: 'Bảng xếp hạng', path: '/leaderboard' },
+    { name: 'Lớp học', path: '/classrooms' },
   ];
 
   return (
@@ -39,8 +40,8 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="relative">
-              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                <span className="text-white font-bold text-lg lg:text-xl">BN</span>
+              <div className="w-12 h-12 lg:w-13 lg:h-13 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
+                <img src={logo}/>
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
@@ -58,7 +59,7 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative group ${
+                className={`relative px-4 py-2 font-medium rounded-lg transition-all duration-300 cursor-pointer ${
                   location.pathname === item.path
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
@@ -72,53 +73,48 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Right Side - Search + Auth */}
+          {/* Right Side */}
           <div className="flex items-center space-x-3 lg:space-x-4">
-            {/* Search Bar */}
-            <div className="hidden md:flex items-center">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search problems..."
-                  className="w-48 lg:w-56 px-4 py-2 pl-10 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-                <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
-
             {/* Theme Toggle */}
-            <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200">
+            <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
             </button>
+            {isAuthenticated && !loading && (
+              <NotificationBell />
+            )}
+            
+            
 
             {/* Auth Buttons */}
 
             {loading ? (
               // Loading spinner while checking auth
               <div className="flex items-center">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin cursor-pointer"></div>
               </div>
             ) : isAuthenticated ? (
               // Show User Menu when authenticated
               <UserMenu />
             ) : (
               // Show Auth Buttons when not authenticated
-              <div className="hidden sm:flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2 ">
                 <button 
                   onClick={openLogin}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium 
+                  transition-all duration-300 transform hover:scale-105 cursor-pointer"
                 >
-                  Login
+                  Đăng nhập
                 </button>
                 <button 
                   onClick={openRegister}
-                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  className="px-4 py-2 font-medium 
+                  text-white bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700
+                  hover:to-blue-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 
+                  transition-all duration-300 cursor-pointer"
                 >
-                  Sign Up
+                  Đăng kí
                 </button>
               </div>
             )}
