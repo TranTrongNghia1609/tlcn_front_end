@@ -34,6 +34,6 @@ export const mapLanguage = () => {
   const map = []
   map['cpp'] = {code: CPP_VALUE, extensions: cpp};
   map['js'] = {code: JS_VALUE, extensions: javascript};
-  map['python'] = {code: PYTHON_VALUE, extensions: python};
+  map['py'] = {code: PYTHON_VALUE, extensions: python};
   return map;
 }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/Textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import discussionService from '@/services/discussionService';
 import { toast } from 'sonner';
