@@ -5,7 +5,7 @@ import App from '@/App.jsx'
 import { Toaster } from 'sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// 2. Tạo một instance của QueryClient
+//Tạo một instance của QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

@@ -10,9 +10,11 @@ export const SocketProvider = ({ children, url }) => {
   const [latestSubmission, setLatestSubmission] = useState(null);
   const [latestNotification, setLatestNotification] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  // ✅ Thêm state cho broadcasts
   const [broadcastCount, setBroadcastCount] = useState(0);
   const [latestBroadcast, setLatestBroadcast] = useState(null);
+  const [latestHint, setLatestHint] = useState(null);
+  const [hintHistory, setHintHistory] = useState([]);
+  const [isHintDialogOpen, setHintDialogOpen] = useState(false);
 
   useEffect(() => {
     socketRef.current = io(url, {
@@ -31,7 +33,7 @@ export const SocketProvider = ({ children, url }) => {
     });
     
     socketRef.current.on('connected', (data) => {
-      console.log('✅ Registered with notification system:', data);
+      console.log(' Registered with notification system:', data);
     });
 
     socketRef.current.on('disconnect', () => {
@@ -71,7 +73,7 @@ export const SocketProvider = ({ children, url }) => {
           }
         });
       } else if (data.type === 'system_announcement') {
-        // ✅ ĐỔI: Navigate đến /home thay vì /posts
+        // ĐỔI: Navigate đến /home thay vì /posts
         toast.info('📝 Bài viết mới', {
           description: data.message,
           duration: 6000,
@@ -135,7 +137,40 @@ export const SocketProvider = ({ children, url }) => {
       }
     });
 
-    // ❌ XÓA: Không cần lắng nghe riêng new-post-published và new-contest-published nữa
+    const handleHintReady = (data) => {
+      const hintPayload = {
+        ...data,
+        hint: data?.hint || '',
+        receivedAt: data?.receivedAt || new Date().toISOString()
+      };
+
+      setLatestHint(hintPayload);
+      setHintHistory((prev) => {
+        const existedIndex = prev.findIndex(
+          (item) => item.submissionId === hintPayload.submissionId
+        );
+
+        if (existedIndex >= 0) {
+          const cloned = [...prev];
+          cloned[existedIndex] = { ...cloned[existedIndex], ...hintPayload };
+          return cloned;
+        }
+
+        return [hintPayload, ...prev];
+      });
+
+      toast.info('AI Hint da san sang', {
+        description: 'Nhan de xem goi y va tiep tuc tu giai bai.',
+        duration: 8000,
+        action: {
+          label: 'Xem goi y',
+          onClick: () => setHintDialogOpen(true)
+        }
+      });
+    };
+
+    socketRef.current.on('HINT_READY', handleHintReady);
+
     
     // Lắng nghe contest announcements (vẫn giữ - dành cho announcements trong contest)
     socketRef.current.on('contest-announcement', (data) => {
@@ -147,30 +182,31 @@ export const SocketProvider = ({ children, url }) => {
       });
     });
 
-    // ✅ Lắng nghe broadcast events
+    //  Lắng nghe broadcast events
     socketRef.current.on('broadcast-seen-success', (data) => {
-      console.log('✅ Broadcast marked as seen:', data.broadcastId);
+      console.log(' Broadcast marked as seen:', data.broadcastId);
       setBroadcastCount(prev => Math.max(0, prev - 1));
     });
 
     socketRef.current.on('broadcast-dismissed-success', (data) => {
-      console.log('✅ Broadcast dismissed:', data.broadcastId);
+      console.log(' Broadcast dismissed:', data.broadcastId);
       setBroadcastCount(prev => Math.max(0, prev - 1));
     });
 
     socketRef.current.on('broadcasts-list', (data) => {
-      console.log('📋 Received broadcasts list:', data);
+      console.log(' Received broadcasts list:', data);
       // Handle broadcasts list if needed
     });
 
     // Lắng nghe khi đánh dấu đã đọc thành công (personal notifications)
     socketRef.current.on('notification-read-success', (data) => {
-      console.log('✅ Notification marked as read:', data.notificationId);
+      console.log('Notification marked as read:', data.notificationId);
       setUnreadCount(prev => Math.max(0, prev - 1));
     });
 
     return () => {
       if (socketRef.current) {
+        socketRef.current.off('HINT_READY', handleHintReady);
         socketRef.current.disconnect();
       }
     };
@@ -204,19 +240,30 @@ export const SocketProvider = ({ children, url }) => {
     emit('mark-notification-read', { notificationId });
   };
 
-  // ✅ Mark broadcast as seen
+  //  Mark broadcast as seen
   const markBroadcastAsSeen = (broadcastId) => {
     emit('mark-broadcast-seen', { broadcastId });
   };
 
-  // ✅ Dismiss broadcast
+  //  Dismiss broadcast
   const dismissBroadcast = (broadcastId) => {
     emit('dismiss-broadcast', { broadcastId });
   };
 
-  // ✅ Get broadcasts
+  //  Get broadcasts
   const getBroadcasts = (options = {}) => {
     emit('get-broadcasts', options);
+  };
+
+  const openLatestHint = () => {
+    if (latestHint) {
+      setHintDialogOpen(true);
+    }
+  };
+
+  const clearHintHistory = () => {
+    setHintHistory([]);
+    setLatestHint(null);
   };
 
   return (
@@ -234,6 +281,12 @@ export const SocketProvider = ({ children, url }) => {
       broadcastCount,
       setBroadcastCount,
       latestBroadcast,
+      latestHint,
+      hintHistory,
+      isHintDialogOpen,
+      setHintDialogOpen,
+      openLatestHint,
+      clearHintHistory,
       joinContest,
       markNotificationAsRead,
       markBroadcastAsSeen,

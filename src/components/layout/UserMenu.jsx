@@ -43,7 +43,7 @@ const UserMenu = () => {
     return user?.userName || user?.fullName || user?.email?.split('@')[0] || 'User';
   };
 
-  // ✅ Get role badge
+  //  Get role badge
   const getRoleBadge = () => {
     if (user?.role === 'admin') {
       return (
@@ -62,7 +62,7 @@ const UserMenu = () => {
     return null;
   };
 
-  // ✅ Handle site switch
+  //  Handle site switch
   const handleSiteSwitch = (switchFn, path) => {
     setIsOpen(false);
     switchFn(path, false);

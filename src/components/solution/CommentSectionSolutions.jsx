@@ -40,7 +40,7 @@ const CommentSectionSolutions = ({
         page,
         limit: 10
       });
-
+      console.log(response)
       if (page === 1) {
         setComments(response.data.comments);
       } else {
@@ -55,11 +55,7 @@ const CommentSectionSolutions = ({
         onCommentCountUpdate(response.data.pagination.totalComments);
       }
 
-      console.log('✅ Comments loaded:', {
-        page,
-        total: response.data.pagination.totalComments,
-        loaded: response.data.comments.length
-      });
+      
     } catch (error) {
       console.error('❌ Load comments error:', error);
       toast.error('Không thể tải comments');

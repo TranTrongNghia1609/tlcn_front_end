@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 
 const PostCard = ({ post, onUpdate, onDelete }) => {
   const { user } = useUser();
-  const { toggleLike, bookmarkPost, updatePost, deletePost } = usePost(); // ✅ Add deletePost
+  const { toggleLike, bookmarkPost, updatePost, deletePost } = usePost(); 
   const { createComment } = useComment();
   
   const [showModal, setShowModal] = useState(false);
@@ -140,7 +140,6 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
     }
   };
 
-  // ✅ Add handleDelete function
   const handleDelete = async (postId) => {
     try {
       await deletePost(postId);
@@ -221,7 +220,7 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         <PostHeader
           post={localPost}
           onEdit={handleEdit}
-          onDelete={handleDelete} // ✅ Pass handleDelete
+          onDelete={handleDelete}
         />
         <PostContent
           post={localPost}

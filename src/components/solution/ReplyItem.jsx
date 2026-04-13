@@ -5,16 +5,16 @@ const ReplyItem = ({ reply, formatTimeAgo }) => {
   return (
     <div className="flex gap-2">
       <Avatar className="w-8 h-8 flex-shrink-0">
-        <AvatarImage src={reply.user?.avatar} />
+        <AvatarImage src={reply.author?.avatar} />
         <AvatarFallback>
-          {reply.user?.fullName?.charAt(0) || 'U'}
+          {reply.author?.fullName?.charAt(0) || 'U'}
         </AvatarFallback>
       </Avatar>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-semibold text-xs">
-            {reply.user?.fullName || 'Anonymous'}
+            {reply.author?.fullName || 'Anonymous'}
           </span>
           <span className="text-xs text-gray-500">
             {formatTimeAgo(reply.createdAt)}
