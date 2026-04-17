@@ -88,37 +88,58 @@ const ProblemListSkeleton = () => {
   );
 };
 
-const ProblemList = ({filters}) => {
+const ProblemList = ({ filters, page, onPageChange }) => {
   const navigate = useNavigate();
 
   const [problems, setProblems] = useState([]);
-  const [problemPagination, setProblemPagination] = useState();
-  const [pageActive, setPageActive] = useState(1);
+  const [problemPagination, setProblemPagination] = useState({
+    page: 1,
+    totalPages: 0,
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchProblems = async () => {
+      setIsLoading(true);
       try {
-        const params = {page: pageActive}
+        const params = { page };
         // Thêm filters vào params nếu có giá trị
         if (filters?.name) params.name = filters.name;
-        if (filters?.tags) params.tags = filters.tags;
+        if (filters?.tag) params.tag = filters.tag;
         if (filters?.difficulty) params.difficulty = filters.difficulty;
-        console.log('Filters applied:', params);
+
         const response = await getProblems(params);
-        setProblems(response.data.content);
-        setProblemPagination(response.data);
-        console.log('Fetched problems:', response.data);
-        setIsLoading(false);
+        const paginationData = response?.data || {};
+        const totalPages = Number(paginationData.totalPages) || 0;
+
+        if (totalPages > 0 && page > totalPages) {
+          onPageChange(totalPages);
+          return;
+        }
+
+        if (totalPages === 0 && page !== 1) {
+          onPageChange(1);
+          return;
+        }
+
+        setProblems(Array.isArray(paginationData.content) ? paginationData.content : []);
+        setProblemPagination(paginationData);
       } catch (error) {
         console.error('Error fetching problems:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
     fetchProblems();
-  }, [pageActive, filters]);
+  }, [page, filters, onPageChange]);
+
   if (isLoading){
-    return <ProblemListSkeleton />
+    return <ProblemListSkeleton />;
   }
+
+  const totalPages = Number(problemPagination?.totalPages) || 0;
+
   return (
     <div className="w-full space-y-3">
       <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6">
@@ -188,36 +209,39 @@ const ProblemList = ({filters}) => {
             ))}
           </TableBody>
         </Table>
-        <div className="mt-4 flex justify-center">
-          <Pagination className={"cursor-pointer"}>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious onClick={() => pageActive > 1 ? setPageActive(pageActive - 1) : {}}/>
-              </PaginationItem>
-              {
-                Array.from({ length: problemPagination.totalPages }, (_, index) => {
-                  const page = index + 1;
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationLink 
-                        onClick={() => {
-                          setPageActive(page);
-                          setIsLoading(true)
-                        } }
-                        isActive={page === problemPagination.page}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })
-              }
-              <PaginationItem>
-                <PaginationNext onClick={() => pageActive < problemPagination.totalPages ? setPageActive(pageActive + 1) : {}} />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-4 flex justify-center">
+            <Pagination className={"cursor-pointer"}>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => (page > 1 ? onPageChange(page - 1) : null)}
+                  />
+                </PaginationItem>
+                {
+                  Array.from({ length: totalPages }, (_, index) => {
+                    const targetPage = index + 1;
+                    return (
+                      <PaginationItem key={targetPage}>
+                        <PaginationLink
+                          onClick={() => onPageChange(targetPage)}
+                          isActive={targetPage === page}
+                        >
+                          {targetPage}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })
+                }
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => (page < totalPages ? onPageChange(page + 1) : null)}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </Card>
     </div>
   );

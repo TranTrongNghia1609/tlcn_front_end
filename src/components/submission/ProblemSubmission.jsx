@@ -43,6 +43,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const setProblemSubmissions = submissionsStore((state) => state.setProblemSubmissions)
   const submissions = submissionsStore((state) => state.submissions);
   const setCurrentSubmission = submissionsStore((state) => state.setCurrentSubmission);
+  const setSubmissionPreviewId = submissionsStore((state) => state.setSubmissionPreviewId);
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
   const { on, off } = useSocket();
 
@@ -141,6 +142,7 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const handleGetSubmission = async (submission) => {
     submission.isNew = true;
     setCurrentSubmission(submission);
+    setSubmissionPreviewId(submission?._id || null);
   }
   return (
     <div className="container mx-auto p-6 space-y-6">

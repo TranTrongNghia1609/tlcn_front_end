@@ -146,9 +146,10 @@ export const SocketProvider = ({ children, url }) => {
 
       setLatestHint(hintPayload);
       setHintHistory((prev) => {
-        const existedIndex = prev.findIndex(
-          (item) => item.submissionId === hintPayload.submissionId
-        );
+        const hasSubmissionId = Boolean(hintPayload?.submissionId);
+        const existedIndex = hasSubmissionId
+          ? prev.findIndex((item) => item.submissionId === hintPayload.submissionId)
+          : -1;
 
         if (existedIndex >= 0) {
           const cloned = [...prev];

@@ -1,28 +1,71 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeLight } from '@uiw/codemirror-theme-vscode';
 import PreferenceNav from './preferences/PreferenceNav';
 import { mapLanguage } from '@/lib/utils.js';
 import { useProblem } from '@/context/ProblemContext';
+import { useAuth } from '@/context/AuthContext';
+import useDebounce from '@/hooks/useDebounce';
 import { submitCode } from '@/services/submissionService';
 import { submissionsStore } from '@/zustand/store';
 import { useLocation,  useParams, useNavigate } from 'react-router-dom';
 
-const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) => {
+const PlayGround = ({
+  contestId = null,
+  classroomId = null,
+  storageScope = 'problemset',
+  storageScopeId = 'public',
+  onSubmitSuccess,
+  onEditorSnapshotChange = null,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id: problemId, classCode } = useParams();
-  const mapValue = mapLanguage();
+  const mapValue = useMemo(() => mapLanguage(), []);
+  const { user } = useAuth();
   const [language, setLanguage] = useState('cpp');
   const [code, setCode] = useState(mapValue[language].code);
   const { currentProblem } = useProblem();
   const currentSubmission = submissionsStore((state) => state.currentSubmission);
+  const submissionPreviewId = submissionsStore((state) => state.submissionPreviewId);
+  const clearSubmissionPreviewId = submissionsStore((state) => state.clearSubmissionPreviewId);
   const addSubmission = submissionsStore((state) => state.addSubmission);
-  const effectiveClassroomId = classroomId || location.state?.classroomId;
-  const fromClassroom = location.state?.fromClassroom;
+  const debouncedCode = useDebounce(code, 600);
+  const skipRestoreOnceRef = useRef(false);
+
+  const languageKeys = useMemo(() => Object.keys(mapValue || {}), [mapValue]);
+  const resolvedProblemId = String(currentProblem?._id || problemId || 'unknown-problem');
+  const resolvedUserId = String(user?._id || user?.id || 'guest');
+  const resolvedScope = String(storageScope || 'problemset');
+  const resolvedScopeId = String(storageScopeId || 'public');
+  const draftKeyBase = useMemo(
+    () => `workspace:draft:${resolvedUserId}:${resolvedScope}:${resolvedScopeId}:${resolvedProblemId}`,
+    [resolvedUserId, resolvedScope, resolvedScopeId, resolvedProblemId]
+  );
+
+  const getDraftKey = (lang) => `${draftKeyBase}:${lang}`;
+  const normalizedPreviewId = String(submissionPreviewId || '');
+  const normalizedSubmissionId = String(currentSubmission?._id || '');
+  const isViewingSelectedSubmission = Boolean(
+    normalizedPreviewId && normalizedSubmissionId && normalizedPreviewId === normalizedSubmissionId
+  );
+
+  const clearDraftForContext = () => {
+    try {
+      languageKeys.forEach((lang) => {
+        localStorage.removeItem(getDraftKey(lang));
+      });
+      localStorage.removeItem(`${draftKeyBase}:meta`);
+    } catch (error) {
+      console.error('Failed to clear editor draft:', error);
+    }
+  };
 
 
   const changeLanguage = (lang) => {
+    if (lang !== language && isViewingSelectedSubmission) {
+      clearSubmissionPreviewId();
+    }
     setLanguage(lang);
   }
 
@@ -30,6 +73,8 @@ const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) =
     const problemId = currentProblem._id;
     const response = await submitCode(problemId, code, language, contestId, classroomId );
     const submissionResult = response.data;
+    clearSubmissionPreviewId();
+    clearDraftForContext();
     submissionResult.isNew = true;
     addSubmission(submissionResult);
     let baseUrl;
@@ -52,9 +97,87 @@ const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) =
         onSubmitSuccess();
       }
   }
+
   useEffect(() => {
-    setCode(currentSubmission?.source || currentProblem?.lastSubmission?.source || mapValue[language].code);
-  }, [language, currentProblem, currentSubmission]);
+    if (!isViewingSelectedSubmission) {
+      return;
+    }
+
+    const submissionLanguage = String(currentSubmission?.language || '').toLowerCase();
+    if (submissionLanguage && mapValue[submissionLanguage] && submissionLanguage !== language) {
+      setLanguage(submissionLanguage);
+    }
+  }, [isViewingSelectedSubmission, currentSubmission?._id, currentSubmission?.language, language, mapValue]);
+
+  useEffect(() => {
+    if (skipRestoreOnceRef.current) {
+      skipRestoreOnceRef.current = false;
+      return;
+    }
+
+    if (isViewingSelectedSubmission) {
+      const submissionSource = String(currentSubmission?.source || '');
+      setCode(submissionSource || mapValue[language]?.code || '');
+      return;
+    }
+
+    const fallbackCode = currentSubmission?.source || currentProblem?.lastSubmission?.source || mapValue[language]?.code || '';
+    let draftCode = null;
+
+    try {
+      draftCode = localStorage.getItem(getDraftKey(language));
+    } catch (error) {
+      console.error('Failed to read editor draft:', error);
+    }
+
+    setCode(draftCode !== null ? draftCode : fallbackCode);
+  }, [
+    language,
+    currentProblem?._id,
+    currentProblem?.lastSubmission?.source,
+    currentSubmission?._id,
+    currentSubmission?.source,
+    isViewingSelectedSubmission,
+    mapValue,
+    draftKeyBase,
+  ]);
+
+  useEffect(() => {
+    if (isViewingSelectedSubmission) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(getDraftKey(language), String(debouncedCode || ''));
+      localStorage.setItem(
+        `${draftKeyBase}:meta`,
+        JSON.stringify({
+          updatedAt: Date.now(),
+          language,
+          scope: resolvedScope,
+          scopeId: resolvedScopeId,
+          problemId: resolvedProblemId,
+        })
+      );
+    } catch (error) {
+      console.error('Failed to save editor draft:', error);
+    }
+  }, [debouncedCode, language, draftKeyBase, resolvedScope, resolvedScopeId, resolvedProblemId, isViewingSelectedSubmission]);
+
+  useEffect(() => {
+    if (typeof onEditorSnapshotChange === 'function') {
+      onEditorSnapshotChange({ code, language });
+    }
+  }, [code, language, onEditorSnapshotChange]);
+
+  const handleEditorChange = (value) => {
+    if (isViewingSelectedSubmission) {
+      skipRestoreOnceRef.current = true;
+      clearSubmissionPreviewId();
+    }
+    setCode(value);
+  };
+
   return (
     <div>
       <div >
@@ -69,7 +192,7 @@ const PlayGround = ({ contestId = null, classroomId = null, onSubmitSuccess }) =
           extensions={mapValue[language].extensions()}
           theme={vscodeLight}
           style={{ fontSize: 16 }}
-          onChange={(value) => setCode(value)}
+          onChange={handleEditorChange}
         />
       </div>
     </div>
