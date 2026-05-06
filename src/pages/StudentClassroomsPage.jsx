@@ -121,9 +121,9 @@ const StudentClassroomsPage = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Lớp học của tôi</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">My ClassRooms</h1>
               <p className="text-gray-600 text-base">
-                Quản lý các lớp học bạn đang tham gia
+                Manage the classrooms you are participating in
               </p>
             </div>
 
@@ -134,7 +134,7 @@ const StudentClassroomsPage = () => {
               disabled={loading}
             >
               <Plus size={20} className="mr-2" />
-              Tham gia lớp học
+              Join ClassRoom
             </Button>
           </div>
 
@@ -153,7 +153,7 @@ const StudentClassroomsPage = () => {
                     <GraduationCap size={24} className="text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Tổng lớp học</p>
+                    <p className="text-gray-600 text-sm">Total ClassRooms</p>
                     <p className="text-2xl font-bold text-gray-900">{classrooms.length}</p>
                   </div>
                 </div>
@@ -165,7 +165,7 @@ const StudentClassroomsPage = () => {
                     <BookOpen size={24} className="text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Bài tập</p>
+                    <p className="text-gray-600 text-sm">Total Problems</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {classrooms.reduce((sum, c) => sum + (c.stats?.totalProblems || 0), 0)}
                     </p>
@@ -179,7 +179,7 @@ const StudentClassroomsPage = () => {
                     <Users size={24} className="text-green-600" />
                   </div>
                   <div>
-                    <p className="text-gray-600 text-sm">Đang hoạt động</p>
+                    <p className="text-gray-600 text-sm">Active ClassRooms</p>
                     <p className="text-2xl font-bold text-gray-900">
                       {classrooms.filter(c => c.status === 'active').length}
                     </p>
@@ -198,7 +198,7 @@ const StudentClassroomsPage = () => {
           <div className="relative">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Tìm kiếm lớp học..."
+              placeholder="Search ClassRoom..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -218,12 +218,12 @@ const StudentClassroomsPage = () => {
           <Card className="p-12 text-center">
             <GraduationCap size={64} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              {searchTerm ? 'Không tìm thấy lớp học' : 'Chưa tham gia lớp học nào'}
+              {searchTerm ? 'No ClassRoom Found' : 'You have not joined any ClassRoom yet'}
             </h3>
             <p className="text-gray-500 mb-6">
               {searchTerm
-                ? 'Thử tìm kiếm với từ khóa khác'
-                : 'Bắt đầu tham gia lớp học để học tập và rèn luyện kỹ năng lập trình'
+                ? 'Try searching with another keyword'
+                : 'Start joining a classroom to learn and practice programming skills'
               }
             </p>
             {!searchTerm && (
@@ -232,7 +232,7 @@ const StudentClassroomsPage = () => {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 <Plus size={18} className="mr-2" />
-                Tham gia lớp học đầu tiên
+                Join First ClassRoom
               </Button>
             )}
           </Card>
@@ -282,7 +282,7 @@ const StudentClassroomsPage = () => {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 flex items-center gap-1">
                         <BookOpen size={14} />
-                        Bài tập
+                        Problems
                       </span>
                       <span className="font-semibold">{classroom.stats?.totalProblems || 0}</span>
                     </div>
@@ -290,7 +290,7 @@ const StudentClassroomsPage = () => {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 flex items-center gap-1">
                         <Users size={14} />
-                        Học viên
+                        Students
                       </span>
                       <span className="font-semibold">{classroom.stats?.totalStudents || 0}</span>
                     </div>
@@ -298,7 +298,7 @@ const StudentClassroomsPage = () => {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 flex items-center gap-1">
                         <Calendar size={14} />
-                        Tham gia
+                        Joined Date
                       </span>
                       <span className="text-gray-500">
                         {formatDate(classroom.createdAt)}
@@ -316,7 +316,7 @@ const StudentClassroomsPage = () => {
                           : 'bg-gray-100 text-gray-700'
                       }
                     >
-                      {classroom.status === 'active' ? 'Đang hoạt động' : 'Đã kết thúc'}
+                      {classroom.status === 'active' ? 'Active' : 'Ended'}
                     </Badge>
 
                     <ChevronRight

@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
+import { useAuth } from './AuthContext';
 import { toast } from 'sonner'
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children, url }) => {
+  const { user } = useAuth();
   const socketRef = useRef(null);
+  const aiHintEnabledRef = useRef(true);
   const [isConnected, setIsConnected] = useState(false);
   const token = localStorage.getItem('access_token');
   const [latestSubmission, setLatestSubmission] = useState(null);
@@ -13,8 +16,23 @@ export const SocketProvider = ({ children, url }) => {
   const [broadcastCount, setBroadcastCount] = useState(0);
   const [latestBroadcast, setLatestBroadcast] = useState(null);
   const [latestHint, setLatestHint] = useState(null);
+  const [latestHintAvailability, setLatestHintAvailability] = useState(null);
+  const [aiHintAvailableMap, setAiHintAvailableMap] = useState({});
   const [hintHistory, setHintHistory] = useState([]);
   const [isHintDialogOpen, setHintDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const isAiHintEnabled = user?.aiHintEnabled !== false;
+    aiHintEnabledRef.current = isAiHintEnabled;
+
+    if (!isAiHintEnabled) {
+      setHintDialogOpen(false);
+      setLatestHint(null);
+      setLatestHintAvailability(null);
+      setHintHistory([]);
+      setAiHintAvailableMap({});
+    }
+  }, [user?.aiHintEnabled]);
 
   useEffect(() => {
     socketRef.current = io(url, {
@@ -137,7 +155,48 @@ export const SocketProvider = ({ children, url }) => {
       }
     });
 
+    const markAiHintAvailable = (payload = {}) => {
+      const keys = [payload?.problemId, payload?.problemShortId]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean);
+
+      if (keys.length === 0) {
+        return;
+      }
+
+      setAiHintAvailableMap((prev) => {
+        const next = { ...prev };
+        keys.forEach((key) => {
+          next[key] = true;
+        });
+        return next;
+      });
+    };
+
+    const handleAiHintAvailable = (data) => {
+      if (!aiHintEnabledRef.current) {
+        return;
+      }
+
+      const availabilityPayload = {
+        ...data,
+        triggeredAt: data?.triggeredAt || new Date().toISOString(),
+      };
+
+      setLatestHintAvailability(availabilityPayload);
+      markAiHintAvailable(availabilityPayload);
+
+      toast.info('AI Hint da mo khoa', {
+        description: availabilityPayload?.message || 'Ban co the chu dong su dung AI Hint de duoc ho tro.',
+        duration: 8000,
+      });
+    };
+
     const handleHintReady = (data) => {
+      if (!aiHintEnabledRef.current) {
+        return;
+      }
+
       const hintPayload = {
         ...data,
         hint: data?.hint || '',
@@ -145,6 +204,7 @@ export const SocketProvider = ({ children, url }) => {
       };
 
       setLatestHint(hintPayload);
+      markAiHintAvailable(hintPayload);
       setHintHistory((prev) => {
         const hasSubmissionId = Boolean(hintPayload?.submissionId);
         const existedIndex = hasSubmissionId
@@ -171,6 +231,7 @@ export const SocketProvider = ({ children, url }) => {
     };
 
     socketRef.current.on('HINT_READY', handleHintReady);
+  socketRef.current.on('AI_HINT_AVAILABLE', handleAiHintAvailable);
 
     
     // Lắng nghe contest announcements (vẫn giữ - dành cho announcements trong contest)
@@ -208,6 +269,7 @@ export const SocketProvider = ({ children, url }) => {
     return () => {
       if (socketRef.current) {
         socketRef.current.off('HINT_READY', handleHintReady);
+        socketRef.current.off('AI_HINT_AVAILABLE', handleAiHintAvailable);
         socketRef.current.disconnect();
       }
     };
@@ -257,7 +319,7 @@ export const SocketProvider = ({ children, url }) => {
   };
 
   const openLatestHint = () => {
-    if (latestHint) {
+    if (latestHint && aiHintEnabledRef.current) {
       setHintDialogOpen(true);
     }
   };
@@ -283,6 +345,8 @@ export const SocketProvider = ({ children, url }) => {
       setBroadcastCount,
       latestBroadcast,
       latestHint,
+      latestHintAvailability,
+      aiHintAvailableMap,
       hintHistory,
       isHintDialogOpen,
       setHintDialogOpen,

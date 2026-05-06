@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import useDebounce from '@/hooks/useDebounce';
 import { submitCode } from '@/services/submissionService';
 import { submissionsStore } from '@/zustand/store';
-import { useLocation,  useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 
 const PlayGround = ({
   contestId = null,
@@ -71,31 +71,31 @@ const PlayGround = ({
 
   const handleSumit = async () => {
     const problemId = currentProblem._id;
-    const response = await submitCode(problemId, code, language, contestId, classroomId );
+    const response = await submitCode(problemId, code, language, contestId, classroomId);
     const submissionResult = response.data;
     clearSubmissionPreviewId();
     clearDraftForContext();
     submissionResult.isNew = true;
     addSubmission(submissionResult);
     let baseUrl;
-      if (classCode) {
-        // Classroom problem
-        baseUrl = `/classrooms/${classCode}/problems/${problemId}`;
-      } else {
-        // Regular problemset
-        baseUrl = `/problemset/problem/${problemId}`;
-      }
+    if (classCode) {
+      // Classroom problem
+      baseUrl = `/classrooms/${classCode}/problems/${problemId}`;
+    } else {
+      // Regular problemset
+      baseUrl = `/problemset/problem/${problemId}`;
+    }
 
-      // Navigate to submission tab
-      navigate(`${baseUrl}/submission`, {
-        replace: true,
-        state: location.state // Preserve state
-      });
+    // Navigate to submission tab
+    navigate(`${baseUrl}/submission`, {
+      replace: true,
+      state: location.state // Preserve state
+    });
 
-      // Or use callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess();
-      }
+    // Or use callback if provided
+    if (onSubmitSuccess) {
+      onSubmitSuccess();
+    }
   }
 
   useEffect(() => {

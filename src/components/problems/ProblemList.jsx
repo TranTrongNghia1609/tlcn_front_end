@@ -12,13 +12,14 @@ import { getProblems } from "@/services/problemService";
 import { CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const getDifficultyVariant = (difficulty) => {
@@ -134,7 +135,7 @@ const ProblemList = ({ filters, page, onPageChange }) => {
     fetchProblems();
   }, [page, filters, onPageChange]);
 
-  if (isLoading){
+  if (isLoading) {
     return <ProblemListSkeleton />;
   }
 
@@ -144,7 +145,7 @@ const ProblemList = ({ filters, page, onPageChange }) => {
     <div className="w-full space-y-3">
       <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Danh sách bài tập
+          Problems List
         </h2>
       </div>
       <Card className="border-border">

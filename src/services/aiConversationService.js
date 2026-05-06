@@ -5,6 +5,10 @@ export const aiConversationService = {
         const response = await API.get(`/ai-conversations/problem/${problemRef}`);
         return response.data;
     },
+    getEligibility: async (problemRef) => {
+        const response = await API.get(`/ai-conversations/problem/${problemRef}/eligibility`);
+        return response.data;
+    },
     addUserMessage: async (problemRef, payload) => {
         const response = await API.post(`/ai-conversations/problem/${problemRef}/messages`, payload);
         return response.data;

@@ -89,12 +89,12 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
           {/* Tên bài */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Tên bài:
+              Problem Name:
             </label>
             <input
               id="name"
               type="text"
-              placeholder="Nhập tên bài tập..."
+              placeholder="Enter problem name..."
               value={localFilters.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               className="text-sm w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -109,7 +109,7 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
             <input
               id="tag"
               type="text"
-              placeholder="Nhập tag..."
+              placeholder="Enter tag..."
               value={localFilters.tag}
               onChange={(e) => handleInputChange('tag', e.target.value)}
               className="text-sm w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -119,7 +119,7 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
           {/* Độ khó */}
           <div className='mt-2'>
             <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
-              Độ khó:
+              Difficulty:
             </label>
             <select
               id="difficulty"
@@ -127,7 +127,7 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
               onChange={(e) => handleInputChange('difficulty', e.target.value)}
               className="text-sm w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all"
             >
-              <option value="">Tất cả</option>
+              <option value="">All</option>
               {difficulties.map(diff => (
                 <option key={diff} value={diff}>{diff}</option>
               ))}
@@ -139,7 +139,7 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
         {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
             <span className="text-sm text-gray-500">Active filters:</span>
-            {Object.entries(localFilters).map(([key, value]) => 
+            {Object.entries(localFilters).map(([key, value]) =>
               value && (
                 <span
                   key={key}
@@ -165,16 +165,16 @@ const ProblemFilter = ({ filters, onFilterChange }) => {
             disabled={!hasPendingChanges}
             className="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
-            Ap dung filter
+            Apply Filters
           </button>
         </div>
 
         {/* Reset Button */}
         {hasActiveFilters && (
           <div className="pt-4 border-t border-gray-100">
-            <button 
+            <button
               type="button"
-              onClick={handleReset} 
+              onClick={handleReset}
               className="w-full text-center text-sm text-gray-600 hover:text-gray-700 font-medium transition-colors"
             >
               Clear All Filters

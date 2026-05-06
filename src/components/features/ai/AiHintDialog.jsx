@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -18,10 +18,39 @@ const normalizePlainMarkdown = (segment) => {
   return segment
     .replace(/\n{3,}/g, '\n\n')
     .replace(/([^\n])\n(#{1,6}\s)/g, '$1\n\n$2')
-    .replace(/([^\n])\n((?:\d+\.|[-*+])\s)/g, '$1\n\n$2');
+    .replace(/([^\n])\n((?:\d+\.|\-|\*|\+)\s)/g, '$1\n\n$2');
 };
 
+/**
+ * Chuyển đổi giá trị hint thành string markdown hợp lệ.
+ * Xử lý trường hợp value là Array (từ conversation context) hoặc Object.
+ */
 const normalizeHintMarkdown = (value) => {
+  if (value === null || value === undefined) return '';
+
+  // Handle Array content
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null) {
+          // Conversation context item: { role, content, createdAt }
+          if (item.content) return String(item.content);
+          return JSON.stringify(item, null, 2);
+        }
+        return String(item || '');
+      })
+      .filter(Boolean)
+      .join('\n\n');
+    return normalizeHintMarkdown(joined);
+  }
+
+  // Handle Object content
+  if (typeof value === 'object') {
+    if (value.content) return normalizeHintMarkdown(value.content);
+    return normalizeHintMarkdown(JSON.stringify(value, null, 2));
+  }
+
   const text = String(value || '');
   if (!text) return '';
 
@@ -46,9 +75,24 @@ const AiHintDialog = ({
   formatHintTime,
   onRequestMoreHint,
   isRequestingMoreHint = false,
+  isHintPending = false,
+  isAiHintEnabled = true,
   canRequestMoreHint = false,
+  cooldownRemaining = 0,
+  isProblemSolved = false,
 }) => {
   const normalizedHint = normalizeHintMarkdown(selectedHint?.hint);
+  const isRequestButtonDisabled = isProblemSolved || !canRequestMoreHint || isRequestingMoreHint || isHintPending || cooldownRemaining > 0;
+  const shouldShowLoading = isRequestingMoreHint || isHintPending;
+  const requestButtonLabel = isProblemSolved
+    ? 'Đã hoàn thành bài này'
+    : cooldownRemaining > 0
+      ? `Đợi ${cooldownRemaining}s`
+      : isHintPending
+        ? 'AI đang xử lý...'
+        : isRequestingMoreHint
+          ? 'Đang gửi yêu cầu...'
+          : 'Xin thêm gợi ý';
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -56,20 +100,20 @@ const AiHintDialog = ({
         <DialogHeader className="border-b px-6 pt-6 pb-4">
           <DialogTitle className="flex items-center gap-2 text-amber-700">
             <Sparkles className="h-5 w-5" />
-            AI Recommendation Hint
+            Gợi ý của AI
           </DialogTitle>
           <DialogDescription>
-            Goi y chi dinh huong cach giai, khong cung cap loi giai hoan chinh.
+            Gợi ý chỉ định hướng cách giải
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid h-[min(70vh,560px)] min-h-0 md:grid-cols-[280px_minmax(0,1fr)]">
           <div className="min-h-0 overflow-y-auto border-b border-r bg-gray-50 p-3 md:border-b-0">
-            <div className="mb-2 text-sm font-semibold text-gray-700">Lich su hint</div>
+            <div className="mb-2 text-sm font-semibold text-gray-700">Lịch sử gợi ý</div>
             <div className="space-y-2 pr-1">
               {problemHintHistory.length === 0 ? (
                 <div className="rounded-md border border-dashed border-gray-300 px-3 py-4 text-sm text-gray-500">
-                  Chua co hint cho bai nay.
+                  Chưa có gợi ý cho bài này.
                 </div>
               ) : (
                 problemHintHistory.map((hintItem, index) => {
@@ -103,29 +147,31 @@ const AiHintDialog = ({
           </div>
 
           <div className="min-h-0 overflow-y-auto px-6 py-5">
-            <div className="mb-4 flex items-center justify-end">
-              <button
-                type="button"
-                onClick={onRequestMoreHint}
-                disabled={!canRequestMoreHint || isRequestingMoreHint}
-                className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isRequestingMoreHint ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                Xin them goi y
-              </button>
-            </div>
+            {isProblemSolved && (
+              <div className="mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>Bạn đã hoàn thành bài này. Không thể yêu cầu thêm gợi ý.</span>
+              </div>
+            )}
+
+            {isAiHintEnabled && !isProblemSolved && (
+              <div className="mb-4 flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={onRequestMoreHint}
+                  disabled={isRequestButtonDisabled}
+                  className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {shouldShowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {requestButtonLabel}
+                </button>
+              </div>
+            )}
 
             {selectedHint?.hint ? (
               <>
                 <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-full bg-amber-100 px-2 py-1 font-medium text-amber-700">
-                    Source: {selectedHint.source || 'gemini'}
-                  </span>
-                  {selectedHint.model && (
-                    <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">
-                      Model: {selectedHint.model}
-                    </span>
-                  )}
+                  
                   {selectedHint.errorType && (
                     <span className="rounded-full bg-red-100 px-2 py-1 text-red-700">
                       {selectedHint.errorType}
@@ -143,7 +189,7 @@ const AiHintDialog = ({
               </>
             ) : (
               <div className="rounded-md border border-dashed border-gray-300 p-4 text-sm text-gray-500">
-                Chon mot hint trong danh sach de xem noi dung.
+                Chọn một gợi ý trong danh sách để xem nội dung.
               </div>
             )}
           </div>
@@ -154,3 +200,4 @@ const AiHintDialog = ({
 };
 
 export default AiHintDialog;
+
