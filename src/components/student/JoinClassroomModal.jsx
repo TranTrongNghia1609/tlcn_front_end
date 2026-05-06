@@ -77,18 +77,18 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Key className="text-white" size={28} />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Tham gia lớp học</h2>
+                <h2 className="text-2xl font-bold mb-2">Join ClassRoom</h2>
                 <p className="text-gray-600">
-                  Nhập mã mời để tham gia
+                  Enter the invite code to join
                 </p>
               </div>
 
               <form onSubmit={handleJoin} className="space-y-4">
-              
+
 
 
                 <div>
-                  <Label>Mã mời (Invite Code)</Label>
+                  <Label>Invite Code</Label>
                   <Input
                     placeholder="VD: ABC123XYZ"
                     value={inviteCode}
@@ -100,14 +100,14 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                     disabled={loading || !!classCode}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Mã mời riêng được gửi qua email
+                    Private invite code sent via email
                   </p>
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">
-                    💡 <strong>Gợi ý:</strong> Bạn có thể tìm mã lớp học trong email mời hoặc 
-                    yêu cầu giảng viên cung cấp.
+                    💡 <strong>Tip:</strong> You can find the classroom code in the invitation email or
+                    ask the teacher for it.
                   </p>
                 </div>
 
@@ -119,7 +119,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                     className="flex-1 cursor-pointer hover:bg-gray-100"
                     disabled={loading}
                   >
-                    Hủy
+                    Cancel
                   </Button>
                   <Button
                     type="submit"
@@ -129,11 +129,11 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                     {loading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Đang tham gia...
+                        Joining...
                       </>
                     ) : (
                       <>
-                        Tham gia
+                        Join ClassRoom
                         <ArrowRight size={16} className="ml-2" />
                       </>
                     )}
@@ -148,13 +148,13 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="text-green-600" size={32} />
                 </div>
-                
+
                 <h2 className="text-2xl font-bold mb-2">
-                  Tham gia thành công!
+                  You have successfully joined the classroom!
                 </h2>
-                
+
                 <p className="text-gray-600 mb-6">
-                  Bạn đã tham gia lớp học
+                  You have successfully joined the classroom
                 </p>
 
                 {joinedClassroom && (
@@ -180,7 +180,7 @@ const JoinClassroomModal = ({ isOpen, onClose, onSuccess }) => {
                   onClick={handleContinue}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
-                  Tiếp tục
+                  Continue
                   <ArrowRight size={16} className="ml-2" />
                 </Button>
               </div>

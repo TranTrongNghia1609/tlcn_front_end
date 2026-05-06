@@ -29,7 +29,13 @@ export const solutionService = {
 
   // Get comments for solution (with pagination)
   getSolutionComments: async (id, params = {}) => {
-    const response = await api.get(`${BASE_URL}/${id}/comments`, { params });
+    const queryParams = {
+      ...params,
+      itemModel: "Solution",
+    };
+    const response = await api.get(`${BASE_URL}/${id}/comments`, {
+      params: queryParams,
+    });
     return response.data;
   },
 
@@ -67,7 +73,8 @@ export const solutionService = {
 
   // Add comment
   addComment: async (id, data) => {
-    const response = await api.post(`${BASE_URL}/${id}/comments`, data);
+    const payload = { ...data, itemModel: "Solution", itemId: id };
+    const response = await api.post(`${BASE_URL}/${id}/comments`, payload);
     return response.data;
   },
 
@@ -75,7 +82,7 @@ export const solutionService = {
   updateComment: async (id, commentId, data) => {
     const response = await api.put(
       `${BASE_URL}/${id}/comments/${commentId}`,
-      data
+      data,
     );
     return response.data;
   },
@@ -83,7 +90,7 @@ export const solutionService = {
   // Delete comment
   deleteComment: async (id, commentId) => {
     const response = await api.delete(
-      `${BASE_URL}/${id}/comments/${commentId}`
+      `${BASE_URL}/${id}/comments/${commentId}`,
     );
     return response.data;
   },
@@ -92,17 +99,21 @@ export const solutionService = {
   voteComment: async (id, commentId, voteType) => {
     const response = await api.post(
       `${BASE_URL}/${id}/comments/${commentId}/vote`,
-      { voteType }
+      { voteType },
     );
     return response.data;
   },
 
   // Add reply
   addReply: async (id, commentId, data) => {
-    const response = await api.post(
-      `${BASE_URL}/${id}/comments/${commentId}/replies`,
-      data
-    );
+    const payload = {
+      ...data,
+      parentCommentId: commentId,
+      itemModel: "Solution",
+      itemId: id,
+    };
+
+    const response = await api.post(`${BASE_URL}/${id}/comments`, payload);
     return response.data;
   },
 

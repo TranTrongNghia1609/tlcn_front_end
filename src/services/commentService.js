@@ -3,7 +3,7 @@ import { COMMENT_ENDPOINTS } from '../config/endpoints';
 
 export const commentService = {
   // Get comments for a post
-  getPostComments: async (postId, page = 1, limit = 10, options = {}) => {
+  getPostComments: async (itemId, page = 1, limit = 10, options = {}) => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -12,7 +12,7 @@ export const commentService = {
         ...(options.repliesLimit !== undefined && { repliesLimit: options.repliesLimit.toString() }), 
         ...options
       });     
-      const url = `${COMMENT_ENDPOINTS.GET_POST_COMMENTS(postId)}?${params.toString()}`;    
+      const url = `${COMMENT_ENDPOINTS.GET_POST_COMMENTS(itemId)}?${params.toString()}`;    
       const response = await api.get(url);             
       // Return đúng structure mà CommentContext expect
       return {
@@ -74,11 +74,12 @@ export const commentService = {
   },
 
   // Create comment  
-  createComment: async (commentData) => {
+   createComment: async (commentData) => {
     try {
-      const response = await api.post(COMMENT_ENDPOINTS.CREATE, commentData);
+      const targetId = commentData.itemId || commentData.postId;
       
-      // Return đúng structure
+      const response = await api.post(COMMENT_ENDPOINTS.CREATE(targetId), commentData);
+      
       return {
         data: response.data.data || response.data
       };

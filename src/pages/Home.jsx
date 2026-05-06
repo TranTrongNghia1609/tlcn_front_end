@@ -8,7 +8,7 @@ import { getPosts, getPostDetails } from '../services/postService';
 import OnboardingModal from "@/components/auth/OnboardingModel.jsx";
 import { Loader2 } from 'lucide-react';
 
-const Home = ({isShowOnboarding = false}) => {
+const Home = ({ isShowOnboarding = false }) => {
   const { user } = useUser();
   const location = useLocation();
   const [posts, setPosts] = useState([]);
@@ -19,7 +19,7 @@ const Home = ({isShowOnboarding = false}) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [highlightedPostId, setHighlightedPostId] = useState(null);
-  
+
   const observerTarget = useRef(null);
   const postRefs = useRef({});
 
@@ -31,17 +31,17 @@ const Home = ({isShowOnboarding = false}) => {
     if (scrollToPostId && posts.length > 0) {
       // Check if post exists in current list
       const postExists = posts.some(p => p._id === scrollToPostId);
-      
+
       if (postExists) {
         // Post exists, scroll to it
         setTimeout(() => {
           const postElement = postRefs.current[scrollToPostId];
           if (postElement) {
-            postElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
+            postElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
             });
-            
+
             if (shouldHighlight) {
               setHighlightedPostId(scrollToPostId);
               setTimeout(() => setHighlightedPostId(null), 3000);
@@ -62,19 +62,19 @@ const Home = ({isShowOnboarding = false}) => {
     try {
       const response = await getPostDetails(postId);
       const fetchedPost = response.data;
-      
+
       // Add to top of posts list
       setPosts(prev => [fetchedPost, ...prev]);
-      
+
       // Scroll after post is added
       setTimeout(() => {
         const postElement = postRefs.current[postId];
         if (postElement) {
-          postElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+          postElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
           });
-          
+
           if (shouldHighlight) {
             setHighlightedPostId(postId);
             setTimeout(() => setHighlightedPostId(null), 3000);
@@ -123,15 +123,15 @@ const Home = ({isShowOnboarding = false}) => {
         setLoadingMore(true);
       }
 
-      const response = await getPosts({ 
-        filter, 
-        page: pageNum, 
-        limit: 10 
+      const response = await getPosts({
+        filter,
+        page: pageNum,
+        limit: 10
       });
 
       const newPosts = response.data.posts;
       const meta = response.data.meta;
-      
+
       // Calculate if has more posts
       const totalPages = Math.ceil(meta.total / meta.limit);
       const hasMorePosts = meta.page < totalPages;
@@ -143,7 +143,7 @@ const Home = ({isShowOnboarding = false}) => {
       }
 
       setHasMore(hasMorePosts);
-      
+
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -164,7 +164,7 @@ const Home = ({isShowOnboarding = false}) => {
   };
 
   const handlePostUpdate = (updatedPost) => {
-    setPosts(prev => prev.map(post => 
+    setPosts(prev => prev.map(post =>
       post._id === updatedPost._id ? updatedPost : post
     ));
   };
@@ -177,7 +177,7 @@ const Home = ({isShowOnboarding = false}) => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
+
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Header */}
@@ -190,7 +190,7 @@ const Home = ({isShowOnboarding = false}) => {
               </p>
             </div>
 
-            <OnboardingModal 
+            <OnboardingModal
               open={onboarding}
               onClose={() => setOnboarding(false)}
             />
@@ -207,11 +207,10 @@ const Home = ({isShowOnboarding = false}) => {
                   <button
                     key={tab.key}
                     onClick={() => setFilter(tab.key)}
-                    className={`px-6 py-3 font-medium transition-colors ${
-                      filter === tab.key
+                    className={`px-6 py-3 font-medium transition-colors ${filter === tab.key
                         ? 'text-blue-600 border-b-2 border-blue-600'
                         : 'text-gray-500 hover:text-gray-700'
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -240,14 +239,13 @@ const Home = ({isShowOnboarding = false}) => {
               ) : posts.length > 0 ? (
                 <>
                   {posts.map(post => (
-                    <div 
+                    <div
                       key={post._id}
                       ref={el => postRefs.current[post._id] = el}
-                      className={`transition-all duration-500 ${
-                        highlightedPostId === post._id 
-                          ? 'ring-4 ring-blue-500 ring-opacity-50 rounded-lg' 
+                      className={`transition-all duration-500 ${highlightedPostId === post._id
+                          ? 'ring-4 ring-blue-500 ring-opacity-50 rounded-lg'
                           : ''
-                      }`}
+                        }`}
                     >
                       <PostCard
                         post={post}

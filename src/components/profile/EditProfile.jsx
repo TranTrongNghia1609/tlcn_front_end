@@ -3,7 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Mail, Calendar, School, Loader2, Save, X, ArrowLeft, Search } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { User, Mail, Calendar, School, Loader2, Save, X, ArrowLeft, Search, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import AvatarUpload from './AvatarUpload';
 import { userService } from '@/services/userService';
@@ -78,7 +79,8 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
     fullName: profileData.fullName || '',
     dob: profileData.dob || '',
     School: profileData.School || '',
-    avatar: profileData.avatar || ''
+    avatar: profileData.avatar || '',
+    aiHintEnabled: profileData.aiHintEnabled !== false,
   });
 
   // School autocomplete states
@@ -290,14 +292,15 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
       const response = await userService.updateProfile({
         fullName: formData.fullName.trim(),
         dob: formData.dob,
-        School: formData.School.trim(),
-        avatar: formData.avatar
+        School: String(formData.School || '').trim(),
+        avatar: formData.avatar,
+        aiHintEnabled: formData.aiHintEnabled,
       });
 
       toast.success('Cập nhật thông tin thành công!');
       
       if (onUpdateSuccess) {
-        onUpdateSuccess();
+        onUpdateSuccess(response?.data);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -476,7 +479,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
                     className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
                   >
                     <div className="flex items-start gap-2">
-                      <School size={16} className="text-blue-600 flex-shrink-0 mt-1" />
+                      <School size={16} className="text-blue-600 shrink-0 mt-1" />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-gray-900">{school.name}</div>
                         {school.domain && (
@@ -493,6 +496,33 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
             )}
 
          
+          </div>
+
+          {/* Privacy: AI Hint */}
+          <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-4" id="ai-hint-privacy">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="aiHintEnabled"
+                checked={formData.aiHintEnabled}
+                onCheckedChange={(checked) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    aiHintEnabled: checked === true,
+                  }));
+                }}
+                disabled={isUpdating}
+                className="mt-0.5"
+              />
+              <div>
+                <Label htmlFor="aiHintEnabled" className="flex cursor-pointer items-center gap-2 text-gray-800">
+                  <Sparkles size={16} className="text-amber-600" />
+                  Bật AI Hint
+                </Label>
+                <p className="mt-1 text-xs text-gray-600">
+                  Khi tắt, hệ thống sẽ chặn toàn bộ tính năng AI Hint cho tài khoản của bạn.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

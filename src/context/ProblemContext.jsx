@@ -9,7 +9,6 @@ export const ProblemProvider = ({ children, problemId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log(problemId);
     const fetchProblem = async () => {
       if (!problemId) {
         setLoading(false);

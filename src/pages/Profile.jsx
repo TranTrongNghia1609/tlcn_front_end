@@ -9,20 +9,21 @@ import { userService } from '@/services/userService';
 import SubmissionPieChart from '@/components/submission/SubmissionPieChart';
 import DifficultyChart from '@/components/submission/DifficultyChart';
 import SubmissionRecent from '@/components/submission/SubmissionRecent';
+import SkillRadarChart from '@/components/features/bkt/SkillRadarChart';
 import { authService } from '@/services/authService';
 
 const Profile = () => {
   const { userName } = useParams();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
+  const query = new URLSearchParams(location.search);
   const isGoogle = query.get("isGoogle");
+  const isPrivacySetting = query.get('setting') === 'privacy';
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -37,6 +38,9 @@ const Profile = () => {
         const response = await userService.getProfileByUsername(targetUsername);
         if (response.success) {
           setProfileData(response.data);
+          if (isPrivacySetting && response.data?.isOwner) {
+            setIsEditing(true);
+          }
         } else {
           setError('Failed to load profile');
         }
@@ -58,7 +62,7 @@ const Profile = () => {
     }
     callRefreshToken();
     fetchProfile();
-  }, [userName, user, location.pathname]);
+  }, [userName, user, location.pathname, location.search, isGoogle, isPrivacySetting]);
 
   const handleEditProfile = () => {
     setIsEditing(true);
@@ -68,8 +72,18 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handleUpdateSuccess = async () => {
+  const handleUpdateSuccess = async (updatedProfile = null) => {
     setIsEditing(false);
+
+    if (updatedProfile && user?.userName === updatedProfile.userName) {
+      setUser((prev) => ({
+        ...prev,
+        fullName: updatedProfile.fullName,
+        avatar: updatedProfile.avatar,
+        aiHintEnabled: updatedProfile.aiHintEnabled !== false,
+      }));
+    }
+
     // Re-fetch profile data
     try {
       const targetUsername = userName || user?.userName;
@@ -110,7 +124,7 @@ const Profile = () => {
       <div className='max-w-7xl mx-auto px-4 py-6'>
         <div className='flex md:flex-row flex-col gap-4'>
           {/* Left Side - User Info */}
-          <div className='md:w-80 flex-shrink-0'>
+          <div className='md:w-80 shrink-0'>
             <Card>
               <UserInfo 
                 profileData={profileData} 
@@ -122,6 +136,10 @@ const Profile = () => {
               <SubmissionPieChart 
                 userId={profileData._id}
               />
+            </div>
+            
+            <div className='mt-4'>
+              <SkillRadarChart userId={profileData._id} />
             </div>
           </div>
 
