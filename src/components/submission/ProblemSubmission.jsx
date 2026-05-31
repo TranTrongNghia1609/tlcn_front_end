@@ -13,7 +13,8 @@ import {
   AlertCircle, 
   Code,
   Target,
-  Activity
+  Activity,
+  Loader2
 } from 'lucide-react';
 import {
   Pagination,
@@ -35,6 +36,7 @@ import { useSocket } from '@/context/SocketContext';
 const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
   const [timeRange, setTimeRange] = useState('all');
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   // const [submissions, setProblemSubmissions] = useState([]);
   const [problemSubmissionPagination, setProblemSubmissionPagination] = useState([]);
   const { user, isAuthenticated } = useAuth();
@@ -65,16 +67,23 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
           shouldExcludeClassroom = true;
         }
 
-        const response = await getSubmissionByUserId(
-          user.id, 
-          currentProblem._id, 
-          pageActive, 
-          contestParticipant, 
-          'all' ,
-          classroomId, 
-          shouldExcludeClassroom);
-        setProblemSubmissions(response.data.content);
-        setProblemSubmissionPagination(response.data);
+        try {
+          setLoadingSubmissions(true);
+          const response = await getSubmissionByUserId(
+            user.id, 
+            currentProblem._id, 
+            pageActive, 
+            contestParticipant, 
+            'all' ,
+            classroomId, 
+            shouldExcludeClassroom);
+          setProblemSubmissions(response.data.content);
+          setProblemSubmissionPagination(response.data);
+        } catch (error) {
+          console.error("Error fetching submissions:", error);
+        } finally {
+          setLoadingSubmissions(false);
+        }
       }
     }
     fetchProblemSubmission();
@@ -133,7 +142,14 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   }, [on, off]);
 
   if (loading){
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+        <p className="text-sm font-medium text-gray-500 animate-pulse">
+          Loading submission history...
+        </p>
+      </div>
+    );
   }
 
 
@@ -205,35 +221,66 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                 </tr>
               </thead>
               <tbody>
-                {submissions.map((submission, index) => {
-                  const prevSubmission = submissions[index + 1];
-                  const improvement = prevSubmission ? 
-                    submission.passed || 0 - prevSubmission.passed || 0 : 0;
-                  
-                  return (
-                    <tr key={submission._id} className="border-b hover:bg-gray-50"
-                      onClick={() => handleGetSubmission(submission)}
-                    >
-                      <td className="p-2 font-mono text-gray-600">#{submission.shortId}</td>
-                      <td className="p-2">{getStatusBadge(submission.status)}</td>
-                      <td className="p-2">
-                        <Badge variant="outline" className="text-xs">
-                          {submission.language}
-                        </Badge>
+                {loadingSubmissions ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr key={idx} className="border-b animate-pulse">
+                      <td className="p-3">
+                        <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
                       </td>
-                      <td className="p-2 font-mono">{submission.status === 'Time Limit Exceeded' ? currentProblem.time * 1000 : submission.time}</td>
-                      <td className="p-2 font-mono">{submission.memory}</td>
-                      <td className="p-2">
-                        <span className={`font-semibold ${
-                          submission.passed === submission.total 
-                            ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {submission.status === 'Pending' ? '...' : `${submission.passed || 0} / ${submission.total || 10}`}
-                        </span>
+                      <td className="p-3">
+                        <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                      </td>
+                      <td className="p-3">
+                        <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+                      </td>
+                      <td className="p-3">
+                        <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+                      </td>
+                      <td className="p-3">
+                        <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+                      </td>
+                      <td className="p-3">
+                        <div className="h-4 w-14 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
                       </td>
                     </tr>
-                  );
-                })}
+                  ))
+                ) : submissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-gray-500 font-medium">
+                      No submissions found
+                    </td>
+                  </tr>
+                ) : (
+                  submissions.map((submission, index) => {
+                    const prevSubmission = submissions[index + 1];
+                    const improvement = prevSubmission ? 
+                      submission.passed || 0 - prevSubmission.passed || 0 : 0;
+                    
+                    return (
+                      <tr key={submission._id} className="border-b hover:bg-gray-50"
+                        onClick={() => handleGetSubmission(submission)}
+                      >
+                        <td className="p-2 font-mono text-gray-600">#{submission.shortId}</td>
+                        <td className="p-2">{getStatusBadge(submission.status)}</td>
+                        <td className="p-2">
+                          <Badge variant="outline" className="text-xs">
+                            {submission.language}
+                          </Badge>
+                        </td>
+                        <td className="p-2 font-mono">{submission.status === 'Time Limit Exceeded' ? currentProblem.time * 1000 : submission.time}</td>
+                        <td className="p-2 font-mono">{submission.memory}</td>
+                        <td className="p-2">
+                          <span className={`font-semibold ${
+                            submission.passed === submission.total 
+                              ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {submission.status === 'Pending' ? '...' : `${submission.passed || 0} / ${submission.total || 10}`}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
             
