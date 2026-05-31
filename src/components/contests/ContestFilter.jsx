@@ -26,7 +26,7 @@ const ContestSideBar = ({ onFilterChange }) => {
   return (
     <div className="space-y-4">
       {/* Filter by Status */}
-      <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-4 hover:shadow-xl transition-shadow">
+      <div className="bg-white rounded-lg shadow-lg border-2 border-purple-100 p-4 hover:shadow-xl transition-shadow">
         <h3 className="font-semibold mb-3 flex items-center gap-2 text-purple-600">
           <Calendar className="w-5 h-5" />
           Trạng thái
@@ -66,7 +66,7 @@ const ContestSideBar = ({ onFilterChange }) => {
       </div>
 
       {/* Filter by Type */}
-      <div className="bg-white rounded-lg shadow-lg border border-blue-100 p-4 hover:shadow-xl transition-shadow">
+      <div className="bg-white rounded-lg shadow-lg border-2 border-blue-100 p-4 hover:shadow-xl transition-shadow">
         <h3 className="font-semibold mb-3 flex items-center gap-2 text-blue-600">
           <Users className="w-5 h-5" />
           Loại cuộc thi
@@ -109,7 +109,7 @@ const ContestSideBar = ({ onFilterChange }) => {
       </div>
 
       {/* Stats */}
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-lg border border-purple-200 p-4 hover:shadow-xl transition-shadow">
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-lg border-2 border-purple-200 p-4 hover:shadow-xl transition-shadow">
         <h3 className="font-semibold mb-3 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           <Trophy className="w-5 h-5 text-purple-600" />
           Thống kê
