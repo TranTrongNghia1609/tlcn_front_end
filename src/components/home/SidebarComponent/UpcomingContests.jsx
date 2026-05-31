@@ -49,12 +49,12 @@ const UpcomingContests = () => {
   }, []);
 
   const formatDuration = (milliseconds) => {
-    let second = milliseconds /1000;
+    let second = milliseconds / 1000;
     const day = Math.floor(second / (3600 * 24));
     second = second % (3600 * 24);
     const hours = Math.floor(second / 3600);
     const mins = (second % 3600) / 60;
-    if (day > 0){
+    if (day > 0) {
       return `${day}d ${hours}h ${mins}m`;
     }
     if (hours > 0) {
@@ -67,12 +67,12 @@ const UpcomingContests = () => {
     const now = new Date();
     const start = new Date(startTime);
     const diffMs = start.getTime() - now.getTime();
-    
+
     if (diffMs <= 0) return 'Started';
-    
+
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
+
     if (days > 0) return `in ${days}d ${hours}h`;
     if (hours > 0) return `in ${hours}h`;
     return 'Starting soon';
@@ -82,9 +82,9 @@ const UpcomingContests = () => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center space-x-2 mb-4">
         <CalendarIcon className="w-5 h-5 text-red-500" />
-        <h3 className="font-semibold text-gray-900">Kỳ thi sắp diễn ra</h3>
+        <h3 className="font-semibold text-gray-900">Upcoming Contests</h3>
       </div>
-      
+
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -100,14 +100,14 @@ const UpcomingContests = () => {
       ) : upcomingContests.length > 0 ? (
         <div className="space-y-3">
           {upcomingContests.slice(0, 3).map(contest => (
-            <div key={contest._id} 
+            <div key={contest._id}
               onClick={() => navigate(`/contest/${contest.code}`)}
               className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group">
               <div className="mb-3">
                 <h4 className="font-medium text-gray-900 text-sm mb-2 group-hover:text-blue-600 transition-colors">
                   {contest.title}
                 </h4>
-                
+
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                   <span className="flex items-center space-x-1">
                     <CalendarIcon className="w-3 h-3" />
@@ -128,7 +128,7 @@ const UpcomingContests = () => {
                   </span>
                   <span>{contest?.noOfParticipants || 0} registered</span>
                 </div>
-                
+
                 {/* <div className="text-xs font-medium text-orange-600">
                   {getTimeUntilStart(contest.startTime)}
                 </div> */}
@@ -137,7 +137,7 @@ const UpcomingContests = () => {
               {/* Progress bar for time until start */}
               <div className="mt-3">
                 <div className="w-full bg-gray-200 rounded-full h-1">
-                  <div 
+                  <div
                     className="bg-orange-500 h-1 rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(20, Math.random() * 80)}%` }}
                   ></div>
@@ -157,9 +157,9 @@ const UpcomingContests = () => {
       )}
 
       <div className="mt-4 pt-4 border-t border-gray-100">
-        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"  
+        <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
           onClick={() => navigate('/contests')}>
-          Xem tất cả
+          See All
         </button>
       </div>
     </div>

@@ -75,6 +75,7 @@ const CommentItem = ({ comment, solutionId, formatTimeAgo, currentUser, onCommen
       if (onCommentUpdated) {
         onCommentUpdated();
       }
+      console.log(currentUser);
     } catch (error) {
       console.error('❌ Submit reply error:', error);
       toast.error('Không thể thêm reply');
@@ -91,9 +92,9 @@ const CommentItem = ({ comment, solutionId, formatTimeAgo, currentUser, onCommen
       {/* Main Comment */}
       <div className="flex gap-3">
         <Avatar className="w-10 h-10 flex-shrink-0">
-          <AvatarImage src={comment.user?.avatar} />
+          <AvatarImage src={comment.author?.avatar} />
           <AvatarFallback>
-            {comment.user?.fullName?.charAt(0) || 'U'}
+            {comment.author?.fullName?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
         
@@ -101,7 +102,7 @@ const CommentItem = ({ comment, solutionId, formatTimeAgo, currentUser, onCommen
           {/* User Info */}
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-sm">
-              {comment.user?.fullName || 'Anonymous'}
+              {comment.author?.fullName || 'Anonymous'}
             </span>
             <span className="text-xs text-gray-500">
               {formatTimeAgo(comment.createdAt)}

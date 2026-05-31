@@ -43,13 +43,14 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const setProblemSubmissions = submissionsStore((state) => state.setProblemSubmissions)
   const submissions = submissionsStore((state) => state.submissions);
   const setCurrentSubmission = submissionsStore((state) => state.setCurrentSubmission);
+  const setSubmissionPreviewId = submissionsStore((state) => state.setSubmissionPreviewId);
   const updateSubmission = submissionsStore((state) => state.updateSubmission);
   const { on, off } = useSocket();
 
   
   useEffect(()=>{
     const fetchProblemSubmission = async () => {
-      if (isAuthenticated && !loading){
+      if (isAuthenticated && !loading && currentProblem?._id){
         let shouldExcludeClassroom = false;
         
         if (contestParticipant) {
@@ -74,12 +75,10 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
           shouldExcludeClassroom);
         setProblemSubmissions(response.data.content);
         setProblemSubmissionPagination(response.data);
-
-        // await fetchSubmissions(user.id, currentProblem._id, pageActive);
       }
     }
     fetchProblemSubmission();
-  }, [pageActive, classroomId]);
+  }, [pageActive, classroomId, currentProblem?._id, loading, isAuthenticated]);
 
   useEffect(()=>{
     console.log('Submission get from component', submissions);
@@ -139,7 +138,9 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
 
 
   const handleGetSubmission = async (submission) => {
-    submission.isNew = true;
+    // Đặt previewId trước để PlayGround biết đang xem submission cụ thể
+    setSubmissionPreviewId(submission?._id || null);
+    // Set current submission để editor hiển thị code + ngôn ngữ đúng
     setCurrentSubmission(submission);
   }
   return (

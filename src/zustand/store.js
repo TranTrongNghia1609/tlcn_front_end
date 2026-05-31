@@ -4,14 +4,24 @@ import { getSubmissionById, getSubmissionByUserId } from '@/services/submissionS
 export const submissionsStore = create((set) => ({
   submissions: [],
   currentSubmission: null,
+  submissionPreviewId: null,
   addSubmission: (submission) =>
     set((state) => ({
       currentSubmission: submission,
+      submissionPreviewId: null,
       submissions: [submission, ...state.submissions],
     })),
   setCurrentSubmission: (submission) => 
     set(() => ({
       currentSubmission: submission,
+    })),
+  setSubmissionPreviewId: (submissionId) =>
+    set(() => ({
+      submissionPreviewId: submissionId ? String(submissionId) : null,
+    })),
+  clearSubmissionPreviewId: () =>
+    set(() => ({
+      submissionPreviewId: null,
     })),
   clearSubmissions: () => set({ submissions: [] }),
   updateSubmission: (submissionId, updateData) => 

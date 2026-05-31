@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useState } from "react"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -107,6 +108,110 @@ function PaginationEllipsis({
   );
 }
 
+/**
+ * ClassroomPagination — component phân trang hoàn chỉnh dùng cho StudentClassroomsPage.
+ * Props:
+ *   currentPage  : số trang hiện tại (1-based)
+ *   totalPages   : tổng số trang
+ *   onPageChange : callback (page: number) => void
+ *   totalItems   : tổng số item (để hiển thị info text)
+ *   itemsPerPage : số item mỗi trang
+ */
+function ClassroomPagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage,
+}) {
+  if (totalPages <= 1) return null;
+
+  const start = (currentPage - 1) * itemsPerPage + 1;
+  const end   = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Tạo danh sách trang với ellipsis
+  const getPages = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3)              pages.push('...');
+      const from = Math.max(2, currentPage - 1);
+      const to   = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = from; i <= to; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-100">
+      {/* Info text */}
+      <p className="text-sm text-gray-500 order-2 sm:order-1">
+        Hiển thị <span className="font-semibold text-gray-700">{start}–{end}</span> trong{" "}
+        <span className="font-semibold text-gray-700">{totalItems}</span> lớp học
+      </p>
+
+      {/* Controls */}
+      <Pagination className="order-1 sm:order-2 w-auto mx-0">
+        <PaginationContent>
+          {/* Prev */}
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => onPageChange(currentPage - 1)}
+              className={cn(
+                "cursor-pointer select-none",
+                currentPage === 1
+                  ? "pointer-events-none opacity-40"
+                  : "hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200"
+              )}
+            />
+          </PaginationItem>
+
+          {/* Page numbers */}
+          {getPages().map((page, i) =>
+            page === '...' ? (
+              <PaginationItem key={`ellipsis-${i}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            ) : (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  isActive={page === currentPage}
+                  onClick={() => onPageChange(page)}
+                  className={cn(
+                    "cursor-pointer select-none",
+                    page === currentPage
+                      ? "bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700"
+                      : "hover:bg-indigo-50 hover:text-indigo-600"
+                  )}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            )
+          )}
+
+          {/* Next */}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => onPageChange(currentPage + 1)}
+              className={cn(
+                "cursor-pointer select-none",
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-40"
+                  : "hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200"
+              )}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  );
+}
+
 export {
   Pagination,
   PaginationContent,
@@ -115,4 +220,5 @@ export {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
+  ClassroomPagination,
 }

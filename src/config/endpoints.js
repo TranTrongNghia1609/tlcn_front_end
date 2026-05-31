@@ -42,8 +42,8 @@ export const POST_ENDPOINTS = {
 };
 
 export const COMMENT_ENDPOINTS = {
-  CREATE: '/comments',
-  GET_POST_COMMENTS: (postId) => `/comments/post/${postId}`,
+  CREATE:  (id) => `/comments/post/${id}`,
+  GET_POST_COMMENTS: (id) => `/comments/post/${id}`,
   GET_COMMENT_REPLIES: (commentId) => `/comments/${commentId}/replies`,
   LOAD_MORE_REPLIES: (commentId) => `/comments/${commentId}/load-more-replies`,
   UPDATE: (commentId) => `/comments/${commentId}`,

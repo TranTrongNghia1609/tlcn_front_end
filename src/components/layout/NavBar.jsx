@@ -22,26 +22,25 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { name: 'Trang chủ', path: '/home' },
-    { name: 'Bài tập', path: '/problemset' },
-    { name: 'Kì thi', path: '/contests' },
-    { name: 'Bảng xếp hạng', path: '/leaderboard' },
-    { name: 'Lớp học', path: '/classrooms' },
+    { name: 'Home', path: '/home' },
+    { name: 'Problems', path: '/problemset' },
+    { name: 'Contests', path: '/contests' },
+    { name: 'Leaderboard', path: '/leaderboard' },
+    { name: 'Classrooms', path: '/classrooms' },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-        : 'bg-white/90 backdrop-blur-sm'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+      ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
+      : 'bg-white/90 backdrop-blur-sm'
+      }`}>
+      <div className="max-w-auto mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="relative">
               <div className="w-12 h-12 lg:w-13 lg:h-13 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                <img src={logo}/>
+                <img src={logo} />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
@@ -59,16 +58,14 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative px-4 py-2 font-medium rounded-lg transition-all duration-300 cursor-pointer ${
-                  location.pathname === item.path
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                className={`relative px-4 py-2 font-medium rounded-lg transition-all duration-300 cursor-pointer ${location.pathname === item.path
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
               >
                 {item.name}
-                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 transform transition-transform duration-200 ${
-                  location.pathname === item.path ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                }`}></div>
+                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 transform transition-transform duration-200 ${location.pathname === item.path ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`}></div>
               </Link>
             ))}
           </div>
@@ -84,8 +81,8 @@ const Navbar = () => {
             {isAuthenticated && !loading && (
               <NotificationBell />
             )}
-            
-            
+
+
 
             {/* Auth Buttons */}
 
@@ -100,14 +97,14 @@ const Navbar = () => {
             ) : (
               // Show Auth Buttons when not authenticated
               <div className="hidden sm:flex items-center space-x-2 ">
-                <button 
+                <button
                   onClick={openLogin}
                   className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium 
                   transition-all duration-300 transform hover:scale-105 cursor-pointer"
                 >
                   Đăng nhập
                 </button>
-                <button 
+                <button
                   onClick={openRegister}
                   className="px-4 py-2 font-medium 
                   text-white bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700
@@ -120,7 +117,7 @@ const Navbar = () => {
             )}
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -136,11 +133,10 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen 
-            ? 'max-h-96 opacity-100 border-t border-gray-200' 
-            : 'max-h-0 opacity-0 overflow-hidden'
-        }`}>
+        <div className={`lg:hidden transition-all duration-300 ease-in-out ${isMenuOpen
+          ? 'max-h-96 opacity-100 border-t border-gray-200'
+          : 'max-h-0 opacity-0 overflow-hidden'
+          }`}>
           <div className="py-4 space-y-2">
             {/* Mobile Search */}
             <div className="px-2 pb-4">
@@ -161,11 +157,10 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  location.pathname === item.path
-                    ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                className={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${location.pathname === item.path
+                  ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.name}
@@ -174,7 +169,7 @@ const Navbar = () => {
 
             {/* Mobile Auth Buttons */}
             <div className="pt-4 px-2 space-y-2 border-t border-gray-200">
-              <button 
+              <button
                 onClick={() => {
                   openLogin();
                   setIsMenuOpen(false);
@@ -183,7 +178,7 @@ const Navbar = () => {
               >
                 Login
               </button>
-              <button 
+              <button
                 onClick={() => {
                   openRegister();
                   setIsMenuOpen(false);

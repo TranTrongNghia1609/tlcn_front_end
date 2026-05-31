@@ -25,7 +25,6 @@ const AppContent = () => {
   const { loading } = useAuth();
   const location = useLocation();
   
-  // Check if current route is landing page or workspace/problem page
   const isLandingPage = location.pathname === '/';
   const isWorkspacePage = location.pathname.includes('/problem/') || 
                           location.pathname.includes('/contest/') ||
@@ -45,15 +44,13 @@ const AppContent = () => {
                 <PostProvider>
                   <CommentProvider>
                     <AuthModalProvider>
-                      <div className="min-h-screen bg-gray-50 flex flex-col">
-                        {/* Only show Navbar if NOT on landing page */}
+                      <div className="min-h-screen max-w-screen bg-gray-100 flex flex-col">
                         {!isLandingPage && <Navbar />}
                         
                         <main className={`flex-1 ${!isLandingPage ? "pt-16 lg:pt-20" : ""}`}>
                           <AppRoutes />
                         </main>
                         
-                        {/* Only show Footer if NOT on workspace/problem page */}
                         {!isWorkspacePage && <Footer />}
 
                         {/* Auth Modals */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/Textarea';
 import { toast } from 'sonner';
 import { ThumbsUp, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import discussionService from '@/services/discussionService';
