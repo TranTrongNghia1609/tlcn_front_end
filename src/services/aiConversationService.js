@@ -21,4 +21,8 @@ export const aiConversationService = {
         const response = await API.post(`/ai-conversations/problem/${problemRef}/request-hint`, payload);
         return response.data;
     },
+    sendChatMessage: async (problemRef, payload) => {
+        const response = await API.post(`/ai-conversations/problem/${problemRef}/chat`, payload);
+        return response.data;
+    },
 };

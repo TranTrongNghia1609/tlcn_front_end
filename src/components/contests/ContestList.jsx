@@ -68,9 +68,9 @@ const ContestList = ({filter}) => {
       ended: 'bg-gray-100 text-gray-700'
     }
     const labels = {
-      upcoming: 'Sắp diễn ra',
-      ongoing: 'Đang diễn ra',
-      ended: 'Đã kết thúc'
+      upcoming: 'Upcoming',
+      ongoing: 'Ongoing',
+      ended: 'Ended'
     }
     
     return (
@@ -83,8 +83,8 @@ const ContestList = ({filter}) => {
   if (loading) {
     return (
       <div className="text-center py-8">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent"></div>
-        <p className="mt-2 text-purple-600">Đang tải...</p>
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+        <p className="mt-2 text-blue-600">Loading...</p>
       </div>
     )
   }
@@ -112,7 +112,7 @@ const ContestList = ({filter}) => {
               key={contest._id}
               className="cursor-pointer group border-gray-200
                          transition-all duration-300 ease-in-out
-                         hover:shadow-lg hover:-translate-y-1 hover:border-purple-300
+                         hover:shadow-lg hover:-translate-y-1  hover:border-blue-300
                          relative"
               onClick={() => {navigate(`/contest/${contest.code}`)}}
             >
@@ -141,17 +141,17 @@ const ContestList = ({filter}) => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <CardTitle className="text-lg group-hover:text-purple-600 transition-colors">
+                      <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
                         {contest.title}
                       </CardTitle>
                       {contest.isPrivate ? (
-                        <Lock className="w-4 h-4 text-purple-500" />
+                        <Lock className="w-4 h-4 text-blue-500" />
                       ) : (
                         <Unlock className="w-4 h-4 text-blue-500" />
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
-                      Mã: <span className="font-mono font-medium text-purple-600">{contest.code}</span>
+                      Mã: <span className="font-mono font-medium text-blue-600">{contest.code}</span>
                     </p>
                   </div>
                   {getStatusBadge(status)}
@@ -166,7 +166,7 @@ const ContestList = ({filter}) => {
                       <span>Bắt đầu: {formatDate(contest.startTime)}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-purple-600" />
+                      <Clock className="w-4 h-4 text-blue-600" />
                       <span>Kết thúc: {formatDate(contest.endTime)}</span>
                     </div>
                   </div>
@@ -185,7 +185,7 @@ const ContestList = ({filter}) => {
         })}
 
         {contests.length === 0 && (
-          <div className="bg-white rounded-lg border border-purple-100 p-8 text-center">
+          <div className="bg-white rounded-lg border border-blue-100 p-8 text-center">
             <p className="text-gray-500 mb-2">Không có cuộc thi nào</p>
             <div className="text-4xl opacity-20">🏆</div>
           </div>
@@ -193,13 +193,13 @@ const ContestList = ({filter}) => {
       </div>
 
       {contestPagination && contestPagination.totalPages > 1 && (
-        <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-4">
+        <div className="bg-white rounded-lg shadow-lg border border-blue-100 p-4">
           <Pagination className="cursor-pointer">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
                   onClick={() => pageActive > 1 ? setPageActive(pageActive - 1) : {}}
-                  className={pageActive === 1 ? "pointer-events-none opacity-50" : "hover:bg-purple-50"}
+                  className={pageActive === 1 ? "pointer-events-none opacity-50" : "hover:bg-blue-50"}
                 />
               </PaginationItem>
               {
@@ -215,7 +215,7 @@ const ContestList = ({filter}) => {
                         isActive={page === contestPagination.page}
                         className={page === contestPagination.page 
                           ? "" 
-                          : "hover:bg-purple-50"}
+                          : "hover:bg-blue-50"}
                       >
                         {page}
                       </PaginationLink>
@@ -226,7 +226,7 @@ const ContestList = ({filter}) => {
               <PaginationItem>
                 <PaginationNext 
                   onClick={() => pageActive < contestPagination.totalPages ? setPageActive(pageActive + 1) : {}}
-                  className={pageActive === contestPagination.totalPages ? "pointer-events-none opacity-50" : "hover:bg-purple-50"}
+                  className={pageActive === contestPagination.totalPages ? "pointer-events-none opacity-50" : "hover:bg-blue-50"}
                 />
               </PaginationItem>
             </PaginationContent>

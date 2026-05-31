@@ -36,6 +36,14 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
   const [hintPendingSince, setHintPendingSince] = useState(null);
   const [hasEditorCode, setHasEditorCode] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  // Chat state
+  const [chatMessages, setChatMessages] = useState([]);
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatCooldownRemaining, setChatCooldownRemaining] = useState(0);
+  // All raw conversation messages for full overview
+  const [conversationMessages, setConversationMessages] = useState([]);
+  const [conversationId, setConversationId] = useState(null);
+  const chatCooldownRef = useRef(null);
   const cooldownTimerRef = useRef(null);
   const editorSnapshotRef = useRef({ code: '', language: 'cpp' });
   const { id, solutionId, classCode } = useParams();
@@ -97,9 +105,15 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
     setIsHintPending(false);
     setHintPendingSince(null);
     setCooldownRemaining(0);
+    setChatCooldownRemaining(0);
+    setChatMessages([]);
     if (cooldownTimerRef.current) {
       clearInterval(cooldownTimerRef.current);
       cooldownTimerRef.current = null;
+    }
+    if (chatCooldownRef.current) {
+      clearInterval(chatCooldownRef.current);
+      chatCooldownRef.current = null;
     }
   }, [id, classCode, code, isContest]);
 
@@ -183,10 +197,11 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
     }
   }, [location.pathname, currentSubmission]);
 
+  // Hydrate ALL conversation messages (hint history + chat) from DB in one call
   useEffect(() => {
     let isMounted = true;
 
-    const hydrateHintHistory = async () => {
+    const hydrateConversation = async () => {
       try {
         const response = await aiConversationService.getConversationByProblem(id);
         const conversation = response?.data;
@@ -194,6 +209,23 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
         const conversationProblemId = conversation?.problem?._id || currentProblem?._id || null;
         const conversationProblemShortId = conversation?.problem?.shortId || currentProblem?.shortId || id;
 
+        if (!isMounted) return;
+
+        // Conversation ID for display
+        setConversationId(conversation?._id || null);
+
+        // Full messages for the new unified dialog view
+        setConversationMessages(messages);
+
+        // Chat messages (for legacy canChat check)
+        const chatMsgs = messages.filter(
+          (msg) =>
+            (msg.role === 'user' && msg.source === 'chat_message') ||
+            (msg.role === 'assistant' && (msg.source === 'chat_message' || msg.type === 'chat'))
+        );
+        setChatMessages(chatMsgs);
+
+        // Hint history (for legacy problemHintHistory / canOpenHintDialog check)
         const historyFromDb = messages
           .filter((msg) => msg.role === 'assistant' && msg.content)
           .map((msg, index) => ({
@@ -209,27 +241,26 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
             hintKey: `${String(msg.submission || '')}-${String(msg.createdAt || '')}-${String(msg.content || '').slice(0, 48)}-${index}`,
           }))
           .reverse();
-
-        if (isMounted) {
-          setPersistedHintHistory(historyFromDb);
-        }
+        setPersistedHintHistory(historyFromDb);
       } catch (error) {
-        console.error('Failed to load AI conversation history:', error);
+        console.error('Failed to load AI conversation:', error);
         if (isMounted) {
+          setConversationMessages([]);
+          setChatMessages([]);
           setPersistedHintHistory([]);
         }
       }
     };
 
     if (id && hasToken && isAiHintEnabled) {
-      hydrateHintHistory();
-    } else if (!isAiHintEnabled) {
-      setPersistedHintHistory([]);
+      hydrateConversation();
+    } else {
+      setConversationMessages([]);
+      setChatMessages([]);
+      if (!isAiHintEnabled) setPersistedHintHistory([]);
     }
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [id, hasToken, currentProblem?._id, currentProblem?.shortId, isAiHintEnabled]);
 
   const mergedHintHistory = useMemo(() => {
@@ -374,6 +405,58 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
     }
   }, [latestHint, isHintPending, currentProblemKeys, hintPendingSince]);
 
+  // When a new socket hint arrives that corresponds to a chat_message, append it to chatMessages
+  useEffect(() => {
+    if (!latestHint) return;
+    const hintProblemId = String(latestHint?.problemId || '').trim();
+    const hintProblemShortId = String(latestHint?.problemShortId || '').trim();
+    const isCurrentProblem = currentProblemKeys.some(
+      (key) => key === hintProblemId || key === hintProblemShortId
+    );
+    if (!isCurrentProblem) return;
+
+    // Refresh chat messages from DB after a short delay
+    if (id && hasToken && isAiHintEnabled) {
+      const timer = setTimeout(async () => {
+        try {
+          const response = await aiConversationService.getConversationByProblem(id);
+          const conversation = response?.data;
+          const messages = conversation?.messages || [];
+          const conversationProblemId = conversation?.problem?._id || currentProblem?._id || null;
+          const conversationProblemShortId = conversation?.problem?.shortId || currentProblem?.shortId || id;
+
+          setConversationMessages(messages);
+
+          const chatMsgs = messages.filter(
+            (msg) =>
+              (msg.role === 'user' && msg.source === 'chat_message') ||
+              (msg.role === 'assistant' && (msg.source === 'chat_message' || msg.type === 'chat'))
+          );
+          setChatMessages(chatMsgs);
+          setIsSendingChat(false);
+
+          const historyFromDb = messages
+            .filter((msg) => msg.role === 'assistant' && msg.content)
+            .map((msg, index) => ({
+              submissionId: msg.submission || null,
+              problemId: conversationProblemId,
+              problemShortId: conversationProblemShortId,
+              hint: msg.content,
+              source: msg.source || null,
+              model: msg.model || null,
+              errorType: msg.errorType || null,
+              generatedAt: msg.createdAt || null,
+              receivedAt: msg.createdAt || null,
+              hintKey: `${String(msg.submission || '')}-${String(msg.createdAt || '')}-${String(msg.content || '').slice(0, 48)}-${index}`,
+            }))
+            .reverse();
+          setPersistedHintHistory(historyFromDb);
+        } catch { /* silent */ }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [latestHint]);
+
   const handleEditorSnapshotChange = useCallback((snapshot) => {
     const normalizedCode = String(snapshot?.code || '');
     const normalizedLanguage = String(snapshot?.language || 'cpp');
@@ -466,6 +549,71 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
       }
     } finally {
       setIsRequestingMoreHint(false);
+    }
+  };
+
+  const handleSendChatMessage = async (content) => {
+    if (!content || isSendingChat || chatCooldownRemaining > 0) return;
+    if (!hasToken) {
+      toast.error('Bạn cần đăng nhập để sử dụng tính năng chat.');
+      return;
+    }
+
+    const sourceCode = String(editorSnapshotRef.current?.code || '').trim();
+    const language = String(editorSnapshotRef.current?.language || 'cpp');
+
+    if (!sourceCode) {
+      toast.error('Hãy viết code trong editor trước khi chat với AI.');
+      return;
+    }
+
+    // Optimistically add user message to BOTH states so dialog shows it immediately
+    const optimisticMsg = {
+      role: 'user',
+      type: 'chat',
+      content,
+      source: 'chat_message',
+      createdAt: new Date().toISOString(),
+    };
+    setChatMessages((prev) => [...prev, optimisticMsg]);
+    setConversationMessages((prev) => [...prev, optimisticMsg]);
+    setIsSendingChat(true);
+
+    try {
+      await aiConversationService.sendChatMessage(currentProblem?._id || id, {
+        content,
+        sourceCode,
+        language,
+        submissionId: currentSubmission?._id || null,
+      });
+
+      // Start 20s cooldown
+      setChatCooldownRemaining(20);
+      if (chatCooldownRef.current) clearInterval(chatCooldownRef.current);
+      chatCooldownRef.current = setInterval(() => {
+        setChatCooldownRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(chatCooldownRef.current);
+            chatCooldownRef.current = null;
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      // Remove optimistic message on error from both states
+      setChatMessages((prev) => prev.filter((m) => m !== optimisticMsg));
+      setConversationMessages((prev) => prev.filter((m) => m !== optimisticMsg));
+      setIsSendingChat(false);
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message || '';
+      if (status === 429) {
+        toast.warning(serverMessage || 'Gửi quá nhanh. Vui lòng đợi một chút.');
+      } else if (status === 403) {
+        toast.info(serverMessage || 'Bạn cần nhận gợi ý AI trước khi có thể chat.');
+      } else {
+        toast.error('Không thể gửi tin nhắn lúc này. Vui lòng thử lại.');
+      }
     }
   };
 
@@ -705,6 +853,12 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
         canRequestMoreHint={isAiHintEnabled && hasEditorCode && isAiHintUnlocked && !isProblemSolved && !isRequestingMoreHint && !isHintPending && cooldownRemaining === 0}
         cooldownRemaining={cooldownRemaining}
         isProblemSolved={isProblemSolved}
+        conversationMessages={conversationMessages}
+        conversationId={conversationId}
+        onSendChatMessage={handleSendChatMessage}
+        isSendingChat={isSendingChat}
+        chatCooldownRemaining={chatCooldownRemaining}
+        canChat={isAiHintEnabled && hasEditorCode && !isProblemSolved && conversationMessages.some((m) => m.role === 'assistant')}
       />
     </div>
   );
