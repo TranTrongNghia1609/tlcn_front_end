@@ -1,55 +1,44 @@
-import React, { useState } from 'react'
-import LeaderboardHeader from '@/components/leaderboard/LeaderBoardHeader'
-import LeaderboardTable from '@/components/leaderboard/LeaderBoardTable'
-import TopThreeCard from '@/components/leaderboard/TopThreeCard'
-import StatsCard from '@/components/leaderboard/StatsCard'
-import LevelDistributionCard from '@/components/leaderboard/LevelDistributionCard'
-
-export const leaderboardData = [
-  { rank: 1, username: 'CodeMaster2024', avatar: '🏆', points: 15420, solved: 342, streak: 45, level: 'Grandmaster' },
-  { rank: 2, username: 'AlgoNinja', avatar: '🥈', points: 14850, solved: 328, streak: 38, level: 'Grandmaster' },
-  { rank: 3, username: 'DevGenius', avatar: '🥉', points: 13920, solved: 315, streak: 32, level: 'Master' },
-  { rank: 4, username: 'ByteWarrior', avatar: '👨‍💻', points: 12680, solved: 298, streak: 28, level: 'Master' },
-  { rank: 5, username: 'StackOverflow', avatar: '💪', points: 11950, solved: 285, streak: 25, level: 'Master' },
-  { rank: 6, username: 'BugHunter', avatar: '🐛', points: 10840, solved: 267, streak: 22, level: 'Expert' },
-  { rank: 7, username: 'CodingKing', avatar: '👑', points: 9920, solved: 254, streak: 20, level: 'Expert' },
-  { rank: 8, username: 'AlgoQueen', avatar: '👸', points: 9350, solved: 241, streak: 18, level: 'Expert' },
-  { rank: 9, username: 'DataWizard', avatar: '🧙‍♂️', points: 8740, solved: 228, streak: 16, level: 'Expert' },
-  { rank: 10, username: 'LogicMaster', avatar: '🎯', points: 8120, solved: 215, streak: 15, level: 'Advanced' },
-  { rank: 11, username: 'CodeNinja99', avatar: '🥷', points: 7560, solved: 203, streak: 14, level: 'Advanced' },
-  { rank: 12, username: 'PythonPro', avatar: '🐍', points: 7120, solved: 192, streak: 12, level: 'Advanced' },
-  { rank: 13, username: 'JavaJedi', avatar: '☕', points: 6680, solved: 181, streak: 11, level: 'Advanced' },
-  { rank: 14, username: 'ReactRuler', avatar: '⚛️', points: 6240, solved: 170, streak: 10, level: 'Intermediate' },
-  { rank: 15, username: 'NodeNinja', avatar: '🟢', points: 5820, solved: 159, streak: 9, level: 'Intermediate' },
-  { rank: 16, username: 'GitGuru', avatar: '🔱', points: 5410, solved: 148, streak: 8, level: 'Intermediate' },
-  { rank: 17, username: 'APIAce', avatar: '🎮', points: 5050, solved: 137, streak: 7, level: 'Intermediate' },
-  { rank: 18, username: 'DatabaseDev', avatar: '💾', points: 4690, solved: 126, streak: 6, level: 'Beginner' },
-  { rank: 19, username: 'FrontEndFan', avatar: '🎨', points: 4350, solved: 115, streak: 5, level: 'Beginner' },
-  { rank: 20, username: 'BackEndBoss', avatar: '⚙️', points: 4020, solved: 104, streak: 4, level: 'Beginner' }
-]
+import React from 'react';
+import { Trophy, ArrowLeft, Sparkles, Rocket } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const LeaderBoard = () => {
-  const [timeFilter, setTimeFilter] = useState('all-time')
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <LeaderboardTable data={leaderboardData} />
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 px-4">
+      {/* Main Container */}
+      <div className="max-w-xl w-full text-center bg-white border border-gray-200 p-8 md:p-12 rounded-2xl shadow-sm space-y-6">
+
+        {/* Icon Container */}
+        <div className="flex justify-center">
+          <div className="flex items-center justify-center w-20 h-20 bg-blue-50 rounded-full border border-blue-100">
+            <Trophy className="h-10 w-10 text-blue-600 animate-bounce" />
+          </div>
+        </div>
+
+        {/* Text Content */}
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600 tracking-wider uppercase">
+            Feature under development
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <TopThreeCard data={leaderboardData} />
-            <StatsCard data={leaderboardData} />
-          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+            Leaderboard
+          </h1>
+
+          <h2 className="text-xl font-bold text-blue-600">
+            Coming Soon
+          </h2>
+
+          <p className="text-sm md:text-base text-gray-500 max-w-md mx-auto leading-relaxed">
+            We are designing a brand-new competitive landscape. Prepare to challenge your peers, track your performance, climb the ranks, and showcase your coding mastery!
+          </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LeaderBoard
+export default LeaderBoard;

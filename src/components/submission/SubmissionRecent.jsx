@@ -46,21 +46,21 @@ const SubmissionRowSkeleton = () => (
 );
 
 
-function SubmissionRecent({userId}) {
-  const [ submissions, setSubmissions ] = useState([]);
-  const [ pageActive, setPageActive ] = useState(1);
-  const [ pagination, setPagination ] = useState({});
-  const [ isLoading, setIsLoading ] = useState(false);
+function SubmissionRecent({ userId }) {
+  const [submissions, setSubmissions] = useState([]);
+  const [pageActive, setPageActive] = useState(1);
+  const [pagination, setPagination] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const fetchSubmssion = async () => {
       setIsLoading(true);
       try {
-        const response = await getSubmissionByUserId(userId, null, pageActive); 
-        console.log('Fetched submissions:', {page: response.page, totalPages: response.totalPages, last: response.last});
-        setPagination({page: response.data.page, totalPages: response.data.totalPages, last: response.data.last});
+        const response = await getSubmissionByUserId(userId, null, pageActive);
+        console.log('Fetched submissions:', { page: response.page, totalPages: response.totalPages, last: response.last });
+        setPagination({ page: response.data.page, totalPages: response.data.totalPages, last: response.data.last });
         setSubmissions(response.data.content);
       }
-      catch (error){
+      catch (error) {
         console.error('Error fetching submissions:', error);
       }
       finally {
@@ -122,7 +122,7 @@ function SubmissionRecent({userId}) {
                 // Hiển thị message khi không có data
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Không có bài nộp nào
+                    No Submissions Yet
                   </TableCell>
                 </TableRow>
               ) : (
@@ -135,12 +135,12 @@ function SubmissionRecent({userId}) {
 
                     <TableCell>
                       <div className="flex flex-col">
-                          <span className="font-medium text-foreground">
-                              {formatDate(submission.createdAt)}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                              {formatTime(submission.createdAt)}
-                          </span>
+                        <span className="font-medium text-foreground">
+                          {formatDate(submission.createdAt)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTime(submission.createdAt)}
+                        </span>
                       </div>
                     </TableCell>
 
@@ -172,7 +172,7 @@ function SubmissionRecent({userId}) {
             />
           )}
         </div>
-        
+
       </Card>
     </div>
   )

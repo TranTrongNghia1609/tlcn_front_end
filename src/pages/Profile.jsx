@@ -29,7 +29,7 @@ const Profile = () => {
       try {
         setLoading(true);
         const targetUsername = userName || user?.userName;
-        
+
         if (!targetUsername) {
           setError('No username provided');
           return;
@@ -52,7 +52,7 @@ const Profile = () => {
     };
 
     const callRefreshToken = async () => {
-      if (isGoogle){
+      if (isGoogle) {
         try {
           await authService.refreshToken();
         } catch (error) {
@@ -126,20 +126,16 @@ const Profile = () => {
           {/* Left Side - User Info */}
           <div className='md:w-80 shrink-0'>
             <Card>
-              <UserInfo 
-                profileData={profileData} 
+              <UserInfo
+                profileData={profileData}
                 onEditProfile={handleEditProfile}
               />
             </Card>
 
             <div className='mt-4'>
-              <SubmissionPieChart 
+              <SubmissionPieChart
                 userId={profileData._id}
               />
-            </div>
-            
-            <div className='mt-4'>
-              <SkillRadarChart userId={profileData._id} />
             </div>
           </div>
 
@@ -152,19 +148,19 @@ const Profile = () => {
                 onUpdateSuccess={handleUpdateSuccess}
               />
             ) : (
-              <>
-              <div className='flex-1 md:mt-0 mt-4 space-y-3'>
+              <div className='flex-1 md:mt-0 mt-4 space-y-4'>
+                <SkillRadarChart userId={profileData._id} />
                 <SubmissionRecent
                   userId={profileData._id}
                 />
                 <SubmissionCalendar userId={profileData._id} year={2024} />
               </div>
-              </>
             )}
           </div>
         </div>
       </div>
     </div>
-  )};
+  )
+};
 
 export default Profile;

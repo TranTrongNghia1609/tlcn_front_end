@@ -4,9 +4,9 @@ import { User, MapPinHouse, Mail, Calendar, School, Edit } from 'lucide-react';
 
 const UserInfo = ({ profileData, onEditProfile }) => {
   const formatDate = (dateString) => {
-    if (!dateString) return 'Chưa cập nhật';
+    if (!dateString) return 'Not updated';
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', { 
+    return date.toLocaleDateString('en-US', { 
       day: '2-digit', 
       month: '2-digit', 
       year: 'numeric' 
@@ -34,7 +34,7 @@ const UserInfo = ({ profileData, onEditProfile }) => {
 
           {/* Full Name */}
           <div className='mb-4'>
-            <p className='text-gray-600 text-lg'>{profileData.fullName || 'Chưa cập nhật'}</p>
+            <p className='text-gray-600 text-lg'>{profileData.fullName || 'Not updated'}</p>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ const UserInfo = ({ profileData, onEditProfile }) => {
           <div className='flex items-start gap-3'>
             <Calendar size={20} className="text-blue-600 flex-shrink-0 mt-1" />
             <div className='flex-1'>
-              <p className='text-xs text-gray-500 mb-1'>Ngày sinh</p>
+              <p className='text-xs text-gray-500 mb-1'>Date of Birth</p>
               <p className='text-gray-900'>{formatDate(profileData.dob)}</p>
             </div>
           </div>
@@ -62,8 +62,8 @@ const UserInfo = ({ profileData, onEditProfile }) => {
           <div className='flex items-start gap-3'>
             <School size={20} className="text-blue-600 flex-shrink-0 mt-1" />
             <div className='flex-1'>
-              <p className='text-xs text-gray-500 mb-1'>Trường học</p>
-              <p className='text-gray-900'>{profileData.School || 'Chưa cập nhật'}</p>
+              <p className='text-xs text-gray-500 mb-1'>School</p>
+              <p className='text-gray-900'>{profileData.School || 'Not updated'}</p>
             </div>
           </div>
 
@@ -71,7 +71,7 @@ const UserInfo = ({ profileData, onEditProfile }) => {
           <div className='flex items-start gap-3'>
             <MapPinHouse size={20} className="text-blue-600 flex-shrink-0 mt-1" />
             <div className='flex-1'>
-              <p className='text-xs text-gray-500 mb-1'>Quốc gia</p>
+              <p className='text-xs text-gray-500 mb-1'>Country</p>
               <p className='text-gray-900'>Vietnam</p>
             </div>
           </div>
@@ -86,14 +86,14 @@ const UserInfo = ({ profileData, onEditProfile }) => {
               type="button"
             >
               <Edit size={18} className="mr-2" />
-              Chỉnh sửa thông tin
+              Edit Profile
             </Button>
           </div>
         )}
 
         {/* Languages Section */}
         <div className='pt-6 border-t'>
-          <h3 className="text-base font-semibold mb-3 text-gray-900">Ngôn ngữ lập trình</h3>
+          <h3 className="text-base font-semibold mb-3 text-gray-900">Programming Languages</h3>
           <div className="flex flex-wrap gap-2">
             {profileData.languages?.length > 0 ? (
               profileData.languages.map((lang, index) => (
@@ -105,7 +105,7 @@ const UserInfo = ({ profileData, onEditProfile }) => {
                 </span>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">Chưa có ngôn ngữ nào</p>
+              <p className="text-gray-500 text-sm">No languages added yet</p>
             )}
           </div>
         </div>

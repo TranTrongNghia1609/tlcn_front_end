@@ -127,7 +127,7 @@ function ClassroomPagination({
   if (totalPages <= 1) return null;
 
   const start = (currentPage - 1) * itemsPerPage + 1;
-  const end   = Math.min(currentPage * itemsPerPage, totalItems);
+  const end = Math.min(currentPage * itemsPerPage, totalItems);
 
   // Tạo danh sách trang với ellipsis
   const getPages = () => {
@@ -136,9 +136,9 @@ function ClassroomPagination({
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
       pages.push(1);
-      if (currentPage > 3)              pages.push('...');
+      if (currentPage > 3) pages.push('...');
       const from = Math.max(2, currentPage - 1);
-      const to   = Math.min(totalPages - 1, currentPage + 1);
+      const to = Math.min(totalPages - 1, currentPage + 1);
       for (let i = from; i <= to; i++) pages.push(i);
       if (currentPage < totalPages - 2) pages.push('...');
       pages.push(totalPages);
@@ -165,7 +165,7 @@ function ClassroomPagination({
                 "cursor-pointer select-none",
                 currentPage === 1
                   ? "pointer-events-none opacity-40"
-                  : "hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200"
+                  : "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
               )}
             />
           </PaginationItem>
@@ -184,8 +184,8 @@ function ClassroomPagination({
                   className={cn(
                     "cursor-pointer select-none",
                     page === currentPage
-                      ? "bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700"
-                      : "hover:bg-indigo-50 hover:text-indigo-600"
+                      ? "bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
+                      : "hover:bg-blue-50 hover:text-blue-600"
                   )}
                 >
                   {page}
