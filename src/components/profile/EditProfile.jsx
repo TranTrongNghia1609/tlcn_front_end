@@ -243,12 +243,12 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
 
   const validateFullName = (value) => {
     if (!value.trim()) {
-      setNameError('Họ và tên không được để trống');
+      setNameError('Full name cannot be empty');
       return false;
     }
     
     if (value.length > 100) {
-      setNameError('Họ và tên không được vượt quá 100 ký tự');
+      setNameError('Full name cannot exceed 100 characters');
       return false;
     }
 
@@ -283,7 +283,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
     e.preventDefault();
 
     if (!validateFullName(formData.fullName)) {
-      toast.error(nameError || 'Vui lòng kiểm tra lại họ tên');
+      toast.error(nameError || 'Please check your full name');
       return;
     }
 
@@ -297,14 +297,14 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
         aiHintEnabled: formData.aiHintEnabled,
       });
 
-      toast.success('Cập nhật thông tin thành công!');
+      toast.success('Profile updated successfully!');
       
       if (onUpdateSuccess) {
         onUpdateSuccess(response?.data);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error(error.message || 'Không thể cập nhật thông tin');
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setIsUpdating(false);
     }
@@ -326,15 +326,15 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
               <ArrowLeft size={20} />
             </Button>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Chỉnh sửa thông tin</h3>
-              <p className="text-sm text-gray-500">Cập nhật thông tin cá nhân của bạn</p>
+              <h3 className="text-xl font-bold text-gray-900">Edit Profile</h3>
+              <p className="text-sm text-gray-500">Update your personal profile information</p>
             </div>
           </div>
         </div>
 
         {/* Avatar Upload */}
         <div className="bg-gray-50 rounded-lg p-6">
-          <Label className="text-base font-semibold mb-4 block text-gray-900">Ảnh đại diện</Label>
+          <Label className="text-base font-semibold mb-4 block text-gray-900">Profile Picture</Label>
           <div className="flex items-center gap-6">
             <div className="relative">
               <img
@@ -356,7 +356,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
           <div>
             <Label htmlFor="userName" className="flex items-center gap-2 mb-2 text-gray-700">
               <User size={18} className="text-blue-600" />
-              Tên đăng nhập
+              Username
             </Label>
             <Input
               id="userName"
@@ -364,7 +364,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
               disabled
               className="bg-gray-100 cursor-not-allowed border-gray-200"
             />
-            <p className="text-xs text-gray-500 mt-1.5">Không thể thay đổi tên đăng nhập</p>
+            <p className="text-xs text-gray-500 mt-1.5">Username cannot be changed</p>
           </div>
 
           {/* Email - Read Only */}
@@ -379,14 +379,14 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
               disabled
               className="bg-gray-100 cursor-not-allowed border-gray-200"
             />
-            <p className="text-xs text-gray-500 mt-1.5">Không thể thay đổi email</p>
+            <p className="text-xs text-gray-500 mt-1.5">Email cannot be changed</p>
           </div>
 
           {/* Full Name */}
           <div>
             <Label htmlFor="fullName" className="flex items-center gap-2 mb-2 text-gray-700">
               <User size={18} className="text-blue-600" />
-              Họ và tên <span className="text-red-500">*</span>
+              Full Name <span className="text-red-500">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -394,7 +394,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Nhập họ và tên đầy đủ"
+                placeholder="Enter your full name"
                 disabled={isUpdating}
                 required
                 maxLength={100}
@@ -413,7 +413,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
               </p>
             ) : (
               <p className="text-xs text-gray-500 mt-1.5">
-                Tối đa 100 ký tự
+                Maximum 100 characters
               </p>
             )}
           </div>
@@ -422,7 +422,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
           <div>
             <Label htmlFor="dob" className="flex items-center gap-2 mb-2 text-gray-700">
               <Calendar size={18} className="text-blue-600" />
-              Ngày sinh
+              Date of Birth
             </Label>
             <Input
               id="dob"
@@ -440,7 +440,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
           <div className="relative" ref={suggestionRef}>
             <Label htmlFor="School" className="flex items-center gap-2 mb-2 text-gray-700">
               <School size={18} className="text-blue-600" />
-              Trường học
+              School
             </Label>
             <div className="relative">
               <Input
@@ -453,7 +453,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
                     searchSchools(schoolSearch);
                   }
                 }}
-                placeholder="Tìm kiếm tên trường học..."
+                placeholder="Search for your school..."
                 disabled={isUpdating}
                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
               />
@@ -516,10 +516,10 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
               <div>
                 <Label htmlFor="aiHintEnabled" className="flex cursor-pointer items-center gap-2 text-gray-800">
                   <Sparkles size={16} className="text-amber-600" />
-                  Bật AI Hint
+                  Enable AI Hint
                 </Label>
                 <p className="mt-1 text-xs text-gray-600">
-                  Khi tắt, hệ thống sẽ chặn toàn bộ tính năng AI Hint cho tài khoản của bạn.
+                  When disabled, the AI Hint feature will be completely blocked for your account.
                 </p>
               </div>
             </div>
@@ -536,7 +536,7 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
             className="flex-1 border-gray-300 hover:bg-gray-50"
           >
             <X size={18} className="mr-2" />
-            Hủy
+            Cancel
           </Button>
           <Button
             type="submit"
@@ -546,12 +546,12 @@ const EditProfile = ({ profileData, onCancel, onUpdateSuccess }) => {
             {isUpdating ? (
               <>
                 <Loader2 size={18} className="animate-spin mr-2" />
-                Đang lưu...
+                Saving...
               </>
             ) : (
               <>
                 <Save size={18} className="mr-2" />
-                Lưu thay đổi
+                Save Changes
               </>
             )}
           </Button>

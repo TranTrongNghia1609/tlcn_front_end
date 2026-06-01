@@ -111,7 +111,7 @@ const ClassroomCard = ({ classroom, globalIndex, onClick }) => {
           <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 inline-block mb-1.5">
             {classroom.classCode}
           </span>
-          <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
             {classroom.className}
           </h3>
         </div>
@@ -181,18 +181,16 @@ const ClassroomCard = ({ classroom, globalIndex, onClick }) => {
       {/* Footer */}
       <div className="px-5 py-3 bg-gray-50/80 border-t border-gray-100 flex justify-between items-center">
         <span
-          className={`text-xs font-medium flex items-center gap-1.5 px-2.5 py-1 rounded-full ${
-            isActive ? 'text-green-700 bg-green-100' : 'text-gray-500 bg-gray-100'
-          }`}
+          className={`text-xs font-medium flex items-center gap-1.5 px-2.5 py-1 rounded-full ${isActive ? 'text-green-700 bg-green-100' : 'text-gray-500 bg-gray-100'
+            }`}
         >
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+              }`}
           />
           {isActive ? 'Active' : 'Ended'}
         </span>
-        <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center gap-1 group/btn transition-colors">
+        <button className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1 group/btn transition-colors">
           Enter
           <ArrowRight size={13} className="transform group-hover/btn:translate-x-1 transition-transform" />
         </button>
@@ -359,8 +357,8 @@ const StudentClassroomsPage = () => {
         {/* ── Page Header Card ── */}
         <div className="bg-white rounded-lg shadow-lg border border-purple-100 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 rounded-xl">
-              <School size={22} className="text-indigo-600" />
+            <div className="p-2.5 bg-blue-100 rounded-xl">
+              <School size={22} className="text-blue-600" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">My Classrooms</h1>
@@ -372,7 +370,7 @@ const StudentClassroomsPage = () => {
           <Button
             id="btn-join-classroom"
             onClick={() => setShowJoinModal(true)}
-            className="bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer shadow-sm flex-shrink-0"
+            className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-sm flex-shrink-0"
             disabled={loading}
           >
             <Plus size={18} className="mr-1.5" />
