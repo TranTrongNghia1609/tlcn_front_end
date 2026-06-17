@@ -20,6 +20,7 @@ import ShareMySolutionPage from "@/pages/ShareMySolutionPage";
 import EditMySolutionPage from "@/pages/EditMySolutionPage";
 import ResubmitSolutionPage from "@/pages/solution/ResubmitSolutionPage";
 import StudentDiscussionDetailPage from '@/pages/StudentDiscussionDetailPage';
+import { goToAdminSite, goToTeacherSite } from '@/utils/siteNavigation';
 const StudentRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -241,7 +242,7 @@ const AppRoutes = () => {
 
       {/* Profile Routes */}
       <Route path="/profile" element={<Profile />} />
-      <Route path="/profile/:username" element={<Profile />} />
+      <Route path="/profile/:userName" element={<Profile />} />
       {/* 404 */}
       <Route path="/contests" element={<Contests/>}/>
       <Route path="/contest/:code" element={<ContestDetail/>}/>
