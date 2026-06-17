@@ -12,8 +12,42 @@ export const AuthProvider = ({ children }) => {
   const [pendingRegistration, setPendingRegistration] = useState(null);
   const [pendingPasswordReset, setPendingPasswordReset] = useState(null);
 
+  const setLoggedInCookie = () => {
+    const hostname = window.location.hostname;
+    let domainString = "";
+    if (hostname.endsWith("ball.id.vn")) {
+      domainString = "; domain=.ball.id.vn";
+    }
+    document.cookie = `logged_in=true; path=/${domainString}; max-age=86400`;
+  };
+
+  const clearLoggedInCookie = () => {
+    const hostname = window.location.hostname;
+    let domainString = "";
+    if (hostname.endsWith("ball.id.vn")) {
+      domainString = "; domain=.ball.id.vn";
+    }
+    document.cookie = `logged_in=; path=/${domainString}; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+  };
+
   useEffect(() => {
-    checkAuth();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'logout') {
+      authService.removeToken();
+      clearLoggedInCookie();
+      setUser(null);
+      setIsAuthenticated(false);
+      setPendingRegistration(null);
+      setPendingPasswordReset(null);
+      
+      params.delete('action');
+      const newSearch = params.toString();
+      const cleanUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '') + window.location.hash;
+      window.history.replaceState({}, document.title, cleanUrl);
+      setLoading(false);
+    } else {
+      checkAuth();
+    }
 
     //  Listen for logout events từ interceptor
     const handleLogout = () => {
@@ -30,6 +64,29 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const syncLogout = () => {
+      const loggedInCookie = document.cookie.split('; ').find(row => row.startsWith('logged_in='));
+      const isLoggedIn = loggedInCookie ? loggedInCookie.split('=')[1] === 'true' : false;
+      
+      if (isAuthenticated && !isLoggedIn) {
+        authService.removeToken();
+        setUser(null);
+        setIsAuthenticated(false);
+        setPendingRegistration(null);
+        setPendingPasswordReset(null);
+      }
+    };
+
+    window.addEventListener('focus', syncLogout);
+    const interval = setInterval(syncLogout, 2000);
+
+    return () => {
+      window.removeEventListener('focus', syncLogout);
+      clearInterval(interval);
+    };
+  }, [isAuthenticated]);
+
   const checkAuth = async () => {
 
     try {
@@ -42,6 +99,7 @@ export const AuthProvider = ({ children }) => {
         if (userData){
           setUser(userData);
           setIsAuthenticated(true);
+          setLoggedInCookie();
         }
         return;
       }
@@ -52,6 +110,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(userData);
       setIsAuthenticated(true);
+      setLoggedInCookie();
 
     } catch (error) {
       console.error('❌ CheckAuth error:', error);
@@ -81,6 +140,7 @@ export const AuthProvider = ({ children }) => {
       if (userData && (userData.userName || userData.email)) {
         setUser(userData);
         setIsAuthenticated(true);
+        setLoggedInCookie();
       } else {
         console.warn('⚠️ No user data in login response, trying to fetch...');
         // Fallback: fetch user data if login successful but no user data
@@ -205,12 +265,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
   const logout = async () => {
     try {
       await authService.logout();
     } finally {
       authService.removeToken();
+      clearLoggedInCookie();
       setUser(null);
       setIsAuthenticated(false);
       setPendingRegistration(null);
