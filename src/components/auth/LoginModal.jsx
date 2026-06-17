@@ -5,6 +5,7 @@ import { useAuthModal } from '../../context/AuthModalContext';
 import { useAuth } from '../../context/AuthContext';
 import classroomService from '@/services/classroomService';
 import { toast } from 'sonner';
+import { goToAdminSite, goToTeacherSite } from '@/utils/siteNavigation';
 
 const LoginModal = () => {
   const { isLoginOpen, closeModals, switchToRegister, switchToForgotPassword, modalOptions } = useAuthModal();
@@ -38,6 +39,18 @@ const LoginModal = () => {
       setUsername('');
       setPassword('');
       setError('');
+
+      const userData = response?.data?.user || response?.user || response;
+      if (userData?.role === 'admin') {
+        closeModals();
+        goToAdminSite('/');
+        return;
+      }
+      if (userData?.role === 'teacher') {
+        closeModals();
+        goToTeacherSite('/');
+        return;
+      }
 
       if (modalOptions.pendingAction) {
         const { type, data } = modalOptions.pendingAction;
