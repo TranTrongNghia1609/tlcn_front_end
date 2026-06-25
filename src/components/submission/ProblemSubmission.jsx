@@ -13,7 +13,10 @@ import {
   AlertCircle, 
   Code,
   Target,
-  Activity
+  Activity,
+  ChevronDown,
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react';
 import {
   Pagination,
@@ -34,6 +37,7 @@ import { submissionsStore } from '@/zustand/store';
 import { useSocket } from '@/context/SocketContext';
 const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('all');
+  const [expandedErrors, setExpandedErrors] = useState({});
   const [timeRange, setTimeRange] = useState('all');
   // const [submissions, setProblemSubmissions] = useState([]);
   const [problemSubmissionPagination, setProblemSubmissionPagination] = useState([]);
@@ -209,13 +213,39 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                   const prevSubmission = submissions[index + 1];
                   const improvement = prevSubmission ? 
                     submission.passed || 0 - prevSubmission.passed || 0 : 0;
-                  
-                  return (
-                    <tr key={submission._id} className="border-b hover:bg-gray-50"
+                                    const hasError = Boolean(submission.errorMessage);
+                    const isErrorExpanded = Boolean(expandedErrors[submission._id]);
+
+                    return (
+                    <React.Fragment key={submission._id}>
+                    <tr className="border-b hover:bg-gray-50"
                       onClick={() => handleGetSubmission(submission)}
                     >
                       <td className="p-2 font-mono text-gray-600">#{submission.shortId}</td>
-                      <td className="p-2">{getStatusBadge(submission.status)}</td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-1.5">
+                          {getStatusBadge(submission.status)}
+                          {hasError && (
+                            <button
+                              type="button"
+                              title={isErrorExpanded ? 'Hide error details' : 'Show error details'}
+                              className="inline-flex items-center gap-0.5 text-red-500 hover:text-red-700 transition-colors p-0.5 rounded hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedErrors((prev) => ({
+                                  ...prev,
+                                  [submission._id]: !prev[submission._id],
+                                }));
+                              }}
+                            >
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              {isErrorExpanded
+                                ? <ChevronDown className="h-3 w-3" />
+                                : <ChevronRight className="h-3 w-3" />}
+                            </button>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-2">
                         <Badge variant="outline" className="text-xs">
                           {submission.language}
@@ -232,6 +262,22 @@ const ProblemSubmissions = ({contestParticipant=null, classroomId = null}) => {
                         </span>
                       </td>
                     </tr>
+                    {hasError && isErrorExpanded && (
+                      <tr className="bg-red-50/60">
+                        <td colSpan={6} className="px-4 py-3">
+                          <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+                            <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-semibold text-red-700 mb-1">Error Details</p>
+                              <pre className="text-xs text-red-800 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-48 overflow-y-auto">
+                                {submission.errorMessage}
+                              </pre>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
