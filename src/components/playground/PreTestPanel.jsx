@@ -121,8 +121,8 @@ export function PreTestPanel({
               if (onRunFinish) onRunFinish();
             }
           }
-        }, 1500);
-      }, 4000);
+        }, 3000);
+      }, 5000);
 
     } catch (err) {
       cleanupTimers();
