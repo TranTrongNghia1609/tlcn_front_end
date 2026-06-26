@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import useDebounce from '@/hooks/useDebounce';
 import { submitCode } from '@/services/submissionService';
 import { submissionsStore } from '@/zustand/store';
+import { AlertCircle } from 'lucide-react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 
 const PlayGround = ({
@@ -184,6 +185,7 @@ const PlayGround = ({
         <PreferenceNav
           changLanguage={changeLanguage}
           onSubmit={handleSumit}
+          language={language}
         />
       </div>
       <div className='w-full overflow-auto'>
@@ -195,6 +197,24 @@ const PlayGround = ({
           onChange={handleEditorChange}
         />
       </div>
+
+      {/* Error Message Panel */}
+      {isViewingSelectedSubmission && currentSubmission?.errorMessage && (
+        <div className='border-t border-red-300 bg-red-50 dark:bg-red-950/30 dark:border-red-800'>
+          <div className='flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/40 border-b border-red-200 dark:border-red-800'>
+            <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0' />
+            <span className='text-sm font-semibold text-red-700 dark:text-red-300'>
+              Error Output
+            </span>
+            <span className='ml-auto text-xs text-red-500 dark:text-red-400'>
+              {currentSubmission.status}
+            </span>
+          </div>
+          <pre className='px-4 py-3 text-sm font-mono text-red-800 dark:text-red-300 whitespace-pre-wrap break-words overflow-auto max-h-48'>
+            {currentSubmission.errorMessage}
+          </pre>
+        </div>
+      )}
     </div>
   )
 }

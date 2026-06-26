@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,14 +20,21 @@ export function ComboBox({
   options,
   placeholder = "Select...",
   defaultValue,
+  value: controlledValue,
   onChange,
   className,
 }) {
   const [open, setOpen] = useState(false)
-  const [value, setValue] = useState(defaultValue || "")
+  const [value, setValue] = useState(controlledValue ?? defaultValue ?? "")
 
-  const selectedLabel =
-    options.find((option) => option.value === value)?.label || placeholder
+  // Sync internal state when controlled value changes from parent
+  useEffect(() => {
+    if (controlledValue !== undefined && controlledValue !== value) {
+      setValue(controlledValue)
+    }
+  }, [controlledValue])
+
+  const selectedOption = options.find((option) => option.value === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -36,10 +43,15 @@ export function ComboBox({
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className={cn("h-7 bg-transparent flex justify-between", className)}
+          className={cn("h-7 bg-transparent flex justify-between items-center gap-2", className)}
         >
-          <span className="text-sm">{selectedLabel}</span>
-          <ChevronsUpDown className="opacity-50" />
+          <div className="flex items-center gap-2 truncate">
+            {selectedOption?.logo && (
+              <img src={selectedOption.logo} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+            )}
+            <span className="text-sm truncate">{selectedOption?.label || placeholder}</span>
+          </div>
+          <ChevronsUpDown className="opacity-50 h-4 w-4 ml-1 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -57,11 +69,15 @@ export function ComboBox({
                     setOpen(false)
                     onChange?.(currentValue)
                   }}
+                  className="flex items-center gap-2 cursor-pointer"
                 >
-                  {option.label}
+                  {option.logo && (
+                    <img src={option.logo} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                  )}
+                  <span>{option.label}</span>
                   <Check
                     className={cn(
-                      "ml-auto",
+                      "ml-auto h-4 w-4 flex-shrink-0",
                       value === option.value ? "opacity-100" : "opacity-0"
                     )}
                   />
