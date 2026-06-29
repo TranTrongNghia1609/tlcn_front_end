@@ -1,37 +1,39 @@
-import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Trophy } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import React from 'react';
+import { Trophy, Users, Zap } from 'lucide-react';
 
-const LeaderboardHeader = ({ timeFilter, setTimeFilter }) => {
+/**
+ * LeaderBoardHeader — Hero section của trang leaderboard.
+ * Hiển thị tổng số user đang xếp hạng.
+ */
+const LeaderBoardHeader = ({ totalUsers = 0, loading = false }) => {
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Trophy className="w-8 h-8 text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-800">Bảng Xếp Hạng</h1>
-          </div>
-          <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chọn khoảng thời gian" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-time">Mọi thời gian</SelectItem>
-              <SelectItem value="month">Tháng này</SelectItem>
-              <SelectItem value="week">Tuần này</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+    <div className="lb-header">
+      {/* Background decoration */}
+      <div className="lb-header__bg-orb lb-header__bg-orb--1" />
+      <div className="lb-header__bg-orb lb-header__bg-orb--2" />
 
-export default LeaderboardHeader
+      <div className="lb-header__content">
+        {/* Icon + Title */}
+        <div className="lb-header__icon-wrap">
+          <Trophy size={32} strokeWidth={1.8} />
+        </div>
+
+        <h1 className="lb-header__title">Leaderboard</h1>
+
+        {/* Stats strip */}
+        <div className="lb-header__stats">
+          <div className="lb-header__stat">
+            <Users size={16} />
+            <span>
+              {loading ? '—' : totalUsers.toLocaleString()}{' '}
+              <strong>Ranked Users</strong>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LeaderBoardHeader;

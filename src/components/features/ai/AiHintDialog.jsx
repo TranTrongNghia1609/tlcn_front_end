@@ -73,14 +73,12 @@ const ChatBubble = ({ message, formatTime, highlight }) => {
 
   return (
     <div
-      className={`flex gap-2 transition-all duration-300 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${
-        highlight ? 'rounded-lg ring-2 ring-amber-300 ring-offset-1' : ''
-      }`}
+      className={`flex gap-2 transition-all duration-300 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${highlight ? 'rounded-lg ring-2 ring-blue-300 ring-offset-1' : ''
+        }`}
     >
       <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${
-          isUser ? 'border-amber-300 bg-amber-100 text-amber-700' : 'border-blue-200 bg-blue-50 text-blue-600'
-        }`}
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${isUser ? 'border-blue-300 bg-blue-100 text-blue-700' : 'border-blue-200 bg-blue-50 text-blue-600'
+          }`}
       >
         {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
       </div>
@@ -88,11 +86,10 @@ const ChatBubble = ({ message, formatTime, highlight }) => {
         {/* Type badge */}
         <div className="flex items-center gap-1.5">
           <span
-            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-              type === 'chat'
-                ? 'bg-blue-100 text-blue-600'
-                : 'bg-amber-100 text-amber-700'
-            }`}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${type === 'chat'
+              ? 'bg-blue-100 text-blue-600'
+              : 'bg-blue-100 text-blue-700'
+              }`}
           >
             {isUser
               ? type === 'chat' ? 'Câu hỏi' : 'Yêu cầu gợi ý'
@@ -106,11 +103,10 @@ const ChatBubble = ({ message, formatTime, highlight }) => {
         </div>
         {/* Bubble */}
         <div
-          className={`rounded-xl px-3 py-2 text-sm leading-relaxed ${
-            isUser
-              ? 'bg-amber-500 text-white'
-              : 'border border-gray-200 bg-white text-gray-800 shadow-sm'
-          }`}
+          className={`rounded-xl px-3 py-2 text-sm leading-relaxed ${isUser
+            ? 'bg-blue-500 text-white'
+            : 'border border-gray-200 bg-white text-gray-800 shadow-sm'
+            }`}
         >
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.content}</p>
@@ -138,24 +134,21 @@ const SidebarItem = ({ msg, index, isSelected, onClick, formatTime }) => {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-lg px-2.5 py-2 text-left transition-colors border ${
-        isSelected
-          ? 'border-amber-300 bg-amber-50'
-          : 'border-transparent hover:border-gray-200 hover:bg-gray-100'
-      }`}
+      className={`w-full rounded-lg px-2.5 py-2 text-left transition-colors border ${isSelected
+        ? 'border-blue-300 bg-blue-50'
+        : 'border-transparent hover:border-gray-200 hover:bg-gray-100'
+        }`}
     >
       <div className="flex items-center gap-1.5 mb-0.5">
         <div
-          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-            isUser ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'
-          }`}
+          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-blue-100 text-blue-600' : 'bg-blue-100 text-blue-600'
+            }`}
         >
           {isUser ? <User className="h-2.5 w-2.5" /> : <Bot className="h-2.5 w-2.5" />}
         </div>
         <span
-          className={`text-[10px] font-semibold rounded px-1 ${
-            type === 'chat' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-700'
-          }`}
+          className={`text-[10px] font-semibold rounded px-1 ${type === 'chat' ? 'bg-blue-100 text-blue-600' : 'bg-blue-100 text-blue-700'
+            }`}
         >
           {isUser
             ? type === 'chat' ? 'Hỏi' : 'Yêu cầu'
@@ -203,17 +196,39 @@ const AiHintDialog = ({
   const [selectedIdx, setSelectedIdx] = useState(null);
   // Local pending messages — shown immediately when user sends, cleared when parent prop updates
   const [pendingMessages, setPendingMessages] = useState([]);
-  const chatEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
   const messageRefs = useRef({});
 
-  // Combine DB messages + locally pending ones for display
-  const allMessages = [...conversationMessages, ...pendingMessages];
+  // Filter pending messages that already exist in conversationMessages (DB synced)
+  // This is more robust than length comparison — handles re-mounts and race conditions
+  const visiblePending = pendingMessages.filter((pending) => {
+    return !conversationMessages.some(
+      (db) =>
+        db.role === pending.role &&
+        db.source === pending.source &&
+        db.content === pending.content
+    );
+  });
 
-  // When parent updates conversationMessages (after socket refresh from DB), clear pending
+  // Combine DB messages + not-yet-synced pending ones for display
+  const allMessages = [...conversationMessages, ...visiblePending];
+
+  // Cleanup: drop pending messages that are now reflected in the DB
   useEffect(() => {
-    setPendingMessages([]);
-  }, [conversationMessages]);
+    if (pendingMessages.length === 0) return;
+    setPendingMessages((prev) =>
+      prev.filter(
+        (pending) =>
+          !conversationMessages.some(
+            (db) =>
+              db.role === pending.role &&
+              db.source === pending.source &&
+              db.content === pending.content
+          )
+      )
+    );
+  }, [conversationMessages]); // safe: only modifies pendingMessages, no loop risk
 
   const hasMessages = allMessages.length > 0;
   const hasReceivedHint = allMessages.some((m) => m.role === 'assistant');
@@ -231,14 +246,28 @@ const AiHintDialog = ({
           ? 'Đang gửi yêu cầu...'
           : 'Xin thêm gợi ý';
 
-  // Auto-scroll on new messages (allMessages changes when pending is added)
+  // Auto-scroll whenever displayed messages change or AI starts typing
+  const allMessagesLength = allMessages.length;
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [allMessages.length, isSendingChat]);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [allMessagesLength, isSendingChat]);
 
   const handleSidebarClick = (idx) => {
     setSelectedIdx(idx);
-    messageRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const container = scrollContainerRef.current;
+    const target = messageRefs.current[idx];
+    if (container && target) {
+      // Use explicit scrollTo to prevent layout shifting
+      container.scrollTo({
+        top: target.offsetTop - 20, 
+        behavior: 'smooth'
+      });
+    }
   };
 
   const handleSend = () => {
@@ -272,27 +301,29 @@ const AiHintDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-5xl">
-        <DialogHeader className="border-b px-6 pt-5 pb-4">
-          <DialogTitle className="flex items-center gap-2 text-amber-700">
+      {/* h-[90vh] + flex-col so the body can flex-1 inside */}
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-5xl">
+        <DialogHeader className="shrink-0 border-b px-6 pt-5 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-blue-700">
             <Sparkles className="h-5 w-5" />
             Gợi ý của AI
           </DialogTitle>
           <DialogDescription>
-            Gợi ý định hướng
+            Gợi ý định hướng — AI chỉ trả lời bằng mã giả, không code hoàn chỉnh
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid h-[min(78vh,620px)] min-h-0 md:grid-cols-[260px_minmax(0,1fr)]">
+        {/* flex-1 + overflow-hidden: takes remaining height, clips children */}
+        <div className="grid min-h-0 flex-1 w-full md:grid-cols-[260px_minmax(0,1fr)] overflow-hidden">
 
-          {/* ── LEFT: Conversation info card ── */}
+          {/* ── LEFT: SIDEBAR (Conversation info card) ── */}
           <div className="flex min-h-0 flex-col border-r bg-gray-50">
-            <div className="border-b px-3 py-2.5">
+            <div className="shrink-0 border-b px-3 py-2.5">
               <p className="text-sm font-semibold text-gray-700">Cuộc trò chuyện</p>
               <p className="text-xs text-gray-400 mt-0.5">Thông tin phiên làm việc với AI</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div className="min-h-0 flex-1 overflow-y-auto p-3 space-y-3">
               {/* Conversation ID */}
               <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">ID cuộc trò chuyện</p>
@@ -341,10 +372,10 @@ const AiHintDialog = ({
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <span className="h-2 w-2 rounded-full bg-amber-400" />
+                          <span className="h-2 w-2 rounded-full bg-blue-400" />
                           <span className="text-xs text-gray-600">Gợi ý từ AI</span>
                         </div>
-                        <span className="text-xs font-semibold text-amber-700">{hintCount}</span>
+                        <span className="text-xs font-semibold text-blue-700">{hintCount}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
@@ -389,9 +420,10 @@ const AiHintDialog = ({
             </div>
           </div>
 
-          {/* ── RIGHT: Unified conversation thread ── */}
-          <div className="flex min-h-0 flex-col">
-            {/* Action bar */}
+          {/* ── RIGHT PANEL ── */}
+          <div className="flex min-h-0 flex-col relative bg-white">
+
+            {/* NAVBAR (Action bar) */}
             {isAiHintEnabled && !isProblemSolved && (
               <div className="shrink-0 flex items-center justify-between border-b px-4 py-2">
                 {isProblemSolved ? (
@@ -410,7 +442,7 @@ const AiHintDialog = ({
                   type="button"
                   onClick={onRequestMoreHint}
                   disabled={isRequestButtonDisabled}
-                  className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {shouldShowLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {requestButtonLabel}
@@ -418,8 +450,8 @@ const AiHintDialog = ({
               </div>
             )}
 
-            {/* Messages — single scrollable thread */}
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 space-y-5">
+            {/* MAINCONTENT (Messages — single scrollable thread) */}
+            <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto px-5 py-4 space-y-5">
               {isProblemSolved && (
                 <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
                   <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -429,7 +461,7 @@ const AiHintDialog = ({
 
               {allMessages.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-40 text-center text-sm text-gray-400 gap-2">
-                  <Sparkles className="h-8 w-8 text-amber-300" />
+                  <Sparkles className="h-8 w-8 text-blue-300" />
                   <p>Chưa có cuộc trò chuyện nào.</p>
                   <p className="text-xs">Yêu cầu gợi ý để bắt đầu.</p>
                 </div>
@@ -478,10 +510,9 @@ const AiHintDialog = ({
                   </div>
                 </div>
               )}
-              <div ref={chatEndRef} />
             </div>
 
-            {/* Chat input — pinned bottom */}
+            {/* FOOTER / CHAT INPUT */}
             {hasReceivedHint && isAiHintEnabled && !isProblemSolved && (
               <div className="shrink-0 border-t bg-white px-4 py-3">
                 <div className="flex items-end gap-2">
@@ -499,7 +530,7 @@ const AiHintDialog = ({
                     }
                     disabled={!canChat || chatCooldownRemaining > 0 || isSendingChat}
                     rows={1}
-                    className="flex-1 resize-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex-1 resize-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
                     style={{ minHeight: '38px', maxHeight: '96px' }}
                     onInput={(e) => {
                       e.target.style.height = 'auto';
@@ -510,23 +541,24 @@ const AiHintDialog = ({
                     type="button"
                     onClick={handleSend}
                     disabled={!chatInput.trim() || !canChat || chatCooldownRemaining > 0 || isSendingChat}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSendingChat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </button>
                 </div>
                 {chatCooldownRemaining > 0 && (
-                  <p className="mt-1 text-[11px] text-amber-600">
+                  <p className="mt-1 text-[11px] text-blue-600">
                     Đợi {chatCooldownRemaining}s trước khi gửi tin nhắn tiếp theo
                   </p>
                 )}
               </div>
             )}
-          </div>
-        </div>
+          </div>  {/* end right panel */}
+        </div>    {/* end grid */}
       </DialogContent>
     </Dialog>
   );
 };
 
 export default AiHintDialog;
+

@@ -170,5 +170,15 @@ export const DISCUSSION_ENDPOINTS = {
 };
 export const STATISTICS_ENDPOINTS = {
   PUBLIC: '/statistics/public',
+};
 
+export const RANKING_ENDPOINTS = {
+  // Bảng xếp hạng toàn hệ thống
+  GET_LEADERBOARD: '/rankings',
+  // Elo hiện tại của 1 user
+  GET_USER_RATING: (userId) => `/rankings/users/${userId}/rating`,
+  // Lịch sử thay đổi Elo
+  GET_USER_RATING_HISTORY: (userId) => `/rankings/users/${userId}/rating-history`,
+  // Tính Elo sau contest (Admin/Teacher)
+  CALCULATE_CONTEST_RATING: (contestId) => `/rankings/contests/${contestId}/calculate-rating`,
 };

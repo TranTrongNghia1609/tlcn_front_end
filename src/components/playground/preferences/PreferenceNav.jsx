@@ -4,7 +4,7 @@ import { Play, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useProblem } from "@/context/ProblemContext";
 import { submitCode } from "@/services/submissionService";
-export function PreferenceNav({changLanguage, onSubmit, onRunCode, isRunning, language}) {
+export function PreferenceNav({ changLanguage, onSubmit, onRunCode, isRunning, language }) {
   const { currentProblem } = useProblem();
   const languages = [
     {
@@ -38,19 +38,14 @@ export function PreferenceNav({changLanguage, onSubmit, onRunCode, isRunning, la
         onChange={changLanguage}
       />
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-slate-500 hover:text-slate-700 dark:text-slate-400">
-          <Settings size={18} />
-        </Button>
-        
+
+
         {/* button run code */}
         <Button
           variant="outline"
           size="sm"
           onClick={onRunCode}
-          disabled={isRunning}  
+          disabled={isRunning}
           className="cursor-pointer h-8 flex items-center gap-1.5 border-blue-600 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-medium px-3 transition-all"
         >
           <Play size={15} className={`fill-blue-600 text-blue-600 ${isRunning ? 'animate-pulse' : ''}`} />
