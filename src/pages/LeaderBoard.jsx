@@ -89,7 +89,7 @@ const LeaderBoard = () => {
       <LeaderBoardHeader totalUsers={pagination.total} loading={loading} />
 
       {/* ── Controls bar ── */}
-      <div className="lb-controls">
+      <div className="lb-controls ">
         {/* Search */}
         <div className="lb-search-wrap">
           <Search size={16} className="lb-search__icon" />
@@ -217,9 +217,8 @@ const LeaderBoard = () => {
                 <button
                   key={item}
                   id={`lb-page-${item}`}
-                  className={`lb-pagination__btn lb-pagination__btn--page ${
-                    page === item ? 'lb-pagination__btn--active' : ''
-                  }`}
+                  className={`lb-pagination__btn lb-pagination__btn--page ${page === item ? 'lb-pagination__btn--active' : ''
+                    }`}
                   onClick={() => setPage(item)}
                   aria-label={`Go to page ${item}`}
                   aria-current={page === item ? 'page' : undefined}
@@ -276,7 +275,7 @@ const leaderboardStyles = `
 }
 .lb-header__bg-orb--1 {
   width: 400px; height: 400px;
-  background: rgba(99,102,241,0.25);
+  background: rgba(59,130,246,0.3);
   top: -120px; left: -80px;
 }
 .lb-header__bg-orb--2 {
@@ -294,7 +293,7 @@ const leaderboardStyles = `
 .lb-header__title {
   font-size: clamp(28px, 5vw, 42px); font-weight: 800;
   letter-spacing: -0.02em; margin: 0 0 10px;
-  background: linear-gradient(to right, #fff, #94a3b8);
+  background: linear-gradient(to right, #ffffff, #93c5fd);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .lb-header__subtitle {
@@ -326,7 +325,7 @@ const leaderboardStyles = `
   font-size: 14px; color: #1e293b; background: white;
   outline: none; transition: border-color 0.2s, box-shadow 0.2s;
 }
-.lb-search__input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.lb-search__input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
 .lb-search__clear {
   position: absolute; right: 10px;
   background: none; border: none; cursor: pointer;
@@ -340,7 +339,7 @@ const leaderboardStyles = `
   font-size: 14px; color: #334155; background: white; cursor: pointer; outline: none;
   transition: border-color 0.2s;
 }
-.lb-filter__select:focus { border-color: #6366f1; }
+.lb-filter__select:focus { border-color: #2563eb; }
 .lb-limit__label { font-size: 13px; color: #64748b; }
 .lb-total-label { margin-left: auto; font-size: 13px; color: #94a3b8; }
 
@@ -357,8 +356,8 @@ const leaderboardStyles = `
 /* ── Podium ── */
 .lb-podium {
   display: flex; align-items: flex-end; justify-content: center;
-  gap: 0; padding: 0 24px 12px; max-width: 600px; margin: 0 auto;
-  height: 280px;
+  gap: 12px; padding: 0 24px 12px; max-width: 600px; margin: 40px auto 0;
+  height: 260px;
 }
 .lb-podium__slot {
   display: flex; flex-direction: column; align-items: center;
@@ -390,15 +389,16 @@ const leaderboardStyles = `
   max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   text-align: center;
 }
-.lb-podium__username:hover { color: #6366f1; }
-.lb-podium__username--me { color: #6366f1; }
+.lb-podium__username:hover { color: #2563eb; }
+.lb-podium__username--me { color: #2563eb; }
 .lb-podium__elo { font-size: 12px; font-weight: 700; margin-top: 2px; }
 .lb-podium__base {
   width: 100%; flex: 1; min-height: 40px; margin-top: 8px;
-  display: flex; align-items: center; justify-content: center;
-  border-top: 2px solid; border-radius: 8px 8px 0 0;
-  font-size: 14px; font-weight: 700; color: #64748b;
-  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  display: flex; align-items: flex-start; justify-content: center; padding-top: 16px;
+  border: 1px solid #e2e8f0; border-bottom: none; border-top: 4px solid; border-radius: 12px 12px 0 0;
+  font-size: 18px; font-weight: 800; color: #475569;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
 }
 
 /* ── Table section ── */
@@ -435,8 +435,8 @@ const leaderboardStyles = `
 .lb-table__row--silver { background: linear-gradient(to right, rgba(156,163,175,0.07), transparent); }
 .lb-table__row--bronze { background: linear-gradient(to right, rgba(201,125,62,0.07), transparent); }
 .lb-table__row--me {
-  background: linear-gradient(to right, rgba(99,102,241,0.07), transparent) !important;
-  outline: 1px solid rgba(99,102,241,0.2);
+  background: linear-gradient(to right, rgba(37,99,235,0.07), transparent) !important;
+  outline: 1px solid rgba(37,99,235,0.2);
 }
 .lb-table__row--skeleton { pointer-events: none; }
 
@@ -464,7 +464,7 @@ const leaderboardStyles = `
 }
 .lb-avatar--fallback {
   display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: #ede9fe; color: #6366f1;
+  border-radius: 50%; background: #eff6ff; color: #2563eb;
   font-size: 14px; font-weight: 700; border: 2px solid #e2e8f0;
 }
 .lb-avatar-glow {
@@ -481,11 +481,11 @@ const leaderboardStyles = `
   display: flex; align-items: center; gap: 6px;
   transition: color 0.15s;
 }
-.lb-username:hover { color: #6366f1; }
-.lb-username--me { color: #6366f1; }
+.lb-username:hover { color: #2563eb; }
+.lb-username--me { color: #2563eb; }
 .lb-you-badge {
   font-size: 10px; font-weight: 700; padding: 1px 6px;
-  background: #ede9fe; color: #6366f1; border-radius: 99px;
+  background: #eff6ff; color: #2563eb; border-radius: 99px;
   letter-spacing: 0.04em;
 }
 .lb-fullname { font-size: 12px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -527,12 +527,12 @@ const leaderboardStyles = `
   background: white; cursor: pointer; font-size: 14px; color: #334155;
   transition: all 0.15s;
 }
-.lb-pagination__btn:hover:not(:disabled) { background: #f8fafc; border-color: #6366f1; color: #6366f1; }
+.lb-pagination__btn:hover:not(:disabled) { background: #f8fafc; border-color: #2563eb; color: #2563eb; }
 .lb-pagination__btn:disabled { opacity: 0.4; cursor: default; }
 .lb-pagination__btn--active {
-  background: #6366f1; border-color: #6366f1; color: white; font-weight: 600;
+  background: #2563eb; border-color: #2563eb; color: white; font-weight: 600;
 }
-.lb-pagination__btn--active:hover { background: #4f46e5; }
+.lb-pagination__btn--active:hover { background: #1d4ed8; }
 .lb-pagination__ellipsis { font-size: 14px; color: #94a3b8; padding: 0 4px; }
 
 /* ── Responsive ── */

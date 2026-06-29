@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeLight } from '@uiw/codemirror-theme-vscode';
 import PreferenceNav from './preferences/PreferenceNav';
+import PreTestPanel from './PreTestPanel';
 import { mapLanguage } from '@/lib/utils.js';
 import { useProblem } from '@/context/ProblemContext';
 import { useAuth } from '@/context/AuthContext';
@@ -33,6 +34,9 @@ const PlayGround = ({
   const addSubmission = submissionsStore((state) => state.addSubmission);
   const debouncedCode = useDebounce(code, 600);
   const skipRestoreOnceRef = useRef(false);
+  const [isPreTestOpen, setIsPreTestOpen] = useState(false);
+  const [preTestTab, setPreTestTab] = useState('Testcase');
+  const [isPreTesting, setIsPreTesting] = useState(false);
 
   const languageKeys = useMemo(() => Object.keys(mapValue || {}), [mapValue]);
   const resolvedProblemId = String(currentProblem?._id || problemId || 'unknown-problem');
@@ -185,6 +189,8 @@ const PlayGround = ({
         <PreferenceNav
           changLanguage={changeLanguage}
           onSubmit={handleSumit}
+          onRunCode={() => { if (window.__triggerPreTestRun) window.__triggerPreTestRun(); }}
+          isRunning={isPreTesting}
           language={language}
         />
       </div>
@@ -197,6 +203,19 @@ const PlayGround = ({
           onChange={handleEditorChange}
         />
       </div>
+
+      {/* Pre-Test Collapsible Section under CodeMirror */}
+      <PreTestPanel
+        problemId={currentProblem?._id || problemId}
+        sourceCode={code}
+        language={language}
+        isOpen={isPreTestOpen}
+        setIsOpen={setIsPreTestOpen}
+        activeTab={preTestTab}
+        setActiveTab={setPreTestTab}
+        onRunStart={() => setIsPreTesting(true)}
+        onRunFinish={() => setIsPreTesting(false)}
+      />
 
       {/* Error Message Panel */}
       {isViewingSelectedSubmission && currentSubmission?.errorMessage && (
