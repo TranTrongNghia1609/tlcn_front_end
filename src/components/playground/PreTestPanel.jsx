@@ -155,20 +155,20 @@ export function PreTestPanel({
             variant="ghost"
             size="sm"
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200 px-2 hover:bg-slate-200/60 dark:hover:bg-slate-800"
+            className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200 px-2 hover:bg-slate-200/60 dark:hover:bg-slate-800 cursor-pointer"
           >
-            <Terminal className="h-4 w-4 text-purple-600" />
+            <Terminal className="h-4 w-4 text-blue-600" />
             <span>Testcase & Result</span>
             {isOpen ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronUp className="h-4 w-4 text-slate-400" />}
           </Button>
 
           {isOpen && (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-              <TabsList className="h-8 bg-slate-200/60 dark:bg-slate-800 p-0.5">
-                <TabsTrigger value="Testcase" className="text-xs px-3 h-7 font-medium">
+              <TabsList className="h-8 bg-slate-200/60 dark:bg-slate-800 p-0.5 ">
+                <TabsTrigger value="Testcase" className="text-xs px-3 h-7 font-medium cursor-pointer">
                   Testcase
                 </TabsTrigger>
-                <TabsTrigger value="Result" className="text-xs px-3 h-7 font-medium flex items-center gap-1.5">
+                <TabsTrigger value="Result" className="text-xs px-3 h-7 font-medium flex items-center gap-1.5 cursor-pointer">
                   <span>Result</span>
                   {verdict?.status && (
                     <span className={`h-2 w-2 rounded-full ${verdict.status === 'AC' ? 'bg-emerald-500' : verdict.status === 'Pending' ? 'bg-yellow-500 animate-ping' : 'bg-red-500'}`} />
@@ -186,9 +186,9 @@ export function PreTestPanel({
                 {currentConfig.title}
               </Badge>
             )}
-            <Button size="sm" variant="outline" onClick={triggerRunCode} disabled={isRunning} className="h-7 text-xs border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300">
-              <Play className="h-3 w-3 mr-1 fill-purple-600" />
-              Run Code
+            <Button size="sm" variant="outline" onClick={triggerRunCode} disabled={isRunning} className="h-7 text-xs border-blue-300 hover:cursor-pointer dark:border-blue-700 text-blue-700 dark:text-blue-300">
+              <Play className="h-3 w-3 mr-1 fill-blue-600" />
+              Run Test Case
             </Button>
           </div>
         )}
@@ -212,7 +212,7 @@ export function PreTestPanel({
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
                   placeholder="Enter input parameters here..."
-                  className="w-full h-36 p-3 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  className="w-full h-36 p-3 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
 
@@ -224,7 +224,7 @@ export function PreTestPanel({
                   value={expectedOutput}
                   onChange={(e) => setExpectedOutput(e.target.value)}
                   placeholder="Enter expected output comparison string..."
-                  className="w-full h-36 p-3 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  className="w-full h-36 p-3 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
             </div>
@@ -261,13 +261,13 @@ export function PreTestPanel({
                     <div className="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                       {formattedTime && (
                         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-800">
-                          <Clock className="h-3.5 w-3.5 text-purple-500" />
+                          <Clock className="h-3.5 w-3.5 text-blue-500" />
                           <span>Runtime: <strong className="text-slate-700 dark:text-slate-200">{formattedTime}</strong></span>
                         </div>
                       )}
                       {formattedMemory && (
                         <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-800">
-                          <Cpu className="h-3.5 w-3.5 text-purple-500" />
+                          <Cpu className="h-3.5 w-3.5 text-blue-500" />
                           <span>Memory: <strong className="text-slate-700 dark:text-slate-200">{formattedMemory}</strong></span>
                         </div>
                       )}

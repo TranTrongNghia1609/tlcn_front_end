@@ -753,11 +753,10 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                   type="button"
                   onClick={openHintDialog}
                   disabled={!canOpenHintDialog}
-                  className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                    isProblemSolved
-                      ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100'
-                      : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
-                  }`}
+                  className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${isProblemSolved
+                    ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100'
+                    : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    }`}
                 >
                   {isProblemSolved ? (
                     <>
@@ -769,9 +768,9 @@ const WorkSpaceContent = ({ isContest, code, contestProblems }) => {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4" />
+                      <Sparkles className="h-4 w-4 text-blue-600 " />
                       Xin gợi ý
-                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-200 px-1 text-xs font-semibold text-amber-800">
+                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-200 px-1 text-xs font-semibold text-white-800">
                         {problemHintHistory.length}
                       </span>
                     </>

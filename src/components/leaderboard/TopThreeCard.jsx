@@ -90,7 +90,10 @@ const TopThreeCard = ({ users = [], currentUserId, onUserClick }) => {
             {/* Podium base */}
             <div
               className={`lb-podium__base lb-podium__base--${medalIndex + 1}`}
-              style={{ borderColor: `${tier.color}55` }}
+              style={{
+                borderTopColor: tier.color,
+                backgroundColor: tier.color ? `${tier.color}08` : 'white'
+              }}
             >
               #{user.rank}
             </div>

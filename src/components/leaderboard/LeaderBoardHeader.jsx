@@ -19,9 +19,6 @@ const LeaderBoardHeader = ({ totalUsers = 0, loading = false }) => {
         </div>
 
         <h1 className="lb-header__title">Leaderboard</h1>
-        <p className="lb-header__subtitle">
-          Global ranking based on Elo rating — updated after every official contest.
-        </p>
 
         {/* Stats strip */}
         <div className="lb-header__stats">
@@ -32,11 +29,7 @@ const LeaderBoardHeader = ({ totalUsers = 0, loading = false }) => {
               <strong>Ranked Users</strong>
             </span>
           </div>
-          <div className="lb-header__stat-divider" />
-          <div className="lb-header__stat">
-            <Zap size={16} />
-            <span>Default Elo <strong>1200</strong></span>
-          </div>
+
         </div>
       </div>
     </div>
