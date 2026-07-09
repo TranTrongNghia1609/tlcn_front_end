@@ -3,16 +3,12 @@ import { Calendar, Trophy, Users } from 'lucide-react'
 
 const ContestSideBar = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
-    status: [],
-    type: 'all' // Đổi thành string vì radio chỉ chọn 1 giá trị
+    status: '', // Chỉ chọn 1 trạng thái: 'upcoming' | 'ongoing' | 'ended' | ''
+    type: 'all'
   })
 
   const handleStatusChange = (status) => {
-    const newStatus = filters.status.includes(status)
-      ? filters.status.filter(s => s !== status)
-      : [...filters.status, status]
-    
-    const newFilters = { ...filters, status: newStatus }
+    const newFilters = { ...filters, status }
     setFilters(newFilters)
     onFilterChange?.(newFilters)
   }
@@ -34,9 +30,21 @@ const ContestSideBar = ({ onFilterChange }) => {
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer group">
             <input
+              type="radio"
+              name="contestStatus"
+              value=""
+              checked={filters.status === ''}
+              onChange={() => handleStatusChange('')}
+              className="text-gray-600 focus:ring-gray-500 focus:ring-offset-0"
+            />
+            <span className="text-sm group-hover:text-gray-600 transition-colors">Tất cả</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="radio"
+              name="contestStatus"
               value="upcoming"
-              type="checkbox"
-              checked={filters.status.includes('upcoming')}
+              checked={filters.status === 'upcoming'}
               onChange={() => handleStatusChange('upcoming')}
               className="rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
             />
@@ -44,9 +52,10 @@ const ContestSideBar = ({ onFilterChange }) => {
           </label>
           <label className="flex items-center gap-2 cursor-pointer group">
             <input
+              type="radio"
+              name="contestStatus"
               value="ongoing"
-              type="checkbox"
-              checked={filters.status.includes('ongoing')}
+              checked={filters.status === 'ongoing'}
               onChange={() => handleStatusChange('ongoing')}
               className="rounded text-purple-600 focus:ring-purple-500 focus:ring-offset-0"
             />
@@ -54,9 +63,10 @@ const ContestSideBar = ({ onFilterChange }) => {
           </label>
           <label className="flex items-center gap-2 cursor-pointer group">
             <input
+              type="radio"
+              name="contestStatus"
               value="ended"
-              type="checkbox"
-              checked={filters.status.includes('ended')}
+              checked={filters.status === 'ended'}
               onChange={() => handleStatusChange('ended')}
               className="rounded text-gray-600 focus:ring-gray-500 focus:ring-offset-0"
             />

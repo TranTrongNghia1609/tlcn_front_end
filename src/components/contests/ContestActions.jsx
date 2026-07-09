@@ -22,16 +22,15 @@ const CONTEST_STATUS = {
     type: 2,
   },
   "ended": {
-    lable: "Thi ảo",
-    style: "bg-gray-100 text-gray-600 hover:bg-gray-600 hover:text-white",
-    itemColor: "fill-gray-600",
-    type: 3
+    lable: "Hết hạn",
+    style: "cursor-auto bg-gray-100 text-gray-600 hover:bg-gray-100 hover:text-gray-600",
+    itemColor: "fill-gray-600 hidden"
   },
   "registered": {
     lable: "Đã đăng ký",
     style: "cursor-auto hover:bg-purple-100 hover:text-purple-600 bg-purple-100 text-purple-600",
     itemColor: "fill-purple-600 hidden"
-  },  
+  },
   "expired": {
     lable: "Hết hạn",
     style: "cursor-auto bg-red-100 text-red-600 hover:bg-red-100 hover:text-red-600",
@@ -48,28 +47,28 @@ export default function ContestActions() {
     const now = new Date()
     const startTime = new Date(contest.startTime)
     const endTime = new Date(contest.endTime)
-    
-    
-    if (now < startTime){
+
+
+    if (now < startTime) {
       return !contest.userParticipation.isRegistered ? CONTEST_STATUS.register : CONTEST_STATUS.registered;
     }
-    else if (now <= endTime){
+    else if (now <= endTime) {
       return !contest.userParticipation.isRegistered ? CONTEST_STATUS.register : CONTEST_STATUS.ongoing;
     }
     else {
-      if (contest.userParticipation === null || contest.userParticipation.mode === 'official'){
+      if (contest.userParticipation === null || contest.userParticipation.mode === 'official') {
         return CONTEST_STATUS.ended
       }
 
-      if (contest.userParticipation.endTime < now){
+      if (contest.userParticipation.endTime < now) {
         return CONTEST_STATUS.ended
       }
 
-      else if (contest.userParticipation.startTime <= now){
+      else if (contest.userParticipation.startTime <= now) {
         return CONTEST_STATUS.ongoing
       }
-      
-      else{
+
+      else {
         return contest.userParticipation.isRegistered ? CONTEST_STATUS.registered : CONTEST_STATUS.ended;
       }
     }
@@ -86,7 +85,7 @@ export default function ContestActions() {
             setIsModalOpen(true);
             return;
           }
-          
+
           // Modal is open, proceed with registration
           if (contest.isClassroomContest) {
             // ✅ Classroom contest with password
@@ -123,22 +122,22 @@ export default function ContestActions() {
     }
     else if (action.type == 1) { // Join
       // Navigate with classroom context if available
-       if (contest.isClassroomContest && contest.classCode) {
-      // Classroom contest - use classroom URL format
-      navigate(
-        `/classrooms/${contest.classCode}/contests/${contest.code}/problem/${contest.problems[0].shortId}`,
-        {
-          state: {
-            classroomId: contest.classroomId,
-            classCode: contest.classCode,
-            fromClassroom: true
+      if (contest.isClassroomContest && contest.classCode) {
+        // Classroom contest - use classroom URL format
+        navigate(
+          `/classrooms/${contest.classCode}/contests/${contest.code}/problem/${contest.problems[0].shortId}`,
+          {
+            state: {
+              classroomId: contest.classroomId,
+              classCode: contest.classCode,
+              fromClassroom: true
+            }
           }
-        }
-      );
-    } else {
-      // Public contest - use public URL format
-      navigate(`/contest/${contest.code}/problem/${contest.problems[0].shortId}`);
-    }
+        );
+      } else {
+        // Public contest - use public URL format
+        navigate(`/contest/${contest.code}/problem/${contest.problems[0].shortId}`);
+      }
     }
   }
   return (
@@ -170,7 +169,7 @@ export default function ContestActions() {
         <Play className={`w-4 h-4 ${action.itemColor}`} />
         {action.lable}
       </Button>
-      <Button
+      {/* <Button
         variant="ghost"
         size="icon"
         className="rounded-full bg-muted hover:bg-muted/80"
@@ -183,7 +182,7 @@ export default function ContestActions() {
         className="rounded-full bg-muted hover:bg-muted/80"
       >
         <ExternalLink className="w-5 h-5" />
-      </Button>
+      </Button> */}
     </div>
   )
 }

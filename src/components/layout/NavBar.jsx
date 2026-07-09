@@ -72,12 +72,6 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="flex items-center space-x-3 lg:space-x-4">
-            {/* Theme Toggle */}
-            <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            </button>
             {isAuthenticated && !loading && (
               <NotificationBell />
             )}
