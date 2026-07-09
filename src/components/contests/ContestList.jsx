@@ -29,7 +29,12 @@ const ContestList = ({filter}) => {
 
   const fetchContests = async () => {
     try {
-      const params = { page: pageActive, status: filter?.status, type: filter?.type }
+      const params = { page: pageActive }
+      // Chỉ gửi status nếu có giá trị (bỏ qua '' = "Tất cả")
+      if (filter?.status) params.status = filter.status;
+      // Chỉ gửi type nếu không phải 'all'
+      if (filter?.type && filter.type !== 'all') params.type = filter.type;
+
       const data = await getContests(params)
       setContests(data.data.content)
       setContestPagination(data.data)

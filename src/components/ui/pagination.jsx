@@ -123,6 +123,7 @@ function ClassroomPagination({
   onPageChange,
   totalItems,
   itemsPerPage,
+  label = "lớp học",
 }) {
   if (totalPages <= 1) return null;
 
@@ -147,15 +148,9 @@ function ClassroomPagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-gray-100">
-      {/* Info text */}
-      <p className="text-sm text-gray-500 order-2 sm:order-1">
-        Hiển thị <span className="font-semibold text-gray-700">{start}–{end}</span> trong{" "}
-        <span className="font-semibold text-gray-700">{totalItems}</span> lớp học
-      </p>
-
+    <div className="flex justify-center mt-4 pt-4 border-t border-gray-100">
       {/* Controls */}
-      <Pagination className="order-1 sm:order-2 w-auto mx-0">
+      <Pagination className="w-auto mx-0">
         <PaginationContent>
           {/* Prev */}
           <PaginationItem>

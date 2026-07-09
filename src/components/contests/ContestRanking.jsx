@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { useContestRanking } from "@/hooks/useContestRanking";
+import { ClassroomPagination } from "@/components/ui/pagination";
 const getRankStyle = (index) => {
   switch (index) {
     case 0: // Top 1
@@ -76,27 +77,34 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
     }
   };
 
-  const { 
-    data: rankingData, 
-    isLoading: isLoadingRank, 
-    isError, 
-    isAutoRefresh, 
+  const {
+    data: rankingData,
+    isLoading: isLoadingRank,
+    isError,
+    isAutoRefresh,
     setIsAutoRefresh,
-    isRefetching // Biến này true khi đang chạy ngầm cập nhật
+    isRefetching, // Biến này true khi đang chạy ngầm cập nhật
+    currentPage,
+    setCurrentPage,
+    pageSize,
   } = useContestRanking(contestId);
 
-  const leaderboard = useMemo(() => {
-    setIsAutoRefresh(isRunning)
-    if (isLoadingRank || isError || !rankingData) return [];
-    return rankingData.data || [];
+  const { leaderboard, totalItems, totalPages } = useMemo(() => {
+    setIsAutoRefresh(isRunning);
+    if (isLoadingRank || isError || !rankingData) return { leaderboard: [], totalItems: 0, totalPages: 1 };
+    const payload = rankingData.data || {};          // { data: [...], total: N }
+    const data = payload.data || [];
+    const total = payload.total ?? data.length;
+    const pages = Math.ceil(total / pageSize) || 1;
+    return { leaderboard: data, totalItems: total, totalPages: pages };
   }, [rankingData, isLoadingRank, isError]);
 
   const problemDetailTableHeader = () => {
     if (!isDisplayProblemDetail) return null;
     return problems.map((prob, index) => (
-      <TableHead key={prob._id || index} 
+      <TableHead key={prob._id || index}
         className="text-center font-bold text-purple-900/60 min-w-[80px]"
-        >
+      >
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
@@ -113,7 +121,7 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
       </TableHead>
     ))
   }
-  
+
   const problemDetailTableCells = (entry) => {
     if (!isDisplayProblemDetail) return null;
     return problems.map((prob) => {
@@ -132,7 +140,7 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
             )}>
               {isSolved ? formatScore(score) : "-"}
             </span>
-            
+
             {/* Hiển thị số lần thử (Attempts) nếu có */}
             {isSolved && pData.attempts > 0 && (
               <span className="text-[10px] text-muted-foreground mt-0.5 bg-gray-100 px-1.5 rounded-full">
@@ -169,30 +177,31 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
 
         <CardContent className="p-0 overflow-auto">
           {/* Wrapper div để table có thể scroll ngang trên màn hình nhỏ */}
-          <div className={isDisplayProblemDetail ? "" : "min-w-[800px]"}> 
+          <div className={isDisplayProblemDetail ? "" : "min-w-[800px]"}>
             <Table>
               <TableHeader className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
                 <TableRow className="hover:bg-transparent border-b border-gray-200 shadow-sm">
                   <TableHead className="w-[70px] text-center font-bold text-black">Rank</TableHead>
                   <TableHead className="min-w-[200px] font-bold text-black">Contestant</TableHead>
-                  
+
                   {/* Render Dynamic Problem Columns */}
                   {problemDetailTableHeader()}
                   <TableHead className="text-center font-bold text-pink-600 w-[100px]">Total</TableHead>
                 </TableRow>
               </TableHeader>
-              
+
               <TableBody>
                 {leaderboard.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3 + problems.length} className="h-32 text-center text-muted-foreground">
-                        Chưa có dữ liệu xếp hạng
+                      Chưa có dữ liệu xếp hạng
                     </TableCell>
                   </TableRow>
                 ) : (
                   leaderboard.map((entry, index) => {
-                    const { icon, rowClass, rankClass } = getRankStyle(index);
-                    
+                    const rankIndex = (currentPage - 1) * pageSize + index;
+                    const { icon, rowClass, rankClass } = getRankStyle(rankIndex);
+
                     return (
                       <TableRow key={entry.id} className={cn("transition-colors", rowClass)}>
                         {/* Rank */}
@@ -212,7 +221,7 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <span className={cn("font-semibold text-sm", index === 0 ? "text-purple-900" : "text-gray-700")}>
+                              <span className={cn("font-semibold text-sm", rankIndex === 0 ? "text-purple-900" : "text-gray-700")}>
                                 {entry.user.fullName}
                               </span>
                               <span className="text-[11px] text-muted-foreground font-mono">
@@ -228,10 +237,10 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
                         {/* Total Score */}
                         <TableCell className="text-center py-3">
                           <div className="flex flex-col items-center justify-center">
-                              <span className="font-black text-base text-green-600">
-                                  {formatScore(entry.score)}
-                              </span>
-                              {index === 0 && <Trophy className="h-3 w-3 text-yellow-500 mt-0.5" />}
+                            <span className="font-black text-base text-green-600">
+                              {formatScore(entry.score)}
+                            </span>
+                            {rankIndex === 0 && <Trophy className="h-3 w-3 text-yellow-500 mt-0.5" />}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -240,6 +249,18 @@ function RankingContest({ problems = [], contestId, contestCode, onProblemClick,
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Pagination */}
+          <div className="px-4 pb-4">
+            <ClassroomPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+              totalItems={totalItems}
+              itemsPerPage={pageSize}
+              label="người tham gia"
+            />
           </div>
         </CardContent>
       </Card>
