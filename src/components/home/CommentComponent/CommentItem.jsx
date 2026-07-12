@@ -21,7 +21,7 @@ const CommentItem = ({
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showReplies, setShowReplies] = useState(!hideReplies);
-  
+
   // State cho pagination
   const [replies, setReplies] = useState(comment.replies || []);
   const [totalReplies, setTotalReplies] = useState(comment.totalReplies || 0);
@@ -51,13 +51,13 @@ const CommentItem = ({
 
   const getValidReplies = (repliesList) => {
     if (!Array.isArray(repliesList)) return [];
-    
+
     return repliesList.filter(reply => {
-      return reply && 
-             typeof reply === 'object' && 
-             reply._id && 
-             !reply.buffer &&
-             reply.content;
+      return reply &&
+        typeof reply === 'object' &&
+        reply._id &&
+        !reply.buffer &&
+        reply.content;
     });
   };
 
@@ -67,7 +67,7 @@ const CommentItem = ({
 
   const handleLoadMoreReplies = async () => {
     if (isLoadingMore || !hasMoreReplies || remainingRepliesCount <= 0) return;
-    
+
     setIsLoadingMore(true);
     try {
       const response = await commentService.loadMoreReplies(
@@ -78,23 +78,23 @@ const CommentItem = ({
       );
 
       const { replies: newReplies, pagination } = response.data;
-      
+
       // Chỉ thêm replies mới nếu có
       if (newReplies && newReplies.length > 0) {
         setReplies(prev => [...prev, ...newReplies]);
         setLoadedRepliesCount(prev => prev + newReplies.length);
       }
-      
+
       // Update total từ server
       if (pagination.totalReplies !== undefined) {
         setTotalReplies(pagination.totalReplies);
       }
-      
+
       // Kiểm tra còn replies không - fix logic
       const newLoadedCount = loadedRepliesCount + (newReplies?.length || 0);
       const hasMore = newLoadedCount < pagination.totalReplies;
       setHasMoreReplies(hasMore);
-      
+
     } catch (error) {
       console.error('Error loading more replies:', error);
     } finally {
@@ -104,7 +104,7 @@ const CommentItem = ({
 
   const handleShowAllReplies = async () => {
     if (isLoadingMore || remainingRepliesCount <= 0) return;
-    
+
     setIsLoadingMore(true);
     try {
       const response = await commentService.loadMoreReplies(
@@ -115,16 +115,16 @@ const CommentItem = ({
       );
 
       const { replies: newReplies, pagination } = response.data;
-      
+
       if (newReplies && newReplies.length > 0) {
         setReplies(prev => [...prev, ...newReplies]);
       }
-      
+
       // Đã load hết
       setLoadedRepliesCount(pagination.totalReplies);
       setTotalReplies(pagination.totalReplies);
       setHasMoreReplies(false);
-      
+
     } catch (error) {
       console.error('Error loading all replies:', error);
     } finally {
@@ -162,7 +162,7 @@ const CommentItem = ({
       await onCreateReply(content, comment._id);
       setIsReplying(false);
       setShowReplies(true);
-      
+
       try {
         const response = await commentService.loadMoreReplies(
           comment._id,
@@ -170,7 +170,7 @@ const CommentItem = ({
           3,
           true
         );
-        
+
         const { replies: freshReplies, pagination } = response.data;
         setReplies(freshReplies);
         setTotalReplies(pagination.totalReplies);
@@ -217,7 +217,7 @@ const CommentItem = ({
     <div className={`comment-item mb-3 ${isReply ? `ml-${Math.min(displayLevel * 4, 8)}` : ''}`}>
       <div className="flex items-start">
         {showAvatar && (
-          <div className="flex-shrink-0 mr-3">
+          <div className="flex-shrink-0 mr-3 mt-[10px]">
             <img
               src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(mentionDisplayName)}&background=2563eb&color=fff`}
               alt={mentionDisplayName}
@@ -225,7 +225,7 @@ const CommentItem = ({
             />
           </div>
         )}
-        
+
         <div className="flex-grow">
           <div className={`rounded-lg ${isReply ? 'bg-gray-50' : 'bg-white'} p-3`}>
             <CommentHeader
@@ -254,7 +254,7 @@ const CommentItem = ({
               onToggleReplies={shouldShowToggleButton ? toggleReplies : undefined}
               showReplies={showReplies}
               showReplyForm={isReplying}
-              canReply={true} 
+              canReply={true}
               level={displayLevel}
             />
 
@@ -298,12 +298,11 @@ const CommentItem = ({
       )}
 
       {hasRepliesData && (
-        <div 
-          className={`transition-all duration-300 ml-10 ${
-            showReplies 
-              ? 'max-h-[5000px] opacity-100 mt-2' 
+        <div
+          className={`transition-all duration-300 ml-10 ${showReplies
+              ? 'max-h-[5000px] opacity-100 mt-2'
               : 'max-h-0 opacity-0 overflow-hidden mt-0'
-          }`}
+            }`}
         >
           {showReplies && (
             <>
@@ -326,7 +325,7 @@ const CommentItem = ({
                 <div className="mt-3 mb-2">
                   <div className="flex items-center gap-3">
                     <div className="h-px bg-gray-300 flex-1"></div>
-                    
+
                     <button
                       onClick={handleLoadMoreReplies}
                       disabled={isLoadingMore}
@@ -358,7 +357,7 @@ const CommentItem = ({
                         </button>
                       </>
                     )}
-                    
+
                     <div className="h-px bg-gray-300 flex-1"></div>
                   </div>
                 </div>

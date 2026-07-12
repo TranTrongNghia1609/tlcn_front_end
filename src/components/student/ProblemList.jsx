@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocation } from 'react-router-dom';
+import TablePagination from '@/components/common/TablePagination';
 
-import { 
-  BookOpen, 
+import {
+  BookOpen,
   Search,
   CheckCircle2,
   Circle,
@@ -25,12 +26,8 @@ const ProblemCardSkeleton = () => (
 
       {/* Problem Info Skeleton */}
       <div className="flex-1 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-7 w-1/3" />
           <Skeleton className="h-6 w-20 rounded-full" />
         </div>
 
@@ -45,19 +42,28 @@ const ProblemCardSkeleton = () => (
   </Card>
 );
 
-const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, onRefresh }) => {
+const ProblemList = ({ classCode, classroomId, problems = [], loading = false, onRefresh }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const safeProblems = Array.isArray(problems) ? problems : [];
 
   const filteredProblems = safeProblems.filter(problem => {
     const matchesSearch = problem.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         problem.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      problem.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDifficulty = difficultyFilter === 'all' || problem.difficulty === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
+
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredProblems.length / itemsPerPage);
+  const paginatedProblems = filteredProblems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, difficultyFilter]);
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
@@ -98,10 +104,10 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
   const handleProblemClick = (problem) => {
     const problemId = problem.shortId || problem._id;
     navigate(`/classrooms/${classCode}/problems/${problemId}`, {
-      state: { 
+      state: {
         classCode,
-        classroomId, 
-        fromClassroom: true 
+        classroomId,
+        fromClassroom: true
       }
     });
   };
@@ -123,7 +129,7 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
             </p>
           )}
         </div>
-        
+
         {onRefresh && (
           <Button
             variant="outline"
@@ -154,7 +160,7 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
           <select
             value={difficultyFilter}
             onChange={(e) => setDifficultyFilter(e.target.value)}
-            className="px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             disabled={loading}
           >
             <option value="all">Tất cả độ khó</option>
@@ -186,69 +192,81 @@ const ProblemList = ({ classCode, classroomId ,problems = [], loading = false, o
           </p>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {filteredProblems.map((problem, index) => (
-            <Card
-              key={problem._id || problem.shortId}
-              className="p-5 hover:shadow-lg transition-all cursor-pointer group"
-              onClick={() => handleProblemClick(problem)}
-            >
-              <div className="flex items-start gap-4">
-                {/* Status Icon */}
-                <div className="flex-shrink-0 mt-1">
-                  {getStatusIcon(problem.progress)}
-                </div>
+        <>
+          <div className="space-y-3">
+            {paginatedProblems.map((problem, index) => (
+              <Card
+                key={problem._id || problem.shortId}
+                className="p-5 hover:shadow-lg transition-all cursor-pointer group"
+                onClick={() => handleProblemClick(problem)}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Status Icon */}
+                  <div className="flex-shrink-0 mt-1">
+                    {getStatusIcon(problem.progress)}
+                  </div>
 
-                {/* Problem Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors mb-1">
-                        {index + 1}. {problem.name}
-                      </h3>
-                      {problem.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {problem.description}
-                        </p>
+                  {/* Problem Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors mb-1">
+                          {(currentPage - 1) * itemsPerPage + index + 1}. {problem.name}
+                        </h3>
+                        {problem.description && (
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {problem.description}
+                          </p>
+                        )}
+                      </div>
+                      <Badge className={getDifficultyColor(problem.difficulty)}>
+                        {getDifficultyLabel(problem.difficulty)}
+                      </Badge>
+                    </div>
+
+                    {/* Meta Info */}
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      {problem.tags && problem.tags.length > 0 && (
+                        <div className="flex gap-1">
+                          {problem.tags.slice(0, 3).map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {problem.acceptanceRate && (
+                        <span className="text-green-600">
+                          ✓ {problem.acceptanceRate}% AC
+                        </span>
+                      )}
+
+                      {problem.submissions && (
+                        <span>
+                          {problem.submissions} lượt nộp
+                        </span>
                       )}
                     </div>
-                    <Badge className={getDifficultyColor(problem.difficulty)}>
-                      {getDifficultyLabel(problem.difficulty)}
-                    </Badge>
-                  </div>
-
-                  {/* Meta Info */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    {problem.tags && problem.tags.length > 0 && (
-                      <div className="flex gap-1">
-                        {problem.tags.slice(0, 3).map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {problem.acceptanceRate && (
-                      <span className="text-green-600">
-                        ✓ {problem.acceptanceRate}% AC
-                      </span>
-                    )}
-
-                    {problem.submissions && (
-                      <span>
-                        {problem.submissions} lượt nộp
-                      </span>
-                    )}
                   </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={p => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              showFirstLast
+              maxVisiblePages={5}
+            />
+          )}
+        </>
       )}
     </div>
   );

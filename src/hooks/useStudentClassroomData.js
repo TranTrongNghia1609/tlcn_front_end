@@ -34,8 +34,9 @@ export const useStudentClassroomData = (classCode) => {
         throw new Error('Không tìm thấy thông tin lớp học');
       }
 
-      // Extract problems from classroom data
-      const problemsData = classroomData.problems || [];
+      // Fetch problems from specific api endpoint
+      const problemsResponse = await classroomService.getProblems(classCode, { size: 100 });
+      const problemsData = problemsResponse?.data?.items || problemsResponse?.items || [];
 
       // Extract student progress from classroom data
       const studentProgress = classroomData.studentProgress || [];
@@ -79,20 +80,20 @@ export const useStudentClassroomData = (classCode) => {
       let materialsData = [];
       if (materialsRes.status === 'fulfilled') {
         const materialsValue = materialsRes.value;
-        materialsData = materialsValue?.materials || 
-                       materialsValue?.data?.materials ||
-                       materialsValue?.data?.items ||
-                       materialsValue?.items ||
-                       [];
+        materialsData = materialsValue?.materials ||
+          materialsValue?.data?.materials ||
+          materialsValue?.data?.items ||
+          materialsValue?.items ||
+          [];
       } else {
       }
 
       let statsData = null;
       if (statsRes.status === 'fulfilled') {
         const statsValue = statsRes.value;
-        statsData = statsValue?.data?.stats || 
-                   statsValue?.data || 
-                   null;
+        statsData = statsValue?.data?.stats ||
+          statsValue?.data ||
+          null;
       } else {
       }
 
@@ -102,8 +103,8 @@ export const useStudentClassroomData = (classCode) => {
       const totalScore = studentProgress
         .filter(p => p.status === 'completed')
         .reduce((sum, p) => sum + (p.bestScore || 0), 0);
-      const averageScore = completedProblems > 0 
-        ? Math.round(totalScore / completedProblems) 
+      const averageScore = completedProblems > 0
+        ? Math.round(totalScore / completedProblems)
         : 0;
 
       const calculatedStats = {
@@ -111,16 +112,16 @@ export const useStudentClassroomData = (classCode) => {
         completedProblems,
         attemptedProblems,
         notAttemptedProblems: problemsData.length - completedProblems - attemptedProblems,
-        completionRate: problemsData.length > 0 
+        completionRate: problemsData.length > 0
           ? Math.round((completedProblems / problemsData.length) * 100)
           : 0,
         totalScore,
         averageScore,
         lastSubmission: studentProgress.length > 0
-          ? studentProgress.reduce((latest, p) => 
-              !latest || new Date(p.lastSubmissionAt) > new Date(latest) 
-                ? p.lastSubmissionAt 
-                : latest
+          ? studentProgress.reduce((latest, p) =>
+            !latest || new Date(p.lastSubmissionAt) > new Date(latest)
+              ? p.lastSubmissionAt
+              : latest
             , null)
           : null,
         recentCompletions: studentProgress
@@ -151,16 +152,16 @@ export const useStudentClassroomData = (classCode) => {
     } catch (error) {
 
 
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Không thể tải dữ liệu lớp học';
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        'Không thể tải dữ liệu lớp học';
 
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage,
       }));
-      
+
       toast.error(errorMessage);
     }
   }, [classCode]);
@@ -168,7 +169,7 @@ export const useStudentClassroomData = (classCode) => {
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
- 
+
   const refresh = useCallback(() => {
     fetchAllData();
   }, [fetchAllData]);

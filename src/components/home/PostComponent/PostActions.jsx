@@ -54,11 +54,10 @@ const PostActions = ({
           <button
             onClick={handleLikeClick}
             disabled={isLiking || !user}
-            className={`flex items-center space-x-2 transition-colors ${
-              post.isLiked
-                ? 'text-red-500 hover:text-red-600'
-                : 'text-gray-500 hover:text-red-500'
-            } ${(!user || isLiking) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`flex items-center space-x-2 transition-colors cursor-pointer ${post.isLiked
+              ? 'text-red-500 hover:text-red-600'
+              : 'text-gray-500 hover:text-red-500'
+              } ${(!user || isLiking) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {post.isLiked ? (
               <HeartSolid className="w-5 h-5" />
@@ -73,11 +72,10 @@ const PostActions = ({
           {!hideCommentButton && (
             <button
               onClick={handleCommentClick}
-              className={`flex items-center space-x-2 transition-colors ${
-                showComments
-                  ? 'text-blue-500 hover:text-blue-600'
-                  : 'text-gray-500 hover:text-blue-500'
-              }`}
+              className={`flex items-center space-x-2 transition-colors cursor-pointer ${showComments
+                ? 'text-blue-500 hover:text-blue-600'
+                : 'text-gray-500 hover:text-blue-500'
+                }`}
             >
               <ChatBubbleLeftIcon className="w-5 h-5" />
               <span className="text-sm font-medium">
