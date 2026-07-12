@@ -74,7 +74,7 @@ function ProblemContestList({ isStarted = false, onProblemClick, problems = null
       fromClassroom: isClassroomContest,
       contestId: contest?._id
     };
-   if (isClassroomContest && classCode) {
+    if (isClassroomContest && classCode) {
       // Classroom contest
       targetUrl = `/classrooms/${classCode}/contests/${code}/problem/${problemShortId}`;
     } else if (contest.userParticipation?.isStarted) {

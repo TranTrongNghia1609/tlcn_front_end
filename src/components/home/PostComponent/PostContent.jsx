@@ -135,7 +135,7 @@ const PostContent = ({ post, isExpanded = false, onToggleExpanded }) => {
           {content.length > MAX_LENGTH && onToggleExpanded && (
             <button
               onClick={onToggleExpanded}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors cursor-pointer"
             >
               {isExpanded ? 'Thu gọn' : 'Xem thêm'}
             </button>
@@ -153,7 +153,7 @@ const PostContent = ({ post, isExpanded = false, onToggleExpanded }) => {
                 onClick={() => {
                   navigator.clipboard.writeText(codeSnippet);
                 }}
-                className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-700"
+                className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-700 cursor-pointer"
               >
                 Copy
               </button>

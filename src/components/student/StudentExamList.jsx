@@ -18,6 +18,7 @@ import classroomService from '@/services/classroomService';
 import { formatDateTime, formatDuration, getExamStatus } from '@/utils/dateHelpers';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import TablePagination from '@/components/common/TablePagination';
 
 // Skeleton Component
 const ExamCardSkeleton = () => (
@@ -55,6 +56,7 @@ const StudentExamList = ({ classCode, classroomId }) => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +64,10 @@ const StudentExamList = ({ classCode, classroomId }) => {
       fetchExams();
     }
   }, [classCode, filter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const fetchExams = async () => {
     try {
@@ -172,6 +178,9 @@ const StudentExamList = ({ classCode, classroomId }) => {
   };
 
   const filteredExams = exams;
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(filteredExams.length / itemsPerPage);
+  const paginatedExams = filteredExams.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const filterButtons = [
     { key: 'all', label: 'Tất cả', count: exams.length },
@@ -213,9 +222,9 @@ const StudentExamList = ({ classCode, classroomId }) => {
               onClick={() => setFilter(btn.key)}
               disabled={loading}
               className={cn(
-                'transition-all',
+                'transition-all cursor-pointer',
                 filter === btn.key
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
                   : 'border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-600'
               )}
             >
@@ -240,7 +249,7 @@ const StudentExamList = ({ classCode, classroomId }) => {
             <ExamCardSkeleton key={index} />
           ))}
         </div>
-      ) : filteredExams.length === 0 ? (
+      ) : paginatedExams.length === 0 ? (
         <Card className="p-12 text-center">
           <Trophy size={64} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -254,98 +263,110 @@ const StudentExamList = ({ classCode, classroomId }) => {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredExams.map((exam) => {
-            const status = getExamStatus(exam.startTime, exam.endTime);
-            const isOngoing = status === 'ongoing';
+        <>
+          <div className="grid grid-cols-1 gap-4">
+            {paginatedExams.map((exam) => {
+              const status = getExamStatus(exam.startTime, exam.endTime);
+              const isOngoing = status === 'ongoing';
 
-            return (
-              <Card
-                key={exam._id}
-                className={cn(
-                  'p-6 hover:shadow-lg transition-all duration-200',
-                  isOngoing && 'border-2 border-green-500 shadow-md shadow-green-100'
-                )}
-              >
-                <div className="flex items-start justify-between">
-                  {/* Left: Exam Info */}
-                  <div className="flex-1">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className={cn(
-                        'p-2 rounded-lg',
-                        isOngoing ? 'bg-green-100' : 'bg-blue-100'
-                      )}>
-                        <Trophy 
-                          size={24} 
-                          className={isOngoing ? 'text-green-600' : 'text-blue-600'} 
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-bold text-gray-900">
-                            {exam.title}
-                          </h3>
-                          {getStatusBadge(exam)}
+              return (
+                <Card
+                  key={exam._id}
+                  className={cn(
+                    'p-6 hover:shadow-lg transition-all duration-200',
+                    isOngoing && 'border-2 border-green-500 shadow-md shadow-green-100'
+                  )}
+                >
+                  <div className="flex items-start justify-between">
+                    {/* Left: Exam Info */}
+                    <div className="flex-1">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className={cn(
+                          'p-2 rounded-lg',
+                          isOngoing ? 'bg-green-100' : 'bg-blue-100'
+                        )}>
+                          <Trophy 
+                            size={24} 
+                            className={isOngoing ? 'text-green-600' : 'text-blue-600'} 
+                          />
                         </div>
-                        
-                        {exam.isPrivate && (
-                          <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
-                            <Lock size={14} />
-                            <span>Kỳ thi riêng tư</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-bold text-gray-900">
+                              {exam.title}
+                            </h3>
+                            {getStatusBadge(exam)}
                           </div>
-                        )}
+                          
+                          {exam.isPrivate && (
+                            <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
+                              <Lock size={14} />
+                              <span>Kỳ thi riêng tư</span>
+                            </div>
+                          )}
 
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {exam.description}
-                        </p>
+                          <p className="text-gray-600 text-sm line-clamp-2">
+                            {exam.description}
+                          </p>
+                        </div>
                       </div>
+
+                      {/* Meta Info */}
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-600 ml-14">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={16} />
+                          <span>Bắt đầu: {formatDateTime(exam.startTime)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} />
+                          <span>Kết thúc: {formatDateTime(exam.endTime)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FileText size={16} />
+                          <span>{exam.problems?.length || 0} bài tập</span>
+                        </div>
+                      </div>
+
+                      {/* Registered Info */}
+                      {exam.isRegistered && (
+                        <div className="flex items-center gap-2 mt-3 ml-14 text-sm text-green-600">
+                          <CheckCircle2 size={16} />
+                          <span className="font-medium">Đã đăng ký</span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Meta Info */}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 ml-14">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={16} />
-                        <span>Bắt đầu: {formatDateTime(exam.startTime)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} />
-                        <span>Kết thúc: {formatDateTime(exam.endTime)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileText size={16} />
-                        <span>{exam.problems?.length || 0} bài tập</span>
-                      </div>
+                    {/* Right: Action Button */}
+                    <div className="ml-4">
+                      {getActionButton(exam)}
                     </div>
-
-                    {/* Registered Info */}
-                    {exam.isRegistered && (
-                      <div className="flex items-center gap-2 mt-3 ml-14 text-sm text-green-600">
-                        <CheckCircle2 size={16} />
-                        <span className="font-medium">Đã đăng ký</span>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Right: Action Button */}
-                  <div className="ml-4">
-                    {getActionButton(exam)}
-                  </div>
-                </div>
+                  {/* Warning for ongoing exam */}
+                  {isOngoing && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+                      <AlertCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-green-700">
+                        <strong>Kỳ thi đang diễn ra!</strong> Còn{' '}
+                        {formatDuration(new Date(exam.endTime) - new Date())} để hoàn thành.
+                      </p>
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
 
-                {/* Warning for ongoing exam */}
-                {isOngoing && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-                    <AlertCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-green-700">
-                      <strong>Kỳ thi đang diễn ra!</strong> Còn{' '}
-                      {formatDuration(new Date(exam.endTime) - new Date())} để hoàn thành.
-                    </p>
-                  </div>
-                )}
-              </Card>
-            );
-          })}
-        </div>
+          {totalPages > 1 && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={p => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              showFirstLast
+              maxVisiblePages={5}
+            />
+          )}
+        </>
       )}
     </div>
   );

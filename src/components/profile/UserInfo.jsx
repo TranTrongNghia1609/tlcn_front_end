@@ -21,7 +21,7 @@ const UserInfo = ({ profileData, onEditProfile }) => {
           {/* Avatar */}
           <div className='mb-4'>
             <img 
-              src={profileData.avatar} 
+              src={profileData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.fullName || profileData.userName || 'User')}&background=2563eb&color=fff`} 
               alt={profileData.userName}
               className='h-32 w-32 object-cover rounded-full border-4 border-blue-100 shadow-lg'
             />
